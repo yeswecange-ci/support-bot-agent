@@ -1,0 +1,747 @@
+<?php
+
+namespace App\Services\Chatwoot;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\PendingRequest;
+
+class ChatwootClient
+{
+    private string $baseUrl;
+    private int $accountId;
+    private string $token;
+
+    public function __construct()
+    {
+        $this->baseUrl   = rtrim(config('chatwoot.base_url'), '/');
+        $this->accountId = (int) config('chatwoot.account_id');
+
+        // Use the logged-in agent's own Chatwoot token if available,
+        // otherwise fall back to the global admin token from .env
+        $this->token = $this->resolveToken();
+    }
+
+    private function resolveToken(): string
+    {
+        $user = auth()->user();
+
+        if ($user && $user->agentToken && $user->agentToken->chatwoot_access_token) {
+            return $user->agentToken->chatwoot_access_token;
+        }
+
+        return config('chatwoot.api_token');
+    }
+
+    // ═══════════════════════════════════════════════
+    // HTTP CLIENT
+    // ═══════════════════════════════════════════════
+
+    private function client(): PendingRequest
+    {
+        return Http::baseUrl($this->baseUrl)
+            ->withHeaders([
+                'api_access_token' => $this->token,
+                'Content-Type'     => 'application/json',
+            ])
+            ->withoutVerifying()  // ← AJOUTE CETTE LIGNE
+            ->timeout(15)
+            ->retry(2, 500);
+    }
+
+    private function url(string $path): string
+    {
+        return "/api/v1/accounts/{$this->accountId}/{$path}";
+    }
+
+    // ═══════════════════════════════════════════════
+    // CONVERSATIONS
+    // ═══════════════════════════════════════════════
+
+    /**
+     * Lister les conversations
+     *
+     * @param string $status       open|resolved|pending|snoozed|all
+     * @param string $assigneeType me|unassigned|all|assigned
+     * @param int    $page
+     * @param int|null $inboxId
+     * @return array
+     */
+    public function listConversations(
+        string $status = 'open',
+        string $assigneeType = 'all',
+        int $page = 1,
+        ?int $inboxId = null
+    ): array {
+        $query = compact('status', 'page');
+        $query['assignee_type'] = $assigneeType;
+
+        if ($inboxId) {
+            $query['inbox_id'] = $inboxId;
+        }
+
+        return $this->client()
+            ->get($this->url('conversations'), $query)
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Détails d'une conversation
+     */
+    public function getConversation(int $conversationId): array
+    {
+        return $this->client()
+            ->get($this->url("conversations/{$conversationId}"))
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Créer une conversation (handoff Twilio)
+     */
+    public function createConversation(
+        string $sourceId,
+        int $inboxId,
+        int $contactId,
+        ?string $initialMessage = null,
+        ?int $assigneeId = null
+    ): array {
+        $payload = [
+            'source_id'  => $sourceId,
+            'inbox_id'   => $inboxId,
+            'contact_id' => $contactId,
+            'status'     => 'open',
+        ];
+
+        if ($assigneeId) {
+            $payload['assignee_id'] = $assigneeId;
+        }
+
+        if ($initialMessage) {
+            $payload['message'] = ['content' => $initialMessage];
+        }
+
+        return $this->client()
+            ->post($this->url('conversations'), $payload)
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Changer le statut (open, resolved, pending, snoozed)
+     */
+    public function toggleStatus(int $conversationId, string $status): array
+    {
+        return $this->client()
+            ->post($this->url("conversations/{$conversationId}/toggle_status"), [
+                'status' => $status,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Assigner à un agent
+     */
+    public function assignConversation(int $conversationId, int $agentId): array
+    {
+        return $this->client()
+            ->post($this->url("conversations/{$conversationId}/assignments"), [
+                'assignee_id' => $agentId,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Compteurs (mine_count, unassigned_count, etc.)
+     */
+    public function getConversationCounts(): array
+    {
+        return $this->client()
+            ->get($this->url('conversations'), [
+                'status' => 'open',
+                'page'   => 1,
+            ])
+            ->throw()
+            ->json('data.meta');
+    }
+
+    /**
+     * Rechercher dans les conversations
+     */
+    public function searchConversations(string $query, int $page = 1): array
+    {
+        return $this->client()
+            ->get($this->url('conversations'), [
+                'q'    => $query,
+                'page' => $page,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // MESSAGES
+    // ═══════════════════════════════════════════════
+
+    /**
+     * Récupérer les messages d'une conversation
+     */
+    public function getMessages(int $conversationId): array
+    {
+        return $this->client()
+            ->get($this->url("conversations/{$conversationId}/messages"))
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Marquer une conversation comme lue (reset unread_count)
+     */
+    public function markConversationRead(int $conversationId): void
+    {
+        $this->client()
+            ->post($this->url("conversations/{$conversationId}/update_last_seen"))
+            ->throw();
+    }
+
+    /**
+     * Envoyer un message texte
+     */
+    public function sendMessage(
+        int $conversationId,
+        string $content,
+        bool $isPrivate = false,
+        string $messageType = 'outgoing'
+    ): array {
+        return $this->client()
+            ->post($this->url("conversations/{$conversationId}/messages"), [
+                'content'      => $content,
+                'message_type' => $messageType,
+                'private'      => $isPrivate,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Envoyer un message avec fichiers joints (multipart/form-data)
+     *
+     * @param \Illuminate\Http\UploadedFile[] $attachments
+     */
+    public function sendMessageWithAttachments(
+        int $conversationId,
+        ?string $content,
+        array $attachments,
+        bool $isPrivate = false,
+        string $messageType = 'outgoing'
+    ): array {
+        $request = Http::baseUrl($this->baseUrl)
+            ->withHeaders(['api_access_token' => $this->token])
+            ->withoutVerifying()
+            ->timeout(30);
+
+        foreach ($attachments as $file) {
+            $request = $request->attach(
+                'attachments[]',
+                file_get_contents($file->getRealPath()),
+                $file->getClientOriginalName()
+            );
+        }
+
+        return $request->post($this->url("conversations/{$conversationId}/messages"), [
+                'content'      => $content ?? '',
+                'message_type' => $messageType,
+                'private'      => $isPrivate ? 'true' : 'false',
+            ])
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // CONTACTS
+    // ═══════════════════════════════════════════════
+
+    /**
+     * Rechercher un contact (par nom, email ou téléphone)
+     */
+    public function searchContacts(string $query): array
+    {
+        return $this->client()
+            ->get($this->url('contacts/search'), ['q' => $query])
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Créer un contact
+     */
+    public function createContact(string $name, string $phoneNumber, ?string $email = null, ?int $inboxId = null): array
+    {
+        $payload = [
+            'name'         => $name,
+            'phone_number' => $phoneNumber,
+            'inbox_id'     => $inboxId ?? config('chatwoot.whatsapp_inbox_id'),
+        ];
+
+        if ($email) {
+            $payload['email'] = $email;
+        }
+
+        return $this->client()
+            ->post($this->url('contacts'), $payload)
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Détails d'un contact
+     */
+    public function getContact(int $contactId): array
+    {
+        return $this->client()
+            ->get($this->url("contacts/{$contactId}"))
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Inboxes contactables pour un contact donné
+     */
+    public function getContactableInboxes(int $contactId): array
+    {
+        return $this->client()
+            ->get($this->url("contacts/{$contactId}/contactable_inboxes"))
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // AGENTS
+    // ═══════════════════════════════════════════════
+
+    public function listAgents(): array
+    {
+        return $this->client()
+            ->get($this->url('agents'))
+            ->throw()
+            ->json();
+    }
+
+    public function createAgent(string $name, string $email, string $role = 'agent'): array
+    {
+        return $this->client()
+            ->post($this->url('agents'), [
+                'name'  => $name,
+                'email' => $email,
+                'role'  => $role,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    public function updateAgent(int $agentId, array $data): array
+    {
+        return $this->client()
+            ->put($this->url("agents/{$agentId}"), $data)
+            ->throw()
+            ->json();
+    }
+
+    public function deleteAgent(int $agentId): void
+    {
+        $this->client()
+            ->delete($this->url("agents/{$agentId}"))
+            ->throw();
+    }
+
+    // ═══════════════════════════════════════════════
+    // REPORTS
+    // ═══════════════════════════════════════════════
+
+    /**
+     * Rapport par agent
+     *
+     * @param string $metric conversations_count|avg_first_response_time|avg_resolution_time
+     * @param string $since  Timestamp UNIX
+     * @param string $until  Timestamp UNIX
+     */
+    public function getAgentReport(string $metric, string $since, string $until): array
+    {
+        return $this->client()
+            ->get($this->url('reports/agents'), compact('metric', 'since', 'until'))
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Rapport global du compte
+     */
+    public function getAccountReport(string $metric, string $since, string $until): array
+    {
+        return $this->client()
+            ->get($this->url('reports/account'), compact('metric', 'since', 'until'))
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * Reporting events d'une conversation
+     */
+    public function getReportingEvents(int $conversationId): array
+    {
+        return $this->client()
+            ->get($this->url("conversations/{$conversationId}/reporting_events"))
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // CANNED RESPONSES
+    // ═══════════════════════════════════════════════
+
+    public function listCannedResponses(?string $search = null): array
+    {
+        $query = $search ? ['search' => $search] : [];
+
+        return $this->client()
+            ->get($this->url('canned_responses'), $query)
+            ->throw()
+            ->json();
+    }
+
+    public function createCannedResponse(string $shortCode, string $content): array
+    {
+        return $this->client()
+            ->post($this->url('canned_responses'), [
+                'short_code' => $shortCode,
+                'content'    => $content,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    public function updateCannedResponse(int $id, string $shortCode, string $content): array
+    {
+        return $this->client()
+            ->put($this->url("canned_responses/{$id}"), [
+                'short_code' => $shortCode,
+                'content'    => $content,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    public function deleteCannedResponse(int $id): void
+    {
+        $this->client()
+            ->delete($this->url("canned_responses/{$id}"))
+            ->throw();
+    }
+
+    // ═══════════════════════════════════════════════
+    // LABELS
+    // ═══════════════════════════════════════════════
+
+    public function listAccountLabels(): array
+    {
+        return $this->client()
+            ->get($this->url('labels'))
+            ->throw()
+            ->json();
+    }
+
+    public function createAccountLabel(string $title, ?string $description = null, ?string $color = null, bool $showOnSidebar = true): array
+    {
+        $payload = ['title' => $title, 'show_on_sidebar' => $showOnSidebar];
+        if ($description) $payload['description'] = $description;
+        if ($color) $payload['color'] = $color;
+
+        return $this->client()
+            ->post($this->url('labels'), $payload)
+            ->throw()
+            ->json();
+    }
+
+    public function getConversationLabels(int $conversationId): array
+    {
+        return $this->client()
+            ->get($this->url("conversations/{$conversationId}/labels"))
+            ->throw()
+            ->json();
+    }
+
+    public function updateConversationLabels(int $conversationId, array $labels): array
+    {
+        return $this->client()
+            ->post($this->url("conversations/{$conversationId}/labels"), [
+                'labels' => $labels,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // CONTACTS (extended)
+    // ═══════════════════════════════════════════════
+
+    public function updateContact(int $contactId, array $data): array
+    {
+        return $this->client()
+            ->put($this->url("contacts/{$contactId}"), $data)
+            ->throw()
+            ->json();
+    }
+
+    public function getContactConversations(int $contactId): array
+    {
+        return $this->client()
+            ->get($this->url("contacts/{$contactId}/conversations"))
+            ->throw()
+            ->json();
+    }
+
+    public function listContactNotes(int $contactId): array
+    {
+        return $this->client()
+            ->get($this->url("contacts/{$contactId}/notes"))
+            ->throw()
+            ->json();
+    }
+
+    public function createContactNote(int $contactId, string $content): array
+    {
+        return $this->client()
+            ->post($this->url("contacts/{$contactId}/notes"), [
+                'content' => $content,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    public function deleteContactNote(int $contactId, int $noteId): void
+    {
+        $this->client()
+            ->delete($this->url("contacts/{$contactId}/notes/{$noteId}"))
+            ->throw();
+    }
+
+    // ═══════════════════════════════════════════════
+    // NOTIFICATIONS
+    // ═══════════════════════════════════════════════
+
+    public function listNotifications(int $page = 1): array
+    {
+        return $this->client()
+            ->get($this->url('notifications'), ['page' => $page])
+            ->throw()
+            ->json();
+    }
+
+    public function markNotificationRead(int $notificationId): void
+    {
+        $this->client()
+            ->patch($this->url("notifications/{$notificationId}"), [
+                'read_at' => now()->toIso8601String(),
+            ])
+            ->throw();
+    }
+
+    public function markAllNotificationsRead(): void
+    {
+        $this->client()
+            ->post($this->url('notifications/read_all'))
+            ->throw();
+    }
+
+    // ═══════════════════════════════════════════════
+    // TEAMS
+    // ═══════════════════════════════════════════════
+
+    public function listTeams(): array
+    {
+        return $this->client()
+            ->get($this->url('teams'))
+            ->throw()
+            ->json();
+    }
+
+    public function getTeam(int $teamId): array
+    {
+        return $this->client()
+            ->get($this->url("teams/{$teamId}"))
+            ->throw()
+            ->json();
+    }
+
+    public function getTeamMembers(int $teamId): array
+    {
+        return $this->client()
+            ->get($this->url("teams/{$teamId}/team_members"))
+            ->throw()
+            ->json();
+    }
+
+    public function assignTeam(int $conversationId, int $teamId): array
+    {
+        return $this->client()
+            ->post($this->url("conversations/{$conversationId}/assignments"), [
+                'team_id' => $teamId,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    public function createTeam(string $name, ?string $description = null): array
+    {
+        $payload = ['name' => $name];
+        if ($description) $payload['description'] = $description;
+
+        return $this->client()
+            ->post($this->url('teams'), $payload)
+            ->throw()
+            ->json();
+    }
+
+    public function updateTeam(int $teamId, array $data): array
+    {
+        return $this->client()
+            ->patch($this->url("teams/{$teamId}"), $data)
+            ->throw()
+            ->json();
+    }
+
+    public function deleteTeam(int $teamId): void
+    {
+        $this->client()
+            ->delete($this->url("teams/{$teamId}"))
+            ->throw();
+    }
+
+    public function addTeamMembers(int $teamId, array $userIds): array
+    {
+        return $this->client()
+            ->post($this->url("teams/{$teamId}/team_members"), [
+                'user_ids' => $userIds,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    public function removeTeamMembers(int $teamId, array $userIds): void
+    {
+        $this->client()
+            ->delete($this->url("teams/{$teamId}/team_members"), [
+                'user_ids' => $userIds,
+            ])
+            ->throw();
+    }
+
+    // ═══════════════════════════════════════════════
+    // CONVERSATION FILTERS (advanced)
+    // ═══════════════════════════════════════════════
+
+    public function filterConversations(array $payload, int $page = 1): array
+    {
+        return $this->client()
+            ->post($this->url('conversations/filter'), array_merge($payload, ['page' => $page]))
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // INBOXES
+    // ═══════════════════════════════════════════════
+
+    public function getInbox(int $inboxId): array
+    {
+        return $this->client()
+            ->get($this->url("inboxes/{$inboxId}"))
+            ->throw()
+            ->json();
+    }
+
+    public function updateInbox(int $inboxId, array $data): array
+    {
+        return $this->client()
+            ->patch($this->url("inboxes/{$inboxId}"), $data)
+            ->throw()
+            ->json();
+    }
+
+    public function listInboxes(): array
+    {
+        return $this->client()
+            ->get($this->url('inboxes'))
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // PROFILE / AVAILABILITY
+    // ═══════════════════════════════════════════════
+
+    public function getProfile(): array
+    {
+        return $this->client()
+            ->get($this->baseUrl . '/auth/sign_in', [
+                'api_access_token' => $this->token,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    public function updateAvailability(string $availability): array
+    {
+        return Http::baseUrl($this->baseUrl)
+            ->withHeaders(['api_access_token' => $this->token, 'Content-Type' => 'application/json'])
+            ->withoutVerifying()
+            ->timeout(10)
+            ->put('/api/v1/profile', [
+                'availability' => $availability,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // TYPING INDICATOR
+    // ═══════════════════════════════════════════════
+
+    public function toggleTyping(int $conversationId, string $status = 'on'): void
+    {
+        $this->client()
+            ->post($this->url("conversations/{$conversationId}/toggle_typing"), [
+                'typing_status' => $status,
+            ]);
+    }
+
+    // ═══════════════════════════════════════════════
+    // MESSAGES (pagination)
+    // ═══════════════════════════════════════════════
+
+    public function getMessagesBefore(int $conversationId, int $beforeId): array
+    {
+        return $this->client()
+            ->get($this->url("conversations/{$conversationId}/messages"), [
+                'before' => $beforeId,
+            ])
+            ->throw()
+            ->json();
+    }
+
+    // ═══════════════════════════════════════════════
+    // HEALTH CHECK
+    // ═══════════════════════════════════════════════
+
+    public function ping(): bool
+    {
+        try {
+            $this->listAgents();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+}
