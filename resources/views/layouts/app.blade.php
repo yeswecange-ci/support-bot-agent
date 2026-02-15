@@ -19,6 +19,22 @@
                 to { opacity: 1; transform: translateX(0); }
             }
             .animate-slide-in { animation: slideInRight 0.3s ease-out; }
+            
+            /* Submenu styles */
+            .submenu {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+            }
+            .submenu.open {
+                max-height: 600px;
+            }
+            .menu-chevron {
+                transition: transform 0.3s ease;
+            }
+            .menu-chevron.rotated {
+                transform: rotate(180deg);
+            }
         </style>
     </head>
     <body class="font-sans antialiased">
@@ -39,75 +55,96 @@
                 </div>
 
                 {{-- Navigation --}}
-                <nav class="flex-1 px-3 py-4 space-y-1">
-                    @if(auth()->user()->isAdmin())
-                    <a href="{{ route('dashboard') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                              {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        Dashboard
-                    </a>
-                    @endif
+                <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                    {{-- Menu déroulant Chat --}}
+                    <div>
+                        <button onclick="toggleChatMenu()" id="chat-menu-btn"
+                                class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                                       {{ request()->routeIs(['dashboard', 'conversations.*', 'agents.*', 'teams.*', 'contacts.*', 'canned-responses.*', 'statistics.*']) ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                                <span>Support Client</span>
+                            </div>
+                            <svg class="w-4 h-4 menu-chevron {{ request()->routeIs(['dashboard', 'conversations.*', 'agents.*', 'teams.*', 'contacts.*', 'canned-responses.*', 'statistics.*']) ? 'rotated' : '' }}" 
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        
+                        {{-- Sous-menu --}}
+                        <div id="chat-submenu" class="submenu {{ request()->routeIs(['dashboard', 'conversations.*', 'agents.*', 'teams.*', 'contacts.*', 'canned-responses.*', 'statistics.*']) ? 'open' : '' }} pl-4 mt-1 space-y-1">
+                            @if(auth()->user()->isAdmin())
+                            <a href="{{ route('dashboard') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                </svg>
+                                Dashboard
+                            </a>
+                            @endif
 
-                    <a href="{{ route('conversations.index') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                              {{ request()->routeIs('conversations.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                        </svg>
-                        Conversations
-                    </a>
+                            <a href="{{ route('conversations.index') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('conversations.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                </svg>
+                                Conversations
+                            </a>
 
-                    @if(auth()->user()->isAdmin())
-                    <a href="{{ route('agents.index') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                              {{ request()->routeIs('agents.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        Agents
-                    </a>
+                            @if(auth()->user()->isAdmin())
+                            <a href="{{ route('agents.index') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('agents.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Agents
+                            </a>
 
-                    <a href="{{ route('teams.index') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                              {{ request()->routeIs('teams.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                        Equipes
-                    </a>
-                    @endif
+                            <a href="{{ route('teams.index') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('teams.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                Equipes
+                            </a>
+                            @endif
 
-                    <a href="{{ route('contacts.index') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                              {{ request()->routeIs('contacts.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        Contacts
-                    </a>
+                            <a href="{{ route('contacts.index') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('contacts.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                Contacts
+                            </a>
 
-                    <a href="{{ route('canned-responses.index') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                              {{ request()->routeIs('canned-responses.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                        </svg>
-                        Reponses rapides
-                    </a>
+                            <a href="{{ route('canned-responses.index') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('canned-responses.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                </svg>
+                                Reponses rapides
+                            </a>
 
-                    @if(auth()->user()->isAdmin())
-                    <a href="{{ route('statistics.index') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                              {{ request()->routeIs('statistics.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        Rapports
-                    </a>
-                    @endif
+                            @if(auth()->user()->isAdmin())
+                            <a href="{{ route('statistics.index') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('statistics.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Rapports
+                            </a>
+                            @endif
+                        </div>
+                    </div>
 
                     {{-- Separator --}}
                     <div class="my-3 border-t border-gray-100"></div>
@@ -243,6 +280,20 @@
             let notifTotalPages = 1;
             let notifLoading = false;
             let lastUnreadCount = 0;
+
+            // ═══ Toggle Chat Menu ═══
+            window.toggleChatMenu = function() {
+                const submenu = document.getElementById('chat-submenu');
+                const chevron = document.querySelector('#chat-menu-btn .menu-chevron');
+                
+                if (submenu.classList.contains('open')) {
+                    submenu.classList.remove('open');
+                    chevron.classList.remove('rotated');
+                } else {
+                    submenu.classList.add('open');
+                    chevron.classList.add('rotated');
+                }
+            };
 
             // Poll notification count every 20s
             async function pollNotifCount() {
