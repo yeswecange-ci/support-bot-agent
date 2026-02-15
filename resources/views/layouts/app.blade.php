@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>@yield('title', 'Dashboard') - YesWeChange Support</title>
+        <title>@yield('title', 'Dashboard') - YesWeCange Support</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700&display=swap" rel="stylesheet" />
@@ -14,6 +14,11 @@
 
         <style>
             body { font-family: 'Inter', sans-serif; }
+            @keyframes slideInRight {
+                from { opacity: 0; transform: translateX(100%); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            .animate-slide-in { animation: slideInRight 0.3s ease-out; }
         </style>
     </head>
     <body class="font-sans antialiased">
@@ -75,6 +80,15 @@
                     </a>
                     @endif
 
+                    <a href="{{ route('contacts.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                              {{ request()->routeIs('contacts.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        Contacts
+                    </a>
+
                     <a href="{{ route('canned-responses.index') }}"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
                               {{ request()->routeIs('canned-responses.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -84,11 +98,22 @@
                         Reponses rapides
                     </a>
 
+                    @if(auth()->user()->isAdmin())
+                    <a href="{{ route('statistics.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                              {{ request()->routeIs('statistics.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        Statistiques
+                    </a>
+                    @endif
+
                     {{-- Separator --}}
                     <div class="my-3 border-t border-gray-100"></div>
 
                     {{-- Notifications --}}
-                    <button onclick="toggleNotifications()" id="notif-btn"
+                    <!-- <button onclick="toggleNotifications()" id="notif-btn"
                             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                         <div class="relative">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +122,7 @@
                             <span id="notif-badge" class="hidden absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">0</span>
                         </div>
                         Notifications
-                    </button>
+                    </button> -->
                 </nav>
 
                 {{-- Notification panel (overlay) --}}
@@ -203,6 +228,9 @@
             </div>
 
         </div>
+
+        {{-- Toast notifications container (WhatsApp-style) --}}
+        <div id="msg-toasts" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm"></div>
 
         @stack('scripts')
 
@@ -414,6 +442,45 @@
             pollNotifCount();
             if (window._notifPollTimer) clearInterval(window._notifPollTimer);
             window._notifPollTimer = setInterval(pollNotifCount, 20000);
+
+            // ═══ Toast WhatsApp-style pour nouveaux messages ═══
+            const _prevMsgs = {};
+            window._showMsgToast = function(convId, contactName, contactThumb, message) {
+                const container = document.getElementById('msg-toasts');
+                if (!container) return;
+                const toast = document.createElement('div');
+                toast.className = 'bg-white border border-gray-200 rounded-xl shadow-2xl p-3 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-all duration-300 animate-slide-in';
+                toast.style.animation = 'slideInRight 0.3s ease-out';
+                const initial = (contactName || '?').charAt(0).toUpperCase();
+                const avatarHtml = contactThumb
+                    ? `<img src="${contactThumb}" class="w-10 h-10 rounded-full flex-shrink-0" alt="">`
+                    : `<div class="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">${initial}</div>`;
+                const msgPreview = (message || '').length > 60 ? message.substring(0, 60) + '...' : (message || 'Nouveau message');
+                toast.innerHTML = `
+                    ${avatarHtml}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-900 truncate">${escH(contactName || 'Contact')}</p>
+                        <p class="text-xs text-gray-500 truncate mt-0.5">${escH(msgPreview)}</p>
+                    </div>
+                    <button class="text-gray-400 hover:text-gray-600 flex-shrink-0 mt-1" onclick="event.stopPropagation(); this.parentElement.remove();">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>`;
+                toast.addEventListener('click', () => {
+                    toast.remove();
+                    if (window.loadConversation) {
+                        window.loadConversation(convId);
+                    } else {
+                        window.location.href = '/conversations/' + convId;
+                    }
+                });
+                container.appendChild(toast);
+                // Auto-dismiss apres 8s
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 8000);
+            };
 
             // ═══ Son de notification (Web Audio API) ═══
             let audioCtx = null;

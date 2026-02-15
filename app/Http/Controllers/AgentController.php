@@ -66,9 +66,10 @@ class AgentController extends Controller
             ]);
 
             return response()->json([
-                'success'  => true,
-                'agent'    => $chatwootAgent,
-                'password' => $tempPassword,
+                'success'      => true,
+                'agent'        => $chatwootAgent,
+                'temp_password' => $tempPassword,
+                'message'      => "Agent cree. Mot de passe temporaire : {$tempPassword} — Transmettez-le de maniere securisee.",
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);

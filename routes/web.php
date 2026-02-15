@@ -10,6 +10,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\InboxController;
+use App\Http\Controllers\StatisticsController;
 use Illuminate\Support\Facades\Route;
 
 // ── Route principale → login ──────────────────────────
@@ -35,11 +36,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/canned-responses', [CannedResponseController::class, 'index'])
         ->name('canned-responses.index');
 
+    // Contacts (accessible a tous)
+    Route::get('/contacts', [ContactController::class, 'index'])
+        ->name('contacts.index');
+
     // Admin only pages
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/agents', [AgentController::class, 'index'])->name('agents.index');
+        Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
     });
 
     // AJAX — Polling & Actions
@@ -49,6 +55,8 @@ Route::middleware('auth')->group(function () {
             ->name('ajax.counts');
         Route::get('/conversations/list-update', [ConversationController::class, 'listUpdate'])
             ->name('ajax.listUpdate');
+        Route::post('/conversations/filter', [ConversationController::class, 'filter'])
+            ->name('ajax.filter');
         // Conversations (dynamic routes)
         Route::get('/conversations/{conversationId}/panel', [ConversationController::class, 'panel'])
             ->name('ajax.panel');
@@ -66,6 +74,16 @@ Route::middleware('auth')->group(function () {
             ->name('ajax.messagesBefore');
         Route::post('/conversations/{conversationId}/assign', [ConversationController::class, 'assign'])
             ->name('ajax.assign');
+        Route::delete('/conversations/{conversationId}/messages/{messageId}', [ConversationController::class, 'deleteMessage'])
+            ->name('ajax.deleteMessage');
+        Route::delete('/conversations/{conversationId}', [ConversationController::class, 'destroy'])
+            ->name('ajax.deleteConversation');
+
+        // Twilio Templates
+        Route::get('/twilio/templates', [ConversationController::class, 'twilioTemplates'])
+            ->name('ajax.twilio.templates');
+        Route::post('/conversations/{conversationId}/template-message', [ConversationController::class, 'sendTemplateMessage'])
+            ->name('ajax.sendTemplate');
 
         // Labels
         Route::get('/labels', [LabelController::class, 'list'])->name('ajax.labels');
@@ -86,6 +104,10 @@ Route::middleware('auth')->group(function () {
             ->name('ajax.canned.destroy');
 
         // Contacts
+        Route::get('/contacts/search', [ContactController::class, 'search'])
+            ->name('ajax.contact.search');
+        Route::post('/contacts', [ContactController::class, 'store'])
+            ->name('ajax.contact.store');
         Route::get('/contacts/{contactId}', [ContactController::class, 'show'])
             ->name('ajax.contact');
         Route::put('/contacts/{contactId}', [ContactController::class, 'update'])
@@ -98,6 +120,8 @@ Route::middleware('auth')->group(function () {
             ->name('ajax.contact.notes.store');
         Route::delete('/contacts/{contactId}/notes/{noteId}', [ContactController::class, 'destroyNote'])
             ->name('ajax.contact.notes.destroy');
+        Route::delete('/contacts/{contactId}', [ContactController::class, 'destroy'])
+            ->name('ajax.contact.destroy');
 
         // Notifications
         Route::get('/notifications', [NotificationController::class, 'list'])
@@ -130,6 +154,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/inboxes', [InboxController::class, 'list'])->name('ajax.inboxes');
             Route::get('/inboxes/{inboxId}/settings', [InboxController::class, 'getSettings'])->name('ajax.inboxes.settings');
             Route::post('/inboxes/{inboxId}/auto-assignment', [InboxController::class, 'updateAutoAssignment'])->name('ajax.inboxes.autoAssign');
+
+            // Statistics
+            Route::get('/statistics/data', [StatisticsController::class, 'data'])->name('ajax.statistics.data');
         });
     });
 

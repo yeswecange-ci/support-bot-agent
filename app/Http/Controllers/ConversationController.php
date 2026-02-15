@@ -7,6 +7,7 @@ use App\Http\Requests\SendMessageRequest;
 use App\Services\Chatwoot\ConversationService;
 use App\Services\Chatwoot\MessageService;
 use App\Services\Chatwoot\ChatwootClient;
+use App\Services\Twilio\TwilioService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -16,6 +17,7 @@ class ConversationController extends Controller
         private ConversationService $conversations,
         private MessageService $messages,
         private ChatwootClient $chatwoot,
+        private TwilioService $twilio,
     ) {}
 
     /**
@@ -26,7 +28,7 @@ class ConversationController extends Controller
     {
         $status       = $request->get('status', 'open');
         $assigneeType = $request->get('assignee_type', 'all');
-        $page         = (int) $request->get('page', 1);
+        $page         = max(1, min((int) $request->get('page', 1), 100));
         $search       = $request->get('q');
         $label        = $request->get('label');
 
@@ -63,7 +65,7 @@ class ConversationController extends Controller
     {
         $status       = $request->get('status', 'open');
         $assigneeType = $request->get('assignee_type', 'all');
-        $page         = (int) $request->get('page', 1);
+        $page         = max(1, min((int) $request->get('page', 1), 100));
         $search       = $request->get('q');
         $label        = $request->get('label');
 
@@ -99,12 +101,22 @@ class ConversationController extends Controller
         $data   = $this->conversations->getWithMessages($conversationId);
         $agents = $this->chatwoot->listAgents();
 
+        // Détection fenêtre WhatsApp 24h expirée (uniquement pour les channels WhatsApp/TwilioSms)
+        $twilioConfigured = $this->twilio->isConfigured();
+        $windowExpired = false;
+        $channel = $data['conversation']->channel;
+        if ($twilioConfigured && in_array($channel, ['Channel::TwilioSms', 'Channel::Whatsapp', 'twilio_sms', 'whatsapp'])) {
+            $windowExpired = $this->conversations->isWindowExpired($data['messages']);
+        }
+
         return view('conversations._panel', [
-            'conversation' => $data['conversation'],
-            'messages'     => $data['messages'],
-            'contact'      => $data['contact'],
-            'assignee'     => $data['assignee'],
-            'agents'       => $agents,
+            'conversation'    => $data['conversation'],
+            'messages'        => $data['messages'],
+            'contact'         => $data['contact'],
+            'assignee'        => $data['assignee'],
+            'agents'          => $agents,
+            'windowExpired'   => $windowExpired,
+            'twilioConfigured' => $twilioConfigured,
         ]);
     }
 
@@ -226,6 +238,128 @@ class ConversationController extends Controller
     }
 
     /**
+     * AJAX — Supprimer un message
+     * DELETE /ajax/conversations/{id}/messages/{messageId}
+     */
+    public function deleteMessage(int $conversationId, int $messageId): JsonResponse
+    {
+        try {
+            $this->chatwoot->deleteMessage($conversationId, $messageId);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * AJAX — Supprimer une conversation
+     * DELETE /ajax/conversations/{id}
+     */
+    public function destroy(int $conversationId): JsonResponse
+    {
+        try {
+            $this->chatwoot->deleteConversation($conversationId);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * AJAX — Filtres avances
+     * POST /ajax/conversations/filter
+     */
+    public function filter(Request $request): JsonResponse
+    {
+        $filters = $request->input('filters', []);
+        $page = (int) $request->input('page', 1);
+
+        try {
+            $data = $this->conversations->advancedFilter($filters, $page);
+
+            return response()->json([
+                'conversations' => collect($data['conversations'])->map(fn($c) => [
+                    'id'               => $c->id,
+                    'status'           => $c->status,
+                    'statusLabel'      => $c->statusLabel(),
+                    'contactName'      => $c->contactName,
+                    'contactPhone'     => $c->contactPhone,
+                    'contactThumbnail' => $c->contactThumbnail,
+                    'lastMessage'      => $c->lastMessage,
+                    'timeAgo'          => $c->timeAgo(),
+                    'unreadCount'      => $c->unreadCount,
+                    'assigneeName'     => $c->assigneeName,
+                    'labels'           => $c->labels,
+                    'statusBadgeClass' => $c->statusBadgeClass(),
+                ])->all(),
+                'meta' => $data['meta'],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['conversations' => [], 'meta' => []], 500);
+        }
+    }
+
+    /**
+     * AJAX — Liste des templates Twilio WhatsApp
+     * GET /ajax/twilio/templates
+     */
+    public function twilioTemplates(): JsonResponse
+    {
+        if (!$this->twilio->isConfigured()) {
+            return response()->json(['error' => 'Twilio non configuré'], 500);
+        }
+
+        try {
+            $templates = $this->twilio->getContentTemplates();
+            return response()->json($templates);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * AJAX — Envoyer un template WhatsApp via Twilio
+     * POST /ajax/conversations/{conversationId}/template-message
+     */
+    public function sendTemplateMessage(int $conversationId, Request $request): JsonResponse
+    {
+        $request->validate([
+            'content_sid' => 'required|string|starts_with:HX',
+            'variables'   => 'nullable|array',
+            'template_name' => 'nullable|string',
+            'body_preview'  => 'nullable|string',
+        ]);
+
+        if (!$this->twilio->isConfigured()) {
+            return response()->json(['error' => 'Twilio non configuré'], 500);
+        }
+
+        try {
+            $conversation = $this->chatwoot->getConversation($conversationId);
+            $phone = $conversation['meta']['sender']['phone_number'] ?? null;
+
+            if (!$phone) {
+                return response()->json(['error' => 'Numéro de téléphone du contact introuvable'], 422);
+            }
+
+            // Envoyer via Twilio
+            $variables = $request->input('variables', []);
+            $this->twilio->sendTemplate($phone, $request->content_sid, $variables);
+
+            // Logger dans Chatwoot comme message sortant
+            $templateName = $request->input('template_name', 'Template');
+            $bodyPreview = $request->input('body_preview', '');
+            $logContent = "[Template: {$templateName}]\n{$bodyPreview}";
+
+            $chatwootMsg = $this->chatwoot->sendMessage($conversationId, $logContent);
+
+            return response()->json($chatwootMsg);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * AJAX — Liste legere pour polling sidebar (unread + last message)
      * GET /ajax/conversations/list-update
      */
@@ -240,12 +374,16 @@ class ConversationController extends Controller
                 $lastMsg = $conv['last_non_activity_message'] ?? $conv['messages'][0] ?? [];
                 $lastMsgType = $lastMsg['message_type'] ?? null; // 0=incoming(client), 1=outgoing(agent), 2=activity
 
+                $sender = $conv['meta']['sender'] ?? [];
+
                 return [
                     'id'                => $conv['id'],
                     'unread_count'      => $conv['unread_count'] ?? 0,
                     'last_message'      => $lastMsg['content'] ?? null,
                     'last_message_type' => $lastMsgType,
                     'status'            => $conv['status'] ?? 'open',
+                    'contact_name'      => $sender['name'] ?? 'Inconnu',
+                    'contact_thumbnail' => $sender['thumbnail'] ?? null,
                 ];
             })->all();
 

@@ -73,16 +73,30 @@ class ConversationDTO
     }
 
     /**
+     * Label français du statut
+     */
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            'open'     => 'Ouvert',
+            'pending'  => 'En attente',
+            'resolved' => 'Résolu',
+            'snoozed'  => 'Reporté',
+            default    => ucfirst($this->status),
+        };
+    }
+
+    /**
      * Classe CSS selon le statut
      */
     public function statusBadgeClass(): string
     {
         return match ($this->status) {
-            'open'     => 'bg-green-100 text-green-800',
-            'pending'  => 'bg-yellow-100 text-yellow-800',
-            'resolved' => 'bg-gray-100 text-gray-800',
-            'snoozed'  => 'bg-blue-100 text-blue-800',
-            default    => 'bg-gray-100 text-gray-800',
+            'open'     => 'bg-blue-50 text-blue-700',
+            'pending'  => 'bg-amber-50 text-amber-700',
+            'resolved' => 'bg-green-50 text-green-700',
+            'snoozed'  => 'bg-gray-100 text-gray-600',
+            default    => 'bg-gray-100 text-gray-600',
         };
     }
 }

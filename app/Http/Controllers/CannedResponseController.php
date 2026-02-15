@@ -48,12 +48,15 @@ class CannedResponseController extends Controller
             'content'    => 'required|string|max:4096',
         ]);
 
-        $result = $this->chatwoot->createCannedResponse(
-            $request->short_code,
-            $request->content,
-        );
-
-        return response()->json($result, 201);
+        try {
+            $result = $this->chatwoot->createCannedResponse(
+                $request->short_code,
+                $request->content,
+            );
+            return response()->json($result, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -67,13 +70,16 @@ class CannedResponseController extends Controller
             'content'    => 'required|string|max:4096',
         ]);
 
-        $result = $this->chatwoot->updateCannedResponse(
-            $id,
-            $request->short_code,
-            $request->content,
-        );
-
-        return response()->json($result);
+        try {
+            $result = $this->chatwoot->updateCannedResponse(
+                $id,
+                $request->short_code,
+                $request->content,
+            );
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -82,8 +88,11 @@ class CannedResponseController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        $this->chatwoot->deleteCannedResponse($id);
-
-        return response()->json(['success' => true]);
+        try {
+            $this->chatwoot->deleteCannedResponse($id);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 }

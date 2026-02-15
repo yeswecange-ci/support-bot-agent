@@ -42,8 +42,74 @@ class ReportService
     }
 
     /**
-     * Appel report avec fallback en cas d'erreur API
+     * Stats completes pour la page statistiques
      */
+    public function getFullStats(string $period = 'week'): array
+    {
+        [$since, $until] = $this->resolvePeriod($period);
+
+        $accountSummary = $this->safeAccountSummary($since, $until);
+        $counts = $this->safeCounts();
+
+        // Conversation trends (conversations_count over the period)
+        $convTrend = $this->safeReport('conversations_count', $since, $until);
+
+        return [
+            'summary' => $accountSummary,
+            'counts'  => $counts,
+            'trends'  => $convTrend,
+            'period'  => ['since' => $since, 'until' => $until],
+        ];
+    }
+
+    /**
+     * Classement des agents avec summary
+     */
+    public function getAgentLeaderboard(string $period = 'week'): array
+    {
+        [$since, $until] = $this->resolvePeriod($period);
+
+        try {
+            $summary = $this->client->getAgentSummary($since, $until);
+            return $summary;
+        } catch (\Exception $e) {
+            Log::warning('[ReportService] Agent summary unavailable', ['error' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * Tendances conversations par jour
+     */
+    public function getConversationTrends(string $period = 'week'): array
+    {
+        [$since, $until] = $this->resolvePeriod($period);
+
+        try {
+            $data = $this->client->getAccountReport('conversations_count', $since, $until);
+            return $data;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    private function safeAccountSummary(string $since, string $until): array
+    {
+        try {
+            return $this->client->getAccountSummary($since, $until);
+        } catch (\Exception $e) {
+            Log::warning('[ReportService] Account summary unavailable', ['error' => $e->getMessage()]);
+            return [
+                'conversations_count' => 0,
+                'incoming_messages_count' => 0,
+                'outgoing_messages_count' => 0,
+                'avg_first_response_time' => 0,
+                'avg_resolution_time' => 0,
+                'resolutions_count' => 0,
+            ];
+        }
+    }
+
     private function safeReport(string $metric, string $since, string $until): array
     {
         try {
@@ -54,9 +120,6 @@ class ReportService
         }
     }
 
-    /**
-     * Compteurs avec fallback
-     */
     private function safeCounts(): array
     {
         try {
@@ -67,7 +130,7 @@ class ReportService
         }
     }
 
-    private function resolvePeriod(string $period): array
+    public function resolvePeriod(string $period): array
     {
         return match ($period) {
             'today' => [
@@ -80,6 +143,10 @@ class ReportService
             ],
             'month' => [
                 (string) Carbon::now()->startOfMonth()->timestamp,
+                (string) Carbon::now()->timestamp,
+            ],
+            'quarter' => [
+                (string) Carbon::now()->firstOfQuarter()->timestamp,
                 (string) Carbon::now()->timestamp,
             ],
             default => [

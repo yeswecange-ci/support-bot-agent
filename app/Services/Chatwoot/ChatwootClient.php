@@ -38,14 +38,19 @@ class ChatwootClient
 
     private function client(): PendingRequest
     {
-        return Http::baseUrl($this->baseUrl)
+        $request = Http::baseUrl($this->baseUrl)
             ->withHeaders([
                 'api_access_token' => $this->token,
                 'Content-Type'     => 'application/json',
             ])
-            ->withoutVerifying()  // ← AJOUTE CETTE LIGNE
             ->timeout(15)
             ->retry(2, 500);
+
+        if (!app()->isProduction()) {
+            $request->withoutVerifying();
+        }
+
+        return $request;
     }
 
     private function url(string $path): string
@@ -154,17 +159,34 @@ class ChatwootClient
     }
 
     /**
-     * Compteurs (mine_count, unassigned_count, etc.)
+     * Compteurs par statut
      */
     public function getConversationCounts(): array
     {
-        return $this->client()
-            ->get($this->url('conversations'), [
-                'status' => 'open',
-                'page'   => 1,
-            ])
+        $openMeta = $this->client()
+            ->get($this->url('conversations'), ['status' => 'open', 'page' => 1])
             ->throw()
             ->json('data.meta');
+
+        $pendingMeta = $this->client()
+            ->get($this->url('conversations'), ['status' => 'pending', 'page' => 1])
+            ->throw()
+            ->json('data.meta');
+
+        $resolvedMeta = $this->client()
+            ->get($this->url('conversations'), ['status' => 'resolved', 'page' => 1])
+            ->throw()
+            ->json('data.meta');
+
+        return [
+            'mine_count'       => $openMeta['mine_count'] ?? 0,
+            'assigned_count'   => $openMeta['assigned_count'] ?? 0,
+            'unassigned_count' => $openMeta['unassigned_count'] ?? 0,
+            'all_count'        => $openMeta['all_count'] ?? 0,
+            'open_count'       => $openMeta['all_count'] ?? 0,
+            'pending_count'    => $pendingMeta['all_count'] ?? 0,
+            'resolved_count'   => $resolvedMeta['all_count'] ?? 0,
+        ];
     }
 
     /**
@@ -237,24 +259,31 @@ class ChatwootClient
         bool $isPrivate = false,
         string $messageType = 'outgoing'
     ): array {
-        $request = Http::baseUrl($this->baseUrl)
-            ->withHeaders(['api_access_token' => $this->token])
-            ->withoutVerifying()
-            ->timeout(30);
+        $multipart = [
+            ['name' => 'content',      'contents' => $content ?? ''],
+            ['name' => 'message_type', 'contents' => $messageType],
+            ['name' => 'private',      'contents' => $isPrivate ? 'true' : 'false'],
+        ];
 
         foreach ($attachments as $file) {
-            $request = $request->attach(
-                'attachments[]',
-                file_get_contents($file->getRealPath()),
-                $file->getClientOriginalName()
-            );
+            $multipart[] = [
+                'name'     => 'attachments[]',
+                'contents' => fopen($file->getRealPath(), 'r'),
+                'filename' => $file->getClientOriginalName(),
+            ];
         }
 
-        return $request->post($this->url("conversations/{$conversationId}/messages"), [
-                'content'      => $content ?? '',
-                'message_type' => $messageType,
-                'private'      => $isPrivate ? 'true' : 'false',
-            ])
+        $request = Http::baseUrl($this->baseUrl)
+            ->withHeaders(['api_access_token' => $this->token])
+            ->timeout(30)
+            ->asMultipart();
+
+        if (!app()->isProduction()) {
+            $request->withoutVerifying();
+        }
+
+        return $request
+            ->post($this->url("conversations/{$conversationId}/messages"), $multipart)
             ->throw()
             ->json();
     }
@@ -397,6 +426,22 @@ class ChatwootClient
             ->json();
     }
 
+    public function getAccountSummary(string $since, string $until): array
+    {
+        return $this->client()
+            ->get($this->url('reports/account/summary'), compact('since', 'until'))
+            ->throw()
+            ->json();
+    }
+
+    public function getAgentSummary(string $since, string $until): array
+    {
+        return $this->client()
+            ->get($this->url('reports/agents/summary'), compact('since', 'until'))
+            ->throw()
+            ->json();
+    }
+
     // ═══════════════════════════════════════════════
     // CANNED RESPONSES
     // ═══════════════════════════════════════════════
@@ -485,6 +530,41 @@ class ChatwootClient
     // ═══════════════════════════════════════════════
     // CONTACTS (extended)
     // ═══════════════════════════════════════════════
+
+    public function listContacts(int $page = 1, string $sortBy = '-last_activity_at', bool $includeContactInboxes = false): array
+    {
+        $query = [
+            'page' => $page,
+        ];
+
+        if ($sortBy) {
+            $query['sort'] = $sortBy;
+        }
+
+        if ($includeContactInboxes) {
+            $query['include_contact_inboxes'] = true;
+        }
+
+        return $this->client()
+            ->get($this->url('contacts'), $query)
+            ->throw()
+            ->json();
+    }
+
+    public function deleteContact(int $contactId): void
+    {
+        $this->client()
+            ->delete($this->url("contacts/{$contactId}"))
+            ->throw();
+    }
+
+    public function filterContacts(array $payload, int $page = 1): array
+    {
+        return $this->client()
+            ->post($this->url('contacts/filter'), array_merge($payload, ['page' => $page]))
+            ->throw()
+            ->json();
+    }
 
     public function updateContact(int $contactId, array $data): array
     {
@@ -694,10 +774,15 @@ class ChatwootClient
 
     public function updateAvailability(string $availability): array
     {
-        return Http::baseUrl($this->baseUrl)
+        $request = Http::baseUrl($this->baseUrl)
             ->withHeaders(['api_access_token' => $this->token, 'Content-Type' => 'application/json'])
-            ->withoutVerifying()
-            ->timeout(10)
+            ->timeout(10);
+
+        if (!app()->isProduction()) {
+            $request->withoutVerifying();
+        }
+
+        return $request
             ->put('/api/v1/profile', [
                 'availability' => $availability,
             ])
@@ -720,6 +805,23 @@ class ChatwootClient
     // ═══════════════════════════════════════════════
     // MESSAGES (pagination)
     // ═══════════════════════════════════════════════
+
+    /**
+     * Supprimer une conversation
+     */
+    public function deleteConversation(int $conversationId): void
+    {
+        $this->client()
+            ->delete($this->url("conversations/{$conversationId}"))
+            ->throw();
+    }
+
+    public function deleteMessage(int $conversationId, int $messageId): void
+    {
+        $this->client()
+            ->delete($this->url("conversations/{$conversationId}/messages/{$messageId}"))
+            ->throw();
+    }
 
     public function getMessagesBefore(int $conversationId, int $beforeId): array
     {

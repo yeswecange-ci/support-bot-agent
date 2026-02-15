@@ -33,8 +33,9 @@ class ContactService
         }
 
         $response = $this->client->createContact($name, $phone, $email);
+        $contact = $response['payload']['contact'] ?? $response['payload'] ?? $response;
 
-        return ContactDTO::fromArray($response['payload']['contact']);
+        return ContactDTO::fromArray($contact);
     }
 
     /**
@@ -43,7 +44,8 @@ class ContactService
     public function get(int $contactId): ContactDTO
     {
         $response = $this->client->getContact($contactId);
+        $contact = $response['payload'] ?? $response;
 
-        return ContactDTO::fromArray($response);
+        return ContactDTO::fromArray($contact);
     }
 }

@@ -18,7 +18,7 @@ class NotificationController extends Controller
      */
     public function list(Request $request): JsonResponse
     {
-        $page = (int) $request->get('page', 1);
+        $page = max(1, min((int) $request->get('page', 1), 100));
 
         try {
             $data = $this->chatwoot->listNotifications($page);
@@ -40,11 +40,10 @@ class NotificationController extends Controller
     {
         try {
             $this->chatwoot->markNotificationRead($id);
+            return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            // Silently ignore
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
-
-        return response()->json(['success' => true]);
     }
 
     /**
@@ -55,10 +54,9 @@ class NotificationController extends Controller
     {
         try {
             $this->chatwoot->markAllNotificationsRead();
+            return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            // Silently ignore
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
-
-        return response()->json(['success' => true]);
     }
 }

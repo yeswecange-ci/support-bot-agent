@@ -23,19 +23,28 @@
 
             {{-- Tabs statut --}}
             <div class="flex gap-1">
-                @foreach(['open' => 'Ouverts', 'pending' => 'En attente', 'resolved' => 'Résolus'] as $status => $label)
+                @php
+                    $statusTabs = [
+                        'open'     => ['label' => 'Ouverts',    'countKey' => 'open_count'],
+                        'pending'  => ['label' => 'En attente', 'countKey' => 'pending_count'],
+                        'resolved' => ['label' => 'Résolus',    'countKey' => 'resolved_count'],
+                    ];
+                @endphp
+                @foreach($statusTabs as $status => $tabInfo)
                     <a href="{{ route('conversations.index', ['status' => $status]) }}"
                        class="flex-1 text-center py-1.5 text-xs font-medium rounded-md transition
                               {{ $currentStatus === $status ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                        {{ $label }}
-                        @if($status === 'open' && isset($meta['mine_count']))
-                            <span class="ml-1">({{ ($meta['mine_count'] ?? 0) + ($meta['unassigned_count'] ?? 0) }})</span>
+                        {{ $tabInfo['label'] }}
+                        @if(isset($meta[$tabInfo['countKey']]))
+                            <span class="ml-1">({{ $meta[$tabInfo['countKey']] }})</span>
+                        @elseif($status === 'open' && isset($meta['all_count']))
+                            <span class="ml-1">({{ $meta['all_count'] }})</span>
                         @endif
                     </a>
                 @endforeach
             </div>
 
-            {{-- Filtres avances --}}
+            {{-- Filtres rapides --}}
             <div class="flex gap-2">
                 <select id="filter-assignee" onchange="applyFilters()"
                         class="flex-1 text-[11px] border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:ring-2 focus:ring-primary-500">
@@ -47,6 +56,63 @@
                         class="flex-1 text-[11px] border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 focus:ring-2 focus:ring-primary-500">
                     <option value="">Tous les labels</option>
                 </select>
+                <button onclick="toggleAdvancedFilters()" id="adv-filter-btn"
+                        class="flex-shrink-0 px-2 py-1.5 text-[11px] font-medium rounded-lg border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition"
+                        title="Filtres avances">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                </button>
+            </div>
+
+            {{-- Panneau filtres avances (toggle) --}}
+            <div id="adv-filter-panel" class="hidden border border-gray-200 rounded-lg bg-gray-50 p-3 space-y-2">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[11px] font-semibold text-gray-700 uppercase tracking-wider">Filtres avances</span>
+                    <button onclick="resetAdvancedFilters()" class="text-[10px] text-red-500 hover:text-red-600 font-medium">Reinitialiser</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-medium">Statut</label>
+                        <select id="adv-status" class="w-full text-[11px] border-gray-200 rounded-md px-2 py-1.5 bg-white">
+                            <option value="">Tous</option>
+                            <option value="open">Ouvert</option>
+                            <option value="pending">En attente</option>
+                            <option value="resolved">Resolu</option>
+                            <option value="snoozed">Reporte</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-medium">Agent</label>
+                        <select id="adv-agent" class="w-full text-[11px] border-gray-200 rounded-md px-2 py-1.5 bg-white">
+                            <option value="">Tous</option>
+                            @foreach($agents as $agent)
+                                <option value="{{ $agent['id'] }}">{{ $agent['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-medium">Equipe</label>
+                        <select id="adv-team" class="w-full text-[11px] border-gray-200 rounded-md px-2 py-1.5 bg-white">
+                            <option value="">Toutes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-medium">Label</label>
+                        <select id="adv-label" class="w-full text-[11px] border-gray-200 rounded-md px-2 py-1.5 bg-white">
+                            <option value="">Tous</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-medium">Depuis</label>
+                        <input type="date" id="adv-since" class="w-full text-[11px] border-gray-200 rounded-md px-2 py-1.5 bg-white">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-medium">Jusqu'a</label>
+                        <input type="date" id="adv-until" class="w-full text-[11px] border-gray-200 rounded-md px-2 py-1.5 bg-white">
+                    </div>
+                </div>
+                <button onclick="applyAdvancedFilters()" class="w-full py-1.5 text-[11px] font-medium bg-primary-500 text-white rounded-md hover:bg-primary-600 transition">
+                    Appliquer les filtres
+                </button>
             </div>
 
             @if(auth()->user()->isAdmin())
@@ -94,7 +160,7 @@
                             <p class="conv-last-msg text-xs text-gray-500 truncate mt-0.5">{{ $conv->lastMessage ?? 'Pas de message' }}</p>
                             <div class="flex items-center gap-2 mt-1">
                                 <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium {{ $conv->statusBadgeClass() }}">
-                                    {{ ucfirst($conv->status) }}
+                                    {{ $conv->statusLabel() }}
                                 </span>
                                 @if($conv->assigneeName)
                                     <span class="text-[10px] text-gray-400">{{ $conv->assigneeName }}</span>
@@ -258,6 +324,18 @@
             if (totalEl && counts.all_count !== undefined) {
                 totalEl.textContent = counts.all_count + ' total';
             }
+            // Mettre a jour les compteurs des tabs
+            const tabLinks = document.querySelectorAll('.flex.gap-1 a');
+            const tabCountKeys = ['open_count', 'pending_count', 'resolved_count'];
+            tabLinks.forEach((link, idx) => {
+                const key = tabCountKeys[idx];
+                if (counts[key] !== undefined) {
+                    let countSpan = link.querySelector('span');
+                    if (countSpan) {
+                        countSpan.textContent = '(' + counts[key] + ')';
+                    }
+                }
+            });
         } catch(e) {}
 
         // Rafraichir la liste pour afficher les nouveaux messages/badges
@@ -288,9 +366,12 @@
                 // Badge unread : uniquement si le dernier message vient du CLIENT (type 0)
                 const badge = item.querySelector('.conv-unread-badge');
                 if (lastMsgType === 0 && newUnread > 0) {
-                    // Son si nouveau message (badge n'existait pas ou count augmente)
-                    if ((!badge || newUnread > oldUnread) && window._playNotifSound) {
-                        window._playNotifSound();
+                    // Toast + son si nouveau message client
+                    if ((!badge || newUnread > oldUnread)) {
+                        if (window._playNotifSound) window._playNotifSound();
+                        if (window._showMsgToast) {
+                            window._showMsgToast(conv.id, conv.contact_name, conv.contact_thumbnail, conv.last_message);
+                        }
                     }
                     // Message client non lu → afficher/maj le badge
                     item.dataset.unread = newUnread;
@@ -311,6 +392,103 @@
             });
         } catch(e) {}
     }, SIDEBAR_POLL);
+
+    // ═══ Ensure conversation appears in sidebar (after reopen, send, status change) ═══
+    window._ensureConvInSidebar = async function(convId, options = {}) {
+        const list = document.getElementById('conversation-list');
+        if (!list) return;
+        let item = list.querySelector(`.conv-item[data-id="${convId}"]`);
+
+        // If the item exists, move it to the top
+        if (item) {
+            const loadMore = document.getElementById('load-more-conv');
+            list.insertBefore(item, list.firstChild);
+            // Update last message if provided
+            if (options.lastMessage) {
+                const msgEl = item.querySelector('.conv-last-msg');
+                if (msgEl) msgEl.textContent = options.lastMessage;
+            }
+            // Update status badge if provided
+            if (options.status) {
+                const _sl = {'open':'Ouvert','pending':'En attente','resolved':'Résolu','snoozed':'Reporté'};
+                const _sc = {'open':'bg-blue-50 text-blue-700','pending':'bg-amber-50 text-amber-700','resolved':'bg-green-50 text-green-700','snoozed':'bg-gray-100 text-gray-600'};
+                const badge = item.querySelector('.inline-block.px-1\\.5');
+                if (badge) {
+                    badge.textContent = _sl[options.status] || options.status;
+                    badge.className = 'inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ' + (_sc[options.status] || 'bg-gray-100 text-gray-600');
+                }
+            }
+            return;
+        }
+
+        // Item not in sidebar — fetch conversation data from API and create it
+        try {
+            const r = await fetch(`/ajax/conversations/${convId}/poll?last_message_id=0`);
+            const pollData = await r.json();
+            const lastMsg = (pollData.messages && pollData.messages.length > 0)
+                ? pollData.messages[pollData.messages.length - 1]
+                : null;
+
+            // Also get conversation details from list-update
+            const r2 = await fetch(`/ajax/conversations/list-update?status=open&assignee_type=all`);
+            const listData = await r2.json();
+            const conv = (listData.conversations || []).find(c => c.id == convId);
+
+            const contactName = conv?.contact_name || options.contactName || 'Contact';
+            const contactThumb = conv?.contact_thumbnail || options.contactThumbnail || null;
+            const lastMessage = options.lastMessage || conv?.last_message || lastMsg?.content || 'Pas de message';
+            const status = options.status || conv?.status || 'open';
+            const initial = contactName.charAt(0).toUpperCase();
+
+            const avatarHtml = contactThumb
+                ? `<img src="${contactThumb}" class="w-10 h-10 rounded-full" alt="">`
+                : `<div class="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold text-sm">${initial}</div>`;
+
+            const statusClasses = {
+                'open': 'bg-blue-50 text-blue-700',
+                'pending': 'bg-amber-50 text-amber-700',
+                'resolved': 'bg-green-50 text-green-700',
+                'snoozed': 'bg-gray-100 text-gray-600',
+            };
+            const statusLabels = {
+                'open': 'Ouvert',
+                'pending': 'En attente',
+                'resolved': 'Résolu',
+                'snoozed': 'Reporté',
+            };
+            const statusClass = statusClasses[status] || 'bg-gray-100 text-gray-600';
+            const statusText = statusLabels[status] || status;
+
+            const div = document.createElement('div');
+            div.className = 'conv-item cursor-pointer px-4 py-3 border-b hover:bg-gray-50 transition';
+            div.dataset.id = convId;
+            div.dataset.unread = '0';
+            div.onclick = () => loadConversation(convId);
+            div.innerHTML = `<div class="flex items-start gap-3">
+                <div class="flex-shrink-0">${avatarHtml}</div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-semibold text-gray-900 truncate">${contactName}</p>
+                        <span class="text-xs text-gray-400 flex-shrink-0">A l'instant</span>
+                    </div>
+                    <p class="conv-last-msg text-xs text-gray-500 truncate mt-0.5">${lastMessage}</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${statusClass}">${statusText}</span>
+                    </div>
+                </div>
+            </div>`;
+
+            list.insertBefore(div, list.firstChild);
+        } catch(e) {
+            console.error('_ensureConvInSidebar:', e);
+        }
+    };
+
+    // ═══ Remove conversation from sidebar ═══
+    window._removeConvFromSidebar = function(convId) {
+        const item = document.querySelector(`.conv-item[data-id="${convId}"]`);
+        if (item) item.remove();
+    };
 
     // ═══ Auto-open conversation if selectedConversationId is set (page reload on /conversations/{id}) ═══
     @if($selectedConversationId)
@@ -363,6 +541,142 @@
         }
         window.location.href = '{{ route("conversations.index") }}?' + params.toString();
     };
+
+    // ═══ Advanced filters ═══
+    let advFiltersOpen = false;
+    window.toggleAdvancedFilters = function() {
+        const panel = document.getElementById('adv-filter-panel');
+        const btn = document.getElementById('adv-filter-btn');
+        advFiltersOpen = !advFiltersOpen;
+        panel.classList.toggle('hidden', !advFiltersOpen);
+        btn.classList.toggle('bg-primary-100', advFiltersOpen);
+        btn.classList.toggle('text-primary-700', advFiltersOpen);
+    };
+
+    window.resetAdvancedFilters = function() {
+        document.getElementById('adv-status').value = '';
+        document.getElementById('adv-agent').value = '';
+        document.getElementById('adv-team').value = '';
+        document.getElementById('adv-label').value = '';
+        document.getElementById('adv-since').value = '';
+        document.getElementById('adv-until').value = '';
+        // Reload without filters
+        window.location.href = '{{ route("conversations.index") }}';
+    };
+
+    window.applyAdvancedFilters = async function() {
+        const filters = {};
+        const status = document.getElementById('adv-status').value;
+        const agent = document.getElementById('adv-agent').value;
+        const team = document.getElementById('adv-team').value;
+        const label = document.getElementById('adv-label').value;
+        const since = document.getElementById('adv-since').value;
+        const until = document.getElementById('adv-until').value;
+
+        if (status) filters.status = status;
+        if (agent) filters.assignee_id = agent;
+        if (team) filters.team_id = team;
+        if (label) filters.label = label;
+        if (since) filters.created_since = since;
+        if (until) filters.created_until = until;
+
+        if (Object.keys(filters).length === 0) return;
+
+        const list = document.getElementById('conversation-list');
+        list.innerHTML = '<div class="p-8 text-center text-gray-400"><svg class="w-6 h-6 animate-spin mx-auto mb-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><p class="text-xs">Filtrage...</p></div>';
+
+        try {
+            const r = await fetch('{{ route("ajax.filter") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
+                body: JSON.stringify({ filters })
+            });
+            const data = await r.json();
+            const convs = data.conversations || [];
+
+            if (convs.length === 0) {
+                list.innerHTML = '<div class="p-8 text-center text-gray-400"><p class="text-sm">Aucun resultat</p></div>';
+                return;
+            }
+
+            const _statusClasses = {
+                'open': 'bg-blue-50 text-blue-700',
+                'pending': 'bg-amber-50 text-amber-700',
+                'resolved': 'bg-green-50 text-green-700',
+                'snoozed': 'bg-gray-100 text-gray-600',
+            };
+            const _statusLabels = {
+                'open': 'Ouvert',
+                'pending': 'En attente',
+                'resolved': 'Résolu',
+                'snoozed': 'Reporté',
+            };
+
+            list.innerHTML = '';
+            convs.forEach(conv => {
+                const initial = (conv.contactName || '?').charAt(0).toUpperCase();
+                const avatarHtml = conv.contactThumbnail
+                    ? `<img src="${conv.contactThumbnail}" class="w-10 h-10 rounded-full" alt="">`
+                    : `<div class="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold text-sm">${initial}</div>`;
+                const unreadHtml = conv.unreadCount > 0
+                    ? `<span class="conv-unread-badge ml-auto bg-primary-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center">${conv.unreadCount}</span>`
+                    : '';
+                const assigneeHtml = conv.assigneeName
+                    ? `<span class="text-[10px] text-gray-400">${conv.assigneeName}</span>`
+                    : '<span class="text-[10px] text-orange-500 font-medium">Non assigne</span>';
+                const badgeClass = _statusClasses[conv.status] || 'bg-gray-100 text-gray-600';
+                const badgeLabel = _statusLabels[conv.status] || conv.status;
+
+                const div = document.createElement('div');
+                div.className = 'conv-item cursor-pointer px-4 py-3 border-b hover:bg-gray-50 transition';
+                div.dataset.id = conv.id;
+                div.dataset.unread = conv.unreadCount || 0;
+                div.onclick = () => loadConversation(conv.id);
+                div.innerHTML = `<div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">${avatarHtml}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-gray-900 truncate">${conv.contactName || 'Contact'}</p>
+                            <span class="text-xs text-gray-400 flex-shrink-0">${conv.timeAgo || ''}</span>
+                        </div>
+                        <p class="conv-last-msg text-xs text-gray-500 truncate mt-0.5">${conv.lastMessage || 'Pas de message'}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${badgeClass}">${badgeLabel}</span>
+                            ${assigneeHtml}
+                            ${unreadHtml}
+                        </div>
+                    </div>
+                </div>`;
+                list.appendChild(div);
+            });
+        } catch(e) {
+            list.innerHTML = '<div class="p-8 text-center text-red-400"><p class="text-sm">Erreur de filtrage</p></div>';
+        }
+    };
+
+    // Load teams and labels into advanced filter dropdowns
+    (async function() {
+        try {
+            const [teamsR, labelsR] = await Promise.all([fetch('/ajax/teams'), fetch('/ajax/labels')]);
+            const teams = await teamsR.json();
+            const labels = await labelsR.json();
+            const teamSel = document.getElementById('adv-team');
+            const labelSel = document.getElementById('adv-label');
+            teams.forEach(t => {
+                const o = document.createElement('option');
+                o.value = t.id;
+                o.textContent = t.name;
+                teamSel.appendChild(o);
+            });
+            labels.forEach(l => {
+                const title = l.title || l;
+                const o = document.createElement('option');
+                o.value = title;
+                o.textContent = title;
+                labelSel.appendChild(o);
+            });
+        } catch(e) {}
+    })();
 
     // ═══ Pagination infinie conversations ═══
     const convList = document.getElementById('conversation-list');

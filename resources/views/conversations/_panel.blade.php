@@ -18,7 +18,7 @@
                     <h2 class="text-sm font-semibold text-gray-900 truncate">{{ $conversation->contactName }}</h2>
                     <div class="flex items-center gap-1.5 text-xs text-gray-500">
                         <span class="truncate">{{ $conversation->contactPhone ?? '' }}</span>
-                        <span class="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-medium {{ $conversation->statusBadgeClass() }}">{{ ucfirst($conversation->status) }}</span>
+                        <span class="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-medium {{ $conversation->statusBadgeClass() }}">{{ $conversation->statusLabel() }}</span>
                     </div>
                 </div>
             </div>
@@ -43,13 +43,20 @@
 
                 @if($conversation->status === 'resolved')
                     <button onclick="toggleStatus('reopen')"
-                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition">
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         Reouvrir
                     </button>
                 @else
+                    @if($conversation->status !== 'pending')
+                    <button onclick="toggleStatus('pending')"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 transition">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        En attente
+                    </button>
+                    @endif
                     <button onclick="toggleStatus('resolve')"
-                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium bg-gray-100 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-200 transition">
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Resoudre
                     </button>
@@ -60,6 +67,13 @@
                         class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
                         title="Infos contact">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </button>
+
+                {{-- Supprimer conversation --}}
+                <button onclick="deleteConversation()"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition"
+                        title="Supprimer la conversation">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
 
                 {{-- Ouvrir plein ecran --}}
@@ -122,8 +136,13 @@
                         </span>
                     </div>
                 @else
-                    <div class="{{ $isOutgoing ? 'message-outgoing' : 'message-incoming' }}">
-                        <div class="max-w-[80%] {{ $isPrivate ? 'bg-amber-50 border border-amber-200' : ($isOutgoing ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200') }} rounded-2xl {{ $isOutgoing ? 'rounded-br-md' : 'rounded-bl-md' }} px-4 py-2.5 shadow-sm">
+                    <div class="group/msg {{ $isOutgoing ? 'message-outgoing' : 'message-incoming' }}" data-msg-id="{{ $msg['id'] ?? '' }}">
+                        <div class="relative max-w-[80%] {{ $isPrivate ? 'bg-amber-50 border border-amber-200' : ($isOutgoing ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200') }} rounded-2xl {{ $isOutgoing ? 'rounded-br-md' : 'rounded-bl-md' }} px-4 py-2.5 shadow-sm">
+                            @if($isOutgoing && isset($msg['id']))
+                            <button onclick="deleteMsg({{ $msg['id'] }})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full items-center justify-center text-[10px] shadow hidden group-hover/msg:flex hover:bg-red-600 transition" title="Supprimer">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                            @endif
                             @if($isPrivate)
                                 <p class="text-[10px] font-semibold text-amber-600 mb-0.5">Note privee</p>
                             @endif
@@ -206,8 +225,49 @@
             </div>
         </div>
 
+        {{-- Bannière fenêtre WhatsApp expirée --}}
+        @if($windowExpired ?? false)
+        <div id="window-expired-banner" class="px-4 py-2.5 bg-amber-50 border-t border-amber-200 flex items-center gap-2 flex-shrink-0">
+            <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            <p class="text-xs text-amber-700">La fenetre WhatsApp de 24h est expiree. Utilisez un <strong>template</strong> pour relancer la conversation.</p>
+        </div>
+        @endif
+
+        {{-- Template Picker (toujours disponible si Twilio configuré, affiché par défaut si fenêtre expirée) --}}
+        @if($twilioConfigured ?? false)
+        <div id="template-picker" class="bg-white border-t border-gray-200 px-4 py-3 flex-shrink-0 space-y-3 {{ ($windowExpired ?? false) ? '' : 'hidden' }}">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 flex-1">
+                    <svg class="w-4 h-4 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <select id="template-select" class="flex-1 text-xs border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-primary-500">
+                        <option value="">-- Choisir un template --</option>
+                    </select>
+                </div>
+                <button onclick="toggleTemplatePicker()" class="ml-2 w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition" title="Revenir au message libre">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            {{-- Variables dynamiques --}}
+            <div id="template-variables" class="hidden space-y-2"></div>
+
+            {{-- Aperçu --}}
+            <div id="template-preview" class="hidden p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-1">Apercu du message</p>
+                <p id="template-preview-text" class="text-xs text-gray-700 whitespace-pre-wrap"></p>
+            </div>
+
+            {{-- Bouton envoyer --}}
+            <button id="send-template-btn" onclick="sendTemplateMsg()" disabled
+                    class="w-full py-2 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                Envoyer le template
+            </button>
+        </div>
+        @endif
+
         {{-- Zone de saisie avec autocomplétion --}}
-        <div class="bg-white border-t border-gray-200 px-4 py-3 flex-shrink-0 relative">
+        <div class="bg-white border-t border-gray-200 px-4 py-3 flex-shrink-0 relative {{ ($windowExpired ?? false) ? 'hidden' : '' }}" id="composer-zone">
             {{-- Canned Responses dropdown --}}
             <div id="canned-dropdown" class="hidden absolute bottom-full left-4 right-4 mb-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-52 overflow-y-auto z-30">
                 <div class="p-2 text-[10px] font-medium text-gray-400 uppercase tracking-wider">Reponses rapides</div>
@@ -237,6 +297,13 @@
                             class="w-9 h-9 flex items-center justify-center rounded-lg text-amber-500 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     </button>
+                    @if($twilioConfigured ?? false)
+                    <button type="button" onclick="toggleTemplatePicker()"
+                            title="Envoyer un template WhatsApp"
+                            class="w-9 h-9 flex items-center justify-center rounded-lg text-green-600 bg-green-50 border border-green-200 hover:bg-green-100 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </button>
+                    @endif
                     <button type="submit" id="send-btn"
                             class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition shadow-sm">
                         <svg id="send-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
@@ -365,6 +432,180 @@
     let noMoreOlder = false;
     let typingTimer = null;
     let isTypingSent = false;
+    const WINDOW_EXPIRED = {{ ($windowExpired ?? false) ? 'true' : 'false' }};
+    const TWILIO_CONFIGURED = {{ ($twilioConfigured ?? false) ? 'true' : 'false' }};
+    let twilioTemplates = [];
+    let templatesLoaded = false;
+
+    // ═══ Toggle Template Picker ↔ Composer ═══
+    window.toggleTemplatePicker = function() {
+        const picker = document.getElementById('template-picker');
+        const composer = document.getElementById('composer-zone');
+        if (!picker) return;
+
+        if (picker.classList.contains('hidden')) {
+            picker.classList.remove('hidden');
+            if (composer) composer.classList.add('hidden');
+            if (!templatesLoaded) loadTwilioTemplates();
+        } else {
+            picker.classList.add('hidden');
+            if (composer) composer.classList.remove('hidden');
+        }
+    };
+
+    // ═══ Template Picker (WhatsApp) ═══
+    async function loadTwilioTemplates() {
+        if (templatesLoaded) return;
+        templatesLoaded = true;
+        try {
+            const r = await fetch('/ajax/twilio/templates');
+            if (!r.ok) throw new Error('Erreur chargement templates');
+            twilioTemplates = await r.json();
+            const sel = document.getElementById('template-select');
+            twilioTemplates.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.sid;
+                opt.textContent = t.friendly_name + (t.body ? ' — ' + t.body.substring(0, 50) + (t.body.length > 50 ? '...' : '') : '');
+                opt.dataset.body = t.body || '';
+                opt.dataset.vars = JSON.stringify(t.variables || []);
+                opt.dataset.name = t.friendly_name || '';
+                sel.appendChild(opt);
+            });
+        } catch(e) {
+            console.error('Load templates:', e);
+            const sel = document.getElementById('template-select');
+            if (sel) sel.innerHTML = '<option value="">Erreur de chargement des templates</option>';
+        }
+    }
+
+    // Listener sur le select de template
+    document.getElementById('template-select')?.addEventListener('change', function() {
+        const opt = this.selectedOptions[0];
+        const varsDiv = document.getElementById('template-variables');
+        const previewDiv = document.getElementById('template-preview');
+        const sendBtn = document.getElementById('send-template-btn');
+
+        if (!this.value) {
+            varsDiv.classList.add('hidden');
+            previewDiv.classList.add('hidden');
+            sendBtn.disabled = true;
+            return;
+        }
+
+        const body = opt.dataset.body || '';
+        const vars = JSON.parse(opt.dataset.vars || '[]');
+
+        // Afficher les inputs de variables
+        if (vars.length > 0) {
+            varsDiv.classList.remove('hidden');
+            varsDiv.innerHTML = vars.map(v =>
+                `<div class="flex items-center gap-2">
+                    <label class="text-[11px] font-medium text-gray-500 w-16 flex-shrink-0">Variable ${esc(v)}</label>
+                    <input type="text" class="template-var-input flex-1 px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary-500" data-var="${esc(v)}" placeholder="Valeur pour @{{${esc(v)}@}}" oninput="updateTemplatePreview()">
+                </div>`
+            ).join('');
+        } else {
+            varsDiv.classList.add('hidden');
+            varsDiv.innerHTML = '';
+        }
+
+        // Afficher l'aperçu
+        previewDiv.classList.remove('hidden');
+        document.getElementById('template-preview-text').textContent = body;
+        sendBtn.disabled = false;
+        updateTemplatePreview();
+    });
+
+    // Charger les templates au démarrage si le picker est déjà visible (fenêtre expirée)
+    if (TWILIO_CONFIGURED && WINDOW_EXPIRED) {
+        loadTwilioTemplates();
+    }
+
+    window.updateTemplatePreview = function() {
+        const sel = document.getElementById('template-select');
+        if (!sel || !sel.value) return;
+        const opt = sel.selectedOptions[0];
+        let body = opt.dataset.body || '';
+
+        document.querySelectorAll('.template-var-input').forEach(inp => {
+            const varNum = inp.dataset.var;
+            const val = inp.value || `@{{${varNum}@}}`;
+            body = body.replace(new RegExp(`\\{\\{${varNum}\\}\\}`, 'g'), val);
+        });
+
+        document.getElementById('template-preview-text').textContent = body;
+    };
+
+    window.sendTemplateMsg = async function() {
+        const sel = document.getElementById('template-select');
+        if (!sel || !sel.value) return;
+
+        const opt = sel.selectedOptions[0];
+        const contentSid = sel.value;
+        const templateName = opt.dataset.name || 'Template';
+        const vars = JSON.parse(opt.dataset.vars || '[]');
+        const btn = document.getElementById('send-template-btn');
+
+        // Collecter les variables
+        const variables = {};
+        document.querySelectorAll('.template-var-input').forEach(inp => {
+            variables[inp.dataset.var] = inp.value || '';
+        });
+
+        // Construire l'aperçu final
+        let bodyPreview = opt.dataset.body || '';
+        Object.entries(variables).forEach(([k, v]) => {
+            bodyPreview = bodyPreview.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+        });
+
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Envoi en cours...';
+
+        try {
+            const r = await fetch(`/ajax/conversations/${CID}/template-message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
+                body: JSON.stringify({
+                    content_sid: contentSid,
+                    variables: variables,
+                    template_name: templateName,
+                    body_preview: bodyPreview,
+                }),
+            });
+
+            if (!r.ok) {
+                const err = await r.json().catch(() => null);
+                alert('Erreur: ' + (err?.error || 'Impossible d\'envoyer le template'));
+                return;
+            }
+
+            const m = await r.json();
+            appendMsg(m);
+            lastId = Math.max(lastId, m.id);
+            scroll();
+            showPanelToast('Template envoye avec succes');
+
+            // Reset
+            sel.value = '';
+            document.getElementById('template-variables').classList.add('hidden');
+            document.getElementById('template-variables').innerHTML = '';
+            document.getElementById('template-preview').classList.add('hidden');
+
+            if (window._ensureConvInSidebar) {
+                window._ensureConvInSidebar(CID, {
+                    lastMessage: '[Template] ' + bodyPreview.substring(0, 50),
+                    contactName: '{{ addslashes($conversation->contactName) }}',
+                    contactThumbnail: '{{ $contact["thumbnail"] ?? "" }}',
+                });
+            }
+        } catch(e) {
+            console.error('Send template:', e);
+            alert('Erreur d\'envoi du template');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Envoyer le template';
+        }
+    };
 
     // ═══ Stop previous polling ═══
     if (window._chatPollTimer) clearInterval(window._chatPollTimer);
@@ -387,6 +628,15 @@
                 });
                 // Son pour nouveau message client dans le chat actif
                 if (hasNewClientMsg && window._playNotifSound) window._playNotifSound();
+                // Réouverture dynamique : nouveau message client → fenêtre redevient valide
+                if (hasNewClientMsg && WINDOW_EXPIRED) {
+                    const banner = document.getElementById('window-expired-banner');
+                    const picker = document.getElementById('template-picker');
+                    const composer = document.getElementById('composer-zone');
+                    if (banner) banner.classList.add('hidden');
+                    if (picker) picker.classList.add('hidden');
+                    if (composer) composer.classList.remove('hidden');
+                }
                 // Cacher typing quand un message arrive
                 document.getElementById('typing-indicator')?.classList.add('hidden');
                 scroll();
@@ -539,6 +789,14 @@
             selectedFiles = [];
             renderFilePreview();
             scroll();
+            // Mettre a jour la sidebar : remonter la conversation en haut avec le dernier message
+            if (window._ensureConvInSidebar) {
+                window._ensureConvInSidebar(CID, {
+                    lastMessage: m.content || 'Piece jointe',
+                    contactName: '{{ addslashes($conversation->contactName) }}',
+                    contactThumbnail: '{{ $contact["thumbnail"] ?? "" }}',
+                });
+            }
         } catch(e) { console.error('Send:', e); }
         finally {
             setSending(false);
@@ -557,16 +815,72 @@
         await doSend(true);
     };
 
+    // ═══ Delete message ═══
+    window.deleteMsg = async function(msgId) {
+        if (!confirm('Supprimer ce message ?')) return;
+        try {
+            const r = await fetch(`/ajax/conversations/${CID}/messages/${msgId}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': TOKEN },
+            });
+            if (r.ok) {
+                const el = document.querySelector(`[data-msg-id="${msgId}"]`);
+                if (el) el.remove();
+                showPanelToast('Message supprime');
+            }
+        } catch(e) { console.error('Delete msg:', e); }
+    };
+
     // ═══ Status ═══
     window.toggleStatus = async function(action) {
         try {
-            await fetch(`/ajax/conversations/${CID}/status`, {
+            const r = await fetch(`/ajax/conversations/${CID}/status`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
                 body: JSON.stringify({ action }),
             });
+            const result = await r.json();
+            const newStatus = result.current_status || (action === 'resolve' ? 'resolved' : 'open');
+
+            // Mettre a jour/ajouter la conversation dans la sidebar
+            if (window._ensureConvInSidebar) {
+                window._ensureConvInSidebar(CID, {
+                    status: newStatus,
+                    contactName: '{{ addslashes($conversation->contactName) }}',
+                    contactThumbnail: '{{ $contact["thumbnail"] ?? "" }}',
+                });
+            }
+
             window.loadConversation(CID);
         } catch(e) { console.error('Status:', e); }
+    };
+
+    // ═══ Delete conversation ═══
+    window.deleteConversation = async function() {
+        if (!confirm('Supprimer definitivement cette conversation ? Cette action est irreversible.')) return;
+        try {
+            const r = await fetch(`/ajax/conversations/${CID}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': TOKEN },
+            });
+            if (r.ok) {
+                // Retirer de la sidebar
+                if (window._removeConvFromSidebar) window._removeConvFromSidebar(CID);
+                // Remettre le placeholder dans la zone chat
+                const zone = document.getElementById('chat-zone');
+                if (zone) {
+                    zone.innerHTML = '<div class="flex-1 flex items-center justify-center"><div class="text-center text-gray-400"><svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg><p class="text-lg font-medium">Conversation supprimee</p><p class="text-sm mt-1">Selectionnez une autre conversation</p></div></div>';
+                }
+                // Arreter le polling de cette conversation
+                if (window._chatPollTimer) clearInterval(window._chatPollTimer);
+            } else {
+                const err = await r.json().catch(() => null);
+                alert('Erreur: ' + (err?.error || 'Impossible de supprimer'));
+            }
+        } catch(e) {
+            console.error('Delete conv:', e);
+            alert('Erreur de suppression');
+        }
     };
 
     // ═══ Assign agent ═══
@@ -791,26 +1105,49 @@
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
                 body: JSON.stringify({ title: normalized }),
             });
+            if (!r.ok) {
+                const errData = await r.json().catch(() => null);
+                // If label already exists (409 or 422), just add it to the conversation
+                if (r.status === 422 || r.status === 409) {
+                    if (!currentLabels.includes(normalized)) {
+                        currentLabels.push(normalized);
+                        await syncLabels();
+                        document.getElementById('label-dropdown').classList.add('hidden');
+                        showPanelToast('Label "' + normalized + '" ajoute');
+                    }
+                    return;
+                }
+                throw new Error(errData?.message || errData?.error || 'Erreur API');
+            }
             const newLabel = await r.json();
+            // Response might be wrapped in payload
+            const labelData = newLabel.payload || newLabel;
             // Add to local cache
-            allLabels.push(newLabel);
-            if (newLabel.color) labelColorMap[newLabel.title || normalized] = newLabel.color;
+            allLabels.push(labelData);
+            if (labelData.color) labelColorMap[labelData.title || normalized] = labelData.color;
             // Add to conversation
-            currentLabels.push(newLabel.title || normalized);
+            const labelTitle = labelData.title || normalized;
+            if (!currentLabels.includes(labelTitle)) {
+                currentLabels.push(labelTitle);
+            }
             await syncLabels();
             document.getElementById('label-dropdown').classList.add('hidden');
-            showPanelToast('Label "' + normalized + '" cree et ajoute');
+            showPanelToast('Label "' + labelTitle + '" cree et ajoute');
         } catch(e) {
             console.error('Create label:', e);
-            showPanelToast('Erreur creation label');
+            showPanelToast('Erreur: ' + e.message);
         }
     };
 
     async function addLabel(label) {
+        if (currentLabels.includes(label)) {
+            document.getElementById('label-dropdown').classList.add('hidden');
+            return;
+        }
         currentLabels.push(label);
         await syncLabels();
         document.getElementById('label-dropdown').classList.add('hidden');
-        showPanelToast('Label ajoute');
+        showPanelToast('Label "' + label + '" ajoute');
     }
 
     window.removeLabel = async function(label) {
@@ -823,11 +1160,16 @@
         renderLabelsBar();
         renderLabelOptions();
         try {
-            await fetch(`/ajax/conversations/${CID}/labels`, {
+            const r = await fetch(`/ajax/conversations/${CID}/labels`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
                 body: JSON.stringify({ labels: currentLabels }),
             });
+            if (!r.ok) {
+                const err = await r.json().catch(() => null);
+                console.error('Sync labels error:', r.status, err);
+                showPanelToast('Erreur sync labels: ' + (err?.message || r.status));
+            }
         } catch(e) { console.error('Labels:', e); }
     }
 
@@ -895,7 +1237,10 @@
             convos.forEach(c => {
                 const isCurrent = c.id == CID;
                 const msgs = c.messages || [];
-                const statusClass = c.status === 'resolved' ? 'bg-green-50 text-green-700' : (c.status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700');
+                const _sClasses = {'open':'bg-blue-50 text-blue-700','pending':'bg-amber-50 text-amber-700','resolved':'bg-green-50 text-green-700','snoozed':'bg-gray-100 text-gray-600'};
+                const _sLabels = {'open':'Ouvert','pending':'En attente','resolved':'Résolu','snoozed':'Reporté'};
+                const statusClass = _sClasses[c.status] || 'bg-gray-100 text-gray-600';
+                const statusLabel = _sLabels[c.status] || c.status;
                 const date = c.created_at ? new Date(typeof c.created_at === 'number' ? c.created_at * 1000 : c.created_at).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : '';
 
                 const card = document.createElement('div');
@@ -907,7 +1252,7 @@
                 header.innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="font-mono font-semibold text-[11px] ${isCurrent ? 'text-primary-700' : 'text-gray-700'}">#${c.id}</span>
-                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-medium ${statusClass}">${c.status}</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-medium ${statusClass}">${statusLabel}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] text-gray-400">${date}</span>
@@ -1119,7 +1464,8 @@
             div.className = 'flex justify-center';
             div.innerHTML = `<span class="text-[11px] text-gray-400 bg-white border border-gray-100 px-3 py-1 rounded-full shadow-sm">${esc(m.content||'')}</span>`;
         } else {
-            div.className = out ? 'message-outgoing' : 'message-incoming';
+            div.className = `group/msg ${out ? 'message-outgoing' : 'message-incoming'}`;
+            if (m.id) div.dataset.msgId = m.id;
             const bg = prv ? 'bg-amber-50 border border-amber-200' : (out ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200');
             const corner = out ? 'rounded-br-md' : 'rounded-bl-md';
             const tc = prv ? 'text-amber-400' : (out ? 'text-primary-200' : 'text-gray-400');
@@ -1128,7 +1474,8 @@
             const prvTag = prv ? '<p class="text-[10px] font-semibold text-amber-600 mb-0.5">Note privee</p>' : '';
             const contentHtml = (m.content) ? `<p class="text-[13px] leading-relaxed whitespace-pre-wrap">${esc(m.content)}</p>` : '';
             const attHtml = renderAttachmentsHtml(m.attachments, out);
-            div.innerHTML = `<div class="max-w-[80%] ${bg} rounded-2xl ${corner} px-4 py-2.5 shadow-sm">${prvTag}${contentHtml}${attHtml}<p class="text-[10px] mt-1 ${tc}">${time}${sender}</p></div>`;
+            const delBtn = (out && m.id) ? `<button onclick="deleteMsg(${m.id})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full items-center justify-center text-[10px] shadow hidden group-hover/msg:flex hover:bg-red-600 transition" title="Supprimer"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
+            div.innerHTML = `<div class="relative max-w-[80%] ${bg} rounded-2xl ${corner} px-4 py-2.5 shadow-sm">${delBtn}${prvTag}${contentHtml}${attHtml}<p class="text-[10px] mt-1 ${tc}">${time}${sender}</p></div>`;
         }
         container.appendChild(div);
         initAudioPlayers(div);

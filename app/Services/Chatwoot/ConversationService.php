@@ -87,23 +87,135 @@ class ConversationService
     }
 
     /**
-     * Filtrage avancé (par label, etc.)
+     * Filtrage avance multi-criteres
      */
+    public function advancedFilter(array $filters, int $page = 1): array
+    {
+        $payload = [];
+
+        if (!empty($filters['status'])) {
+            $payload[] = [
+                'attribute_key'   => 'status',
+                'filter_operator' => 'equal_to',
+                'values'          => [$filters['status']],
+                'query_operator'  => !empty($payload) ? 'AND' : null,
+            ];
+        }
+
+        if (!empty($filters['assignee_id'])) {
+            $payload[] = [
+                'attribute_key'   => 'assignee_id',
+                'filter_operator' => 'equal_to',
+                'values'          => [(int) $filters['assignee_id']],
+                'query_operator'  => !empty($payload) ? 'AND' : null,
+            ];
+        }
+
+        if (!empty($filters['team_id'])) {
+            $payload[] = [
+                'attribute_key'   => 'team_id',
+                'filter_operator' => 'equal_to',
+                'values'          => [(int) $filters['team_id']],
+                'query_operator'  => !empty($payload) ? 'AND' : null,
+            ];
+        }
+
+        if (!empty($filters['label'])) {
+            $payload[] = [
+                'attribute_key'   => 'labels',
+                'filter_operator' => 'contains',
+                'values'          => [$filters['label']],
+                'query_operator'  => !empty($payload) ? 'AND' : null,
+            ];
+        }
+
+        if (!empty($filters['created_since'])) {
+            $payload[] = [
+                'attribute_key'   => 'created_at',
+                'filter_operator' => 'is_greater_than',
+                'values'          => [$filters['created_since']],
+                'query_operator'  => !empty($payload) ? 'AND' : null,
+            ];
+        }
+
+        if (!empty($filters['created_until'])) {
+            $payload[] = [
+                'attribute_key'   => 'created_at',
+                'filter_operator' => 'is_less_than',
+                'values'          => [$filters['created_until']],
+                'query_operator'  => !empty($payload) ? 'AND' : null,
+            ];
+        }
+
+        // Fix first item should not have query_operator
+        if (!empty($payload)) {
+            $payload[0]['query_operator'] = null;
+        }
+
+        if (empty($payload)) {
+            return $this->list('open', 'all', $page);
+        }
+
+        try {
+            $response = $this->client->filterConversations(['payload' => $payload], $page);
+
+            return [
+                'conversations' => collect($response['payload'] ?? [])
+                    ->map(fn(array $conv) => ConversationDTO::fromArray($conv))
+                    ->all(),
+                'meta' => $response['meta'] ?? [],
+            ];
+        } catch (\Exception $e) {
+            return ['conversations' => [], 'meta' => []];
+        }
+    }
+
+    /**
+     * Filtrage avancé (par label + statut)
+     */
+    /**
+     * Vérifie si la fenêtre WhatsApp 24h est expirée
+     * (aucun message entrant du client depuis > 24h)
+     */
+    public function isWindowExpired(array $messages): bool
+    {
+        $lastIncoming = collect($messages)
+            ->filter(fn(array $msg) => ($msg['message_type'] ?? -1) === 0)
+            ->sortByDesc(fn(array $msg) => $msg['created_at'] ?? 0)
+            ->first();
+
+        if (!$lastIncoming) {
+            return true;
+        }
+
+        $createdAt = $lastIncoming['created_at'] ?? 0;
+        $timestamp = is_numeric($createdAt) ? $createdAt : strtotime($createdAt);
+
+        return (time() - $timestamp) > 86400;
+    }
+
     public function filterByLabel(string $label, string $status = 'open', int $page = 1): array
     {
-        $payload = [
-            'payload' => [
-                [
-                    'attribute_key'  => 'labels',
-                    'filter_operator' => 'contains',
-                    'values'         => [$label],
-                    'query_operator'  => null,
-                ],
+        $filters = [
+            [
+                'attribute_key'   => 'labels',
+                'filter_operator' => 'contains',
+                'values'          => [$label],
+                'query_operator'  => null,
             ],
         ];
 
+        if ($status && $status !== 'all') {
+            $filters[] = [
+                'attribute_key'   => 'status',
+                'filter_operator' => 'equal_to',
+                'values'          => [$status],
+                'query_operator'  => 'AND',
+            ];
+        }
+
         try {
-            $response = $this->client->filterConversations($payload, $page);
+            $response = $this->client->filterConversations(['payload' => $filters], $page);
 
             return [
                 'conversations' => collect($response['payload'] ?? [])

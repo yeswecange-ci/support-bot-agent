@@ -3,188 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - YesWeChange</title>
+    <title>Connexion - YesWeCange</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-primary: #fafafa;
-            --bg-secondary: #ffffff;
-            --text-primary: #0a0a0a;
-            --text-secondary: #6b6b6b;
-            --border: #e5e5e5;
-            --accent: #0a0a0a;
-            --accent-hover: #2a2a2a;
-            --input-focus: #f0f0f0;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --accent: #4f46e5;
+            --accent-light: #eef2ff;
+            --accent-hover: #4338ca;
+            --accent-ring: rgba(79, 70, 229, 0.15);
+            --input-bg: #ffffff;
+            --error: #ef4444;
         }
 
         body {
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            line-height: 1.6;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
+        /* ═══ Layout split ═══ */
+        .page {
+            display: flex;
             width: 100%;
-            max-width: 440px;
-            animation: fadeIn 0.6s ease-out;
+            min-height: 100vh;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 48px 40px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-            border: 1px solid var(--border);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .logo {
-            display: inline-block;
-            width: 48px;
-            height: 48px;
-            background: var(--accent);
-            border-radius: 12px;
-            margin-bottom: 24px;
+        .branding {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 45%;
+            padding: 60px;
+            background: var(--accent-light);
             position: relative;
             overflow: hidden;
         }
 
-        .logo::after {
+        .branding::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            background: var(--bg-secondary);
-            border-radius: 4px;
+            top: -20%;
+            right: -20%;
+            width: 60%;
+            height: 60%;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.06);
         }
 
-        h1 {
-            font-size: 28px;
+        .branding::after {
+            content: '';
+            position: absolute;
+            bottom: -15%;
+            left: -10%;
+            width: 50%;
+            height: 50%;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.04);
+        }
+
+        .branding-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 360px;
+        }
+
+        .branding-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 32px;
+            background: var(--accent);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .branding-icon svg {
+            width: 36px;
+            height: 36px;
+            color: white;
+        }
+
+        .branding h2 {
+            font-size: 24px;
             font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-            color: var(--text-primary);
+            color: var(--text);
+            letter-spacing: -0.025em;
+            margin-bottom: 12px;
         }
 
-        .subtitle {
+        .branding p {
             font-size: 15px;
             color: var(--text-secondary);
-            font-weight: 400;
+            line-height: 1.6;
         }
 
-        .form-group {
+        .branding-features {
+            margin-top: 40px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .branding-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .branding-feature .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        /* ═══ Form side ═══ */
+        .form-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 44px 36px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+        }
+
+        /* ═══ Header ═══ */
+        .form-header {
+            margin-bottom: 36px;
+        }
+
+        .mobile-logo {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 24px;
         }
 
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 8px;
+        .mobile-logo svg {
+            width: 24px;
+            height: 24px;
+            color: white;
         }
 
-        input[type="email"],
-        input[type="password"] {
+        .form-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ═══ Form ═══ */
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .field-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .field input[type="email"],
+        .field input[type="password"] {
             width: 100%;
-            padding: 14px 16px;
-            font-size: 15px;
+            padding: 12px 14px;
+            font-size: 14px;
             font-family: inherit;
-            color: var(--text-primary);
-            background: var(--bg-primary);
+            color: var(--text);
+            background: var(--input-bg);
             border: 1px solid var(--border);
             border-radius: 10px;
-            transition: all 0.2s ease;
             outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            background: var(--input-focus);
+        .field input:focus {
             border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-ring);
         }
 
-        input[type="email"]::placeholder,
-        input[type="password"]::placeholder {
-            color: #a0a0a0;
-        }
-
-        .password-wrapper {
-            position: relative;
+        .field input::placeholder {
+            color: var(--text-muted);
         }
 
         .forgot-link {
-            position: absolute;
-            right: 0;
-            top: 0;
             font-size: 13px;
-            color: var(--text-secondary);
+            color: var(--accent);
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.2s ease;
+            transition: opacity 0.2s;
         }
 
         .forgot-link:hover {
-            color: var(--text-primary);
+            opacity: 0.8;
         }
 
-        .checkbox-group {
+        .error-text {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
+        /* ═══ Checkbox ═══ */
+        .remember-row {
             display: flex;
             align-items: center;
-            margin: 24px 0 32px 0;
+            margin: 24px 0 28px;
         }
 
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 10px;
-            cursor: pointer;
+        .remember-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
             accent-color: var(--accent);
+            cursor: pointer;
+            border-radius: 4px;
         }
 
-        .checkbox-label {
-            font-size: 14px;
+        .remember-row label {
+            font-size: 13px;
             color: var(--text-secondary);
             cursor: pointer;
             user-select: none;
         }
 
+        /* ═══ Button ═══ */
         .submit-btn {
             width: 100%;
-            padding: 16px;
-            font-size: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
             font-weight: 600;
             font-family: inherit;
             color: #ffffff;
@@ -192,182 +302,202 @@
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
             letter-spacing: -0.01em;
         }
 
         .submit-btn:hover {
             background: var(--accent-hover);
-            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
         }
 
         .submit-btn:active {
-            transform: translateY(0);
+            background: var(--accent-hover);
+            box-shadow: none;
         }
 
-        .footer {
+        /* ═══ Footer ═══ */
+        .form-footer {
             text-align: center;
-            margin-top: 32px;
-            padding-top: 24px;
+            margin-top: 28px;
+            padding-top: 20px;
             border-top: 1px solid var(--border);
         }
 
-        .footer-text {
-            font-size: 13px;
-            color: var(--text-secondary);
+        .form-footer p {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
         }
 
-        .error-message {
-            font-size: 13px;
-            color: #dc2626;
-            margin-top: 6px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .success-message {
+        /* ═══ Error banner (session expired, etc.) ═══ */
+        .alert-success {
             background: #f0fdf4;
-            border: 1px solid #bbf7d0;
+            border: 1px solid #dcfce7;
             color: #166534;
-            padding: 14px 16px;
+            padding: 12px 14px;
             border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 24px;
+            font-size: 13px;
+            margin-bottom: 20px;
             text-align: center;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (min-width: 1024px) {
+            .branding {
+                display: flex;
+            }
+            .mobile-logo {
+                display: none;
+            }
+            .card {
+                box-shadow: none;
+                border: none;
+                padding: 44px 40px;
+                background: transparent;
+            }
+            .form-side {
+                background: var(--card);
+            }
         }
 
         @media (max-width: 480px) {
             .card {
-                padding: 36px 28px;
+                padding: 32px 24px;
             }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .subtitle {
-                font-size: 14px;
-            }
-        }
-
-        /* Animation au chargement */
-        .form-group {
-            animation: slideIn 0.5s ease-out backwards;
-        }
-
-        .form-group:nth-child(1) { animation-delay: 0.1s; }
-        .form-group:nth-child(2) { animation-delay: 0.2s; }
-        .checkbox-group { animation: slideIn 0.5s ease-out 0.3s backwards; }
-        .submit-btn { animation: slideIn 0.5s ease-out 0.4s backwards; }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .form-header h1 {
+                font-size: 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <div class="header">
-                <div class="logo"></div>
-                <h1>Bienvenue</h1>
-                <p class="subtitle">Connectez-vous à votre espace agent</p>
-            </div>
+    <div class="page">
 
-            <!-- Message de succès (optionnel) -->
-            <!-- <div class="success-message">
-                Votre session a expiré. Veuillez vous reconnecter.
-            </div> -->
-
-            <form method="POST" action="{{ route('login') }}" id="loginForm">
-                @csrf
-                
-                <div class="form-group">
-                    <label for="email">Adresse email</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        placeholder="agent@yeswechange.com"
-                        value="{{ old('email') }}"
-                        required 
-                        autofocus
-                        autocomplete="username"
-                    >
-                    <span class="error-message" id="emailError">{{ $errors->first('email') }}</span>
+        {{-- Branding panel (visible on large screens) --}}
+        <div class="branding">
+            <div class="branding-content">
+                <div class="branding-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
                 </div>
+                <h2>YesWeCange Support</h2>
+                <p>Gerez vos conversations clients depuis un seul espace simple et efficace.</p>
 
-                <div class="form-group">
-                    <div class="password-wrapper">
-                        <label for="password">Mot de passe</label>
-                        @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="forgot-link">Mot de passe oublié ?</a>
-                        @endif
+                <div class="branding-features">
+                    <div class="branding-feature">
+                        <span class="dot"></span>
+                        <span>Conversations en temps reel</span>
                     </div>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password"
-                        placeholder="••••••••"
-                        required
-                        autocomplete="current-password"
-                    >
-                    <span class="error-message" id="passwordError">{{ $errors->first('password') }}</span>
+                    <div class="branding-feature">
+                        <span class="dot"></span>
+                        <span>Gestion des contacts et equipes</span>
+                    </div>
+                    <div class="branding-feature">
+                        <span class="dot"></span>
+                        <span>Statistiques et performances</span>
+                    </div>
+                    <div class="branding-feature">
+                        <span class="dot"></span>
+                        <span>Notifications instantanees</span>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="checkbox-group">
-                    <input 
-                        type="checkbox" 
-                        id="remember" 
-                        name="remember"
-                    >
-                    <label for="remember" class="checkbox-label">Se souvenir de moi</label>
+        {{-- Form side --}}
+        <div class="form-side">
+            <div class="form-container">
+                <div class="card">
+
+                    {{-- Mobile logo --}}
+                    <div class="mobile-logo">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                    </div>
+
+                    <div class="form-header">
+                        <h1>Bon retour</h1>
+                        <p>Connectez-vous a votre espace agent</p>
+                    </div>
+
+                    @if (session('status'))
+                        <div class="alert-success">{{ session('status') }}</div>
+                    @endif
+
+                    @if ($errors->has('email') && str_contains($errors->first('email'), 'credentials'))
+                        <div class="alert-error">Identifiants incorrects. Veuillez reessayer.</div>
+                    @endif
+
+                    <form method="POST" action="{{ route('login') }}">
+                        @csrf
+
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="agent@yeswechange.com"
+                                value="{{ old('email') }}"
+                                required
+                                autofocus
+                                autocomplete="username"
+                            >
+                            @if($errors->has('email') && !str_contains($errors->first('email'), 'credentials'))
+                                <span class="error-text show">{{ $errors->first('email') }}</span>
+                            @endif
+                        </div>
+
+                        <div class="field">
+                            <div class="field-header">
+                                <label for="password">Mot de passe</label>
+                                @if (Route::has('password.request'))
+                                    <a href="{{ route('password.request') }}" class="forgot-link">Oublie ?</a>
+                                @endif
+                            </div>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="••••••••"
+                                required
+                                autocomplete="current-password"
+                            >
+                            @if($errors->has('password'))
+                                <span class="error-text show">{{ $errors->first('password') }}</span>
+                            @endif
+                        </div>
+
+                        <div class="remember-row">
+                            <input type="checkbox" id="remember" name="remember">
+                            <label for="remember">Se souvenir de moi</label>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            Se connecter
+                        </button>
+                    </form>
+
+                    <div class="form-footer">
+                        <p>YesWeCange &middot; Espace Support Agent</p>
+                    </div>
                 </div>
-
-                <button type="submit" class="submit-btn">
-                    Se connecter
-                </button>
-            </form>
-
-            <div class="footer">
-                <p class="footer-text">YesWeCange Support</p>
             </div>
         </div>
     </div>
-
-    <script>
-        // Animation au focus des inputs
-        const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
-        
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.01)';
-                this.parentElement.style.transition = 'transform 0.2s ease';
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
-            });
-        });
-
-        // Afficher les erreurs si présentes
-        @if($errors->has('email'))
-            document.getElementById('emailError').classList.add('show');
-        @endif
-        
-        @if($errors->has('password'))
-            document.getElementById('passwordError').classList.add('show');
-        @endif
-    </script>
 </body>
 </html>
