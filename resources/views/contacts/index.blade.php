@@ -221,9 +221,12 @@
     <div class="bg-white rounded-2xl shadow-2xl w-[600px] max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
             <h3 class="font-semibold text-gray-900 text-sm" id="detail-title">Contact</h3>
-            <button onclick="closeModal('modal-contact-detail')" class="w-7 h-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <span id="detail-header-actions"></span>
+                <button onclick="closeModal('modal-contact-detail')" class="w-7 h-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
         </div>
         <div id="detail-body" class="flex-1 overflow-y-auto p-5">
             <div class="p-8 text-center text-gray-400"><svg class="w-6 h-6 animate-spin mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>
@@ -307,6 +310,7 @@
         const title = document.getElementById('detail-title');
         modal.classList.remove('hidden');
         body.innerHTML = '<div class="p-8 text-center text-gray-400"><svg class="w-6 h-6 animate-spin mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+        document.getElementById('detail-header-actions').innerHTML = '';
 
         try {
             const [contactR, convsR, notesR] = await Promise.all([
@@ -322,6 +326,19 @@
             const notesList = notes.payload || notes || [];
 
             title.textContent = contact.name || 'Contact #' + id;
+
+            // Bouton d'envoi de template dans l'en-tête du modal
+            const headerActions = document.getElementById('detail-header-actions');
+            if (headerActions && contact.phone_number) {
+                const safeName = (contact.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                const safePhone = contact.phone_number.replace(/'/g, "\\'");
+                headerActions.innerHTML = `<button onclick="closeModal('modal-contact-detail'); setTimeout(() => openSendTemplate(${id}, '${safeName}', '${safePhone}'), 60)"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-lg hover:bg-green-100 border border-green-200 transition"
+                    title="Envoyer un template WhatsApp">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    Envoyer template
+                </button>`;
+            }
 
             function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 

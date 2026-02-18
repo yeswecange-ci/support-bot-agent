@@ -173,6 +173,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/campagnes/{campaign}/send', [CampaignController::class, 'sendPush'])->name('ajax.campagnes.send');
         Route::post('/campagnes/{campaign}/schedule', [CampaignController::class, 'schedulePush'])->name('ajax.campagnes.schedule');
         Route::delete('/campagnes/{campaign}/schedule', [CampaignController::class, 'cancelSchedule'])->name('ajax.campagnes.cancelSchedule');
+        Route::post('/campagnes/{campaign}/reopen', [CampaignController::class, 'reopen'])->name('ajax.campagnes.reopen');
         Route::post('/campagnes/{campaign}/send-single', [CampaignController::class, 'sendSingle'])->name('ajax.campagnes.sendSingle');
         Route::post('/campagnes/{campaign}/contacts', [CampaignController::class, 'attachContacts'])->name('ajax.campagnes.attachContacts');
         Route::delete('/campagnes/{campaign}/contacts', [CampaignController::class, 'detachContacts'])->name('ajax.campagnes.detachContacts');

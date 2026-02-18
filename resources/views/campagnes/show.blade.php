@@ -12,9 +12,15 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </a>
                 <div>
-                    <div class="flex items-center gap-2.5">
+                    <div class="flex items-center gap-2.5 flex-wrap">
                         <h1 class="text-xl font-bold text-gray-900">{{ $campaign->name }}</h1>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium {{ $campaign->statusBadgeClass() }}">{{ $campaign->statusLabel() }}</span>
+                        @if($campaign->hasPendingSchedule())
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 border border-amber-200">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Planification en cours · {{ $campaign->scheduled_at->format('d/m H:i') }}
+                        </span>
+                        @endif
                     </div>
                     @if($campaign->description)
                     <p class="text-sm text-gray-500 mt-0.5">{{ $campaign->description }}</p>
@@ -147,6 +153,21 @@
                         Planifier
                     </button>
                     @endif
+                </div>
+                @endif
+
+                {{-- RÉOUVRIR CAMPAGNE TERMINÉE --}}
+                @if($campaign->status === 'completed')
+                <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+                    <h3 class="text-sm font-semibold text-gray-900">Actions</h3>
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-xs text-amber-700 leading-relaxed">
+                        Cette campagne est terminée. Réouvrez-la pour modifier le template, ajouter des contacts ou lancer un nouvel envoi.
+                    </div>
+                    <button onclick="doReopen(this)" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition shadow-sm">
+                        <svg class="w-4 h-4 spinner hidden animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        <svg class="w-4 h-4 reopen-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span class="btn-label">Réouvrir la campagne</span>
+                    </button>
                 </div>
                 @endif
 
@@ -654,6 +675,17 @@
             if (res.success) { toast(res.message || 'Planification annulee'); setTimeout(() => location.reload(), 800); }
             else { toast(res.message || 'Erreur', 'error'); btn.disabled = false; }
         } catch(e) { toast('Erreur reseau', 'error'); btn.disabled = false; }
+    };
+
+    window.doReopen = async function(btn) {
+        btnLoad(btn);
+        btn.querySelector('.reopen-icon')?.classList.add('hidden');
+        try {
+            const r = await fetch('{{ route("ajax.campagnes.reopen", $campaign) }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': TOKEN, 'Accept': 'application/json' } });
+            const res = await r.json();
+            if (res.success) { toast(res.message || 'Campagne réouverte'); setTimeout(() => location.reload(), 800); }
+            else { toast(res.message || 'Erreur', 'error'); btnReset(btn); btn.querySelector('.reopen-icon')?.classList.remove('hidden'); }
+        } catch(e) { toast('Erreur réseau', 'error'); btnReset(btn); btn.querySelector('.reopen-icon')?.classList.remove('hidden'); }
     };
 
     window.doDelete = async function(btn) {

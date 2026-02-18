@@ -139,6 +139,21 @@ class CampaignController extends Controller
         return response()->json(['success' => true, 'message' => 'Planification annulee']);
     }
 
+    public function reopen(Campaign $campaign): JsonResponse
+    {
+        if ($campaign->status !== 'completed') {
+            return response()->json(['success' => false, 'message' => 'Seules les campagnes terminees peuvent etre reouvertes'], 422);
+        }
+
+        $campaign->update([
+            'status'       => 'draft',
+            'scheduled_at' => null,
+            'sent_at'      => null,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Campagne repassee en brouillon']);
+    }
+
     public function sendSingle(Request $request, Campaign $campaign): JsonResponse
     {
         $data = $request->validate([
