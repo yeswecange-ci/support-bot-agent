@@ -11,6 +11,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\InboxController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\CampaignContactController;
 use Illuminate\Support\Facades\Route;
 
 // ── Route principale → login ──────────────────────────
@@ -157,8 +159,49 @@ Route::middleware('auth')->group(function () {
 
             // Statistics
             Route::get('/statistics/data', [StatisticsController::class, 'data'])->name('ajax.statistics.data');
+
+            // Dashboard
+            Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('ajax.dashboard.data');
         });
+
+        // ── Campagnes AJAX (accessible a tous) ───────────
+        Route::post('/campagnes', [CampaignController::class, 'store'])->name('ajax.campagnes.store');
+        Route::put('/campagnes/{campaign}', [CampaignController::class, 'update'])->name('ajax.campagnes.update');
+        Route::delete('/campagnes/{campaign}', [CampaignController::class, 'destroy'])->name('ajax.campagnes.destroy');
+        Route::post('/campagnes/{campaign}/send', [CampaignController::class, 'sendPush'])->name('ajax.campagnes.send');
+        Route::post('/campagnes/{campaign}/schedule', [CampaignController::class, 'schedulePush'])->name('ajax.campagnes.schedule');
+        Route::post('/campagnes/{campaign}/send-single', [CampaignController::class, 'sendSingle'])->name('ajax.campagnes.sendSingle');
+        Route::post('/campagnes/{campaign}/contacts', [CampaignController::class, 'attachContacts'])->name('ajax.campagnes.attachContacts');
+        Route::delete('/campagnes/{campaign}/contacts', [CampaignController::class, 'detachContacts'])->name('ajax.campagnes.detachContacts');
+        Route::get('/campagnes/{campaign}/contacts', [CampaignController::class, 'listContacts'])->name('ajax.campagnes.listContacts');
+        Route::get('/campagnes/{campaign}/messages', [CampaignController::class, 'listMessages'])->name('ajax.campagnes.listMessages');
+        Route::get('/campagnes/{campaign}/stats', [CampaignController::class, 'stats'])->name('ajax.campagnes.stats');
+        Route::post('/campagnes/{campaign}/refresh-statuses', [CampaignController::class, 'refreshStatuses'])->name('ajax.campagnes.refreshStatuses');
+        Route::get('/campagnes/{campaign}/available-contacts', [CampaignController::class, 'searchAvailableContacts'])->name('ajax.campagnes.availableContacts');
+        Route::get('/campagnes/{campaign}/period-stats', [CampaignController::class, 'periodStats'])->name('ajax.campagnes.periodStats');
+        Route::get('/campagnes-dashboard/data', [CampaignController::class, 'dashboardData'])->name('ajax.campagnes.dashboard.data');
+
+        // Contacts Campagne AJAX
+        Route::get('/campagnes-contacts/search', [CampaignContactController::class, 'search'])->name('ajax.campagnes.contacts.search');
+        Route::post('/campagnes-contacts', [CampaignContactController::class, 'store'])->name('ajax.campagnes.contacts.store');
+        Route::put('/campagnes-contacts/{contact}', [CampaignContactController::class, 'update'])->name('ajax.campagnes.contacts.update');
+        Route::delete('/campagnes-contacts/{contact}', [CampaignContactController::class, 'destroy'])->name('ajax.campagnes.contacts.destroy');
+        Route::post('/campagnes-contacts/import-preview', [CampaignContactController::class, 'importPreview'])->name('ajax.campagnes.contacts.importPreview');
+        Route::post('/campagnes-contacts/import-confirm', [CampaignContactController::class, 'importConfirm'])->name('ajax.campagnes.contacts.importConfirm');
+        Route::post('/campagnes-contacts/{contact}/sync-chatwoot', [CampaignContactController::class, 'syncToChatwoot'])->name('ajax.campagnes.contacts.syncChatwoot');
+        Route::post('/campagnes-contacts/import-chatwoot', [CampaignContactController::class, 'importFromChatwoot'])->name('ajax.campagnes.contacts.importChatwoot');
     });
+
+    // ── Campagnes (accessible a tous) ───────────────────
+    Route::get('/campagnes', [CampaignController::class, 'index'])->name('campagnes.index');
+    Route::get('/campagnes/create', [CampaignController::class, 'create'])->name('campagnes.create');
+    Route::get('/campagnes/dashboard', [CampaignController::class, 'dashboard'])->name('campagnes.dashboard');
+    Route::get('/campagnes/{campaign}', [CampaignController::class, 'show'])->name('campagnes.show');
+    Route::get('/campagnes/{campaign}/edit', [CampaignController::class, 'edit'])->name('campagnes.edit');
+
+    // Contacts Campagnes
+    Route::get('/campagnes-contacts', [CampaignContactController::class, 'index'])->name('campagnes.contacts.index');
+    Route::get('/campagnes-contacts/import', [CampaignContactController::class, 'importForm'])->name('campagnes.contacts.import');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

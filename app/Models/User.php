@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -61,5 +62,15 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'administrator';
+    }
+
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class, 'created_by');
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class, 'created_by');
     }
 }

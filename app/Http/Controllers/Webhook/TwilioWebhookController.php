@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Webhook;
 
 use App\Http\Controllers\Controller;
+use App\Models\Contact;
+use App\Services\Campaign\DeliveryTrackingService;
 use App\Services\Chatwoot\ChatwootClient;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class TwilioWebhookController extends Controller
@@ -55,6 +58,9 @@ class TwilioWebhookController extends Controller
 
             $conversationId = $conversation['id'] ?? $conversation['conversation_id'] ?? null;
 
+            // Auto-save contact local pour les campagnes
+            $this->autoSaveLocalContact($phone, $name, $contactId);
+
             Log::info('[HANDOFF] Conversation créée', [
                 'conversation_id' => $conversationId,
                 'contact_id'      => $contactId,
@@ -81,6 +87,27 @@ class TwilioWebhookController extends Controller
     }
 
     /**
+     * StatusCallback : Twilio notifie le statut d'un message campagne
+     */
+    public function statusCallback(Request $request): Response
+    {
+        $messageSid = $request->input('MessageSid');
+        $status = $request->input('MessageStatus');
+
+        Log::info('[STATUS CALLBACK] Twilio', compact('messageSid', 'status'));
+
+        if ($messageSid && $status) {
+            try {
+                app(DeliveryTrackingService::class)->processStatusCallback($messageSid, $status);
+            } catch (\Exception $e) {
+                Log::error('[STATUS CALLBACK] Erreur', ['error' => $e->getMessage()]);
+            }
+        }
+
+        return response('', 204);
+    }
+
+    /**
      * Chercher le contact par téléphone, ou le créer
      */
     private function findOrCreateContact(string $phone, string $name): array
@@ -101,6 +128,24 @@ class TwilioWebhookController extends Controller
         );
 
         return $result['payload']['contact'];
+    }
+
+    /**
+     * Sauvegarder le contact localement pour les campagnes
+     */
+    private function autoSaveLocalContact(string $phone, string $name, int $chatwootContactId): void
+    {
+        try {
+            Contact::firstOrCreate(
+                ['phone_number' => $phone],
+                [
+                    'name' => $name,
+                    'chatwoot_contact_id' => $chatwootContactId,
+                ]
+            );
+        } catch (\Exception $e) {
+            Log::warning('[HANDOFF] Auto-save contact local échoué', ['error' => $e->getMessage()]);
+        }
     }
 
     /**

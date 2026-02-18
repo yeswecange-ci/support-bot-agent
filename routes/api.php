@@ -25,3 +25,7 @@ Route::prefix('webhooks')->group(function () {
     Route::post('/chatwoot', [ChatwootWebhookController::class, 'handle'])
         ->name('webhook.chatwoot');
 });
+
+// ── Twilio StatusCallback (sans signature check pour dev) ──
+Route::post('/twilio/status', [TwilioWebhookController::class, 'statusCallback'])
+    ->name('webhook.twilio.status');

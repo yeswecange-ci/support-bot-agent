@@ -99,6 +99,56 @@ class TwilioService
     }
 
     /**
+     * Récupérer le statut d'un message Twilio par son SID
+     */
+    public function fetchMessage(string $sid): object
+    {
+        return $this->client->messages($sid)->fetch();
+    }
+
+    /**
+     * Envoyer un message template WhatsApp via Twilio avec StatusCallback
+     */
+    public function sendTemplateWithCallback(string $to, string $contentSid, array $variables = [], ?string $statusCallbackUrl = null): object
+    {
+        if (!str_starts_with($to, 'whatsapp:')) {
+            $to = "whatsapp:{$to}";
+        }
+
+        $params = [
+            'from'       => $this->from,
+            'contentSid' => $contentSid,
+        ];
+
+        if (!empty($variables)) {
+            $params['contentVariables'] = json_encode($variables);
+        }
+
+        if ($statusCallbackUrl) {
+            $params['statusCallback'] = $statusCallbackUrl;
+        }
+
+        try {
+            $message = $this->client->messages->create($to, $params);
+
+            Log::info('WhatsApp template envoyé avec callback', [
+                'to'         => $to,
+                'contentSid' => $contentSid,
+                'sid'        => $message->sid,
+            ]);
+
+            return $message;
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi template WhatsApp', [
+                'to'         => $to,
+                'contentSid' => $contentSid,
+                'error'      => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Envoyer un message template WhatsApp via Twilio
      */
     public function sendTemplate(string $to, string $contentSid, array $variables = []): object
