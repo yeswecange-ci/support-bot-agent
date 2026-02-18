@@ -16,8 +16,6 @@ class SyncSupportStats extends Command
 
     protected $description = 'Synchronise les stats support client depuis Chatwoot vers la base de donnees locale';
 
-    private array $periods = ['today', 'week', 'month', 'quarter'];
-
     public function __construct(private ChatwootClient $client)
     {
         parent::__construct();
@@ -25,39 +23,76 @@ class SyncSupportStats extends Command
 
     public function handle(): int
     {
-        $period = $this->option('period');
-        $targets = $period === 'all' ? $this->periods : [$period];
+        $this->info('[stats:sync] Demarrage synchronisation');
 
-        $this->info('[stats:sync] Demarrage synchronisation (' . implode(', ', $targets) . ')');
-
-        // Recuperer les compteurs live (open / pending / resolved)
+        // 1. Compteurs live (open / pending / resolved)
         $counts = $this->fetchCounts();
         $this->line("  → Compteurs live : open={$counts['open_count']}, pending={$counts['pending_count']}, resolved={$counts['resolved_count']}");
 
-        // Essayer les resume API (retournent 404 sur certaines instances)
+        // 2. Verifier disponibilite API Reports
         $reportsAvailable = $this->checkReportsApi();
         if (!$reportsAvailable) {
-            $this->warn('  ~ API Reports non disponible — utilisation des compteurs conversation uniquement');
+            $this->warn('  ~ API Reports non disponible — compteurs conversation uniquement');
         }
 
-        foreach ($targets as $p) {
-            $this->syncPeriod($p, $counts, $reportsAvailable);
+        // 3. Toujours stocker un enregistrement journalier (period='day')
+        //    C'est ce qui permet de construire les courbes de tendance
+        $this->syncDailySnapshot($counts, $reportsAvailable);
+
+        // 4. Stocker les resumes par periode (pour les KPIs)
+        foreach (['today', 'week', 'month', 'quarter'] as $p) {
+            $this->syncPeriodSummary($p, $counts, $reportsAvailable);
         }
 
         $this->info('[stats:sync] Synchronisation terminee.');
         return self::SUCCESS;
     }
 
-    // ─────────────────────────────────────────────────────
+    // ─── Snapshot journalier (pour les courbes de tendance) ──────
 
-    private function syncPeriod(string $period, array $counts, bool $reportsAvailable): void
+    private function syncDailySnapshot(array $counts, bool $reportsAvailable): void
     {
-        [$since, $until] = $this->resolvePeriod($period);
-        $date = Carbon::today()->toDateString();
+        $today = Carbon::today()->toDateString();
 
-        $this->line("  → Periode [{$period}]");
+        $data = [
+            'conversations_count'     => $counts['open_count'] + $counts['pending_count'],
+            'resolutions_count'       => $counts['resolved_count'],
+            'incoming_messages_count' => 0,
+            'outgoing_messages_count' => 0,
+            'avg_first_response_time' => 0,
+            'avg_resolution_time'     => 0,
+            'open_count'              => $counts['open_count'],
+            'pending_count'           => $counts['pending_count'],
+            'resolved_count'          => $counts['resolved_count'],
+            'trend_data'              => null,
+        ];
 
-        // Valeurs par defaut = compteurs live
+        // Enrichir avec l'API si disponible
+        if ($reportsAvailable) {
+            [$since, $until] = [$this->ts(Carbon::today()), $this->ts(Carbon::now())];
+            try {
+                $summary = $this->client->getAccountSummary($since, $until);
+                $data['conversations_count']     = $summary['conversations_count'] ?? $data['conversations_count'];
+                $data['resolutions_count']       = $summary['resolutions_count'] ?? $data['resolutions_count'];
+                $data['incoming_messages_count'] = $summary['incoming_messages_count'] ?? 0;
+                $data['outgoing_messages_count'] = $summary['outgoing_messages_count'] ?? 0;
+                $data['avg_first_response_time'] = (int) ($summary['avg_first_response_time'] ?? 0);
+                $data['avg_resolution_time']     = (int) ($summary['avg_resolution_time'] ?? 0);
+            } catch (\Exception $e) {
+                // garde les valeurs issues des compteurs
+            }
+        }
+
+        SupportDailyStat::upsertForPeriod($today, 'day', $data);
+        $this->line("  ✓ Snapshot journalier [{$today}] : conv={$data['conversations_count']}, res={$data['resolutions_count']}");
+    }
+
+    // ─── Resume par periode (KPIs) ────────────────────────────────
+
+    private function syncPeriodSummary(string $period, array $counts, bool $reportsAvailable): void
+    {
+        $today = Carbon::today()->toDateString();
+
         $data = [
             'conversations_count'     => $counts['open_count'] + $counts['pending_count'] + $counts['resolved_count'],
             'resolutions_count'       => $counts['resolved_count'],
@@ -71,8 +106,8 @@ class SyncSupportStats extends Command
             'trend_data'              => null,
         ];
 
-        // Si l'API reports est disponible, enrichir avec les vraies stats
         if ($reportsAvailable) {
+            [$since, $until] = $this->resolvePeriod($period);
             try {
                 $summary = $this->client->getAccountSummary($since, $until);
                 $data['conversations_count']     = $summary['conversations_count'] ?? $data['conversations_count'];
@@ -81,47 +116,35 @@ class SyncSupportStats extends Command
                 $data['outgoing_messages_count'] = $summary['outgoing_messages_count'] ?? 0;
                 $data['avg_first_response_time'] = (int) ($summary['avg_first_response_time'] ?? 0);
                 $data['avg_resolution_time']     = (int) ($summary['avg_resolution_time'] ?? 0);
-
-                // Trend data
-                $trend = $this->safeFetch(fn() => $this->client->getAccountReport('conversations_count', $since, $until));
-                $data['trend_data'] = $trend ?: null;
-
             } catch (\Exception $e) {
-                $this->warn("    ~ Summary API failed: " . $e->getMessage());
+                // garde valeurs live
             }
-        }
 
-        SupportDailyStat::upsertForPeriod($date, $period, $data);
-        $this->line("    ✓ Stats compte sauvegardees (conv: {$data['conversations_count']}, resolved: {$data['resolutions_count']})");
-
-        // Agent stats (seulement si API disponible)
-        if ($reportsAvailable) {
+            // Agent stats
             try {
                 $agentSummary = $this->client->getAgentSummary($since, $until);
                 $agents = $this->fetchAgentsMap();
-                $this->syncAgentStats($agentSummary, $agents, $date, $period);
+                $this->syncAgentStats($agentSummary, $agents, $today, $period);
             } catch (\Exception $e) {
-                $this->warn("    ~ Agent summary non disponible: " . $e->getMessage());
+                // pas de stats agent
             }
         }
+
+        SupportDailyStat::upsertForPeriod($today, $period, $data);
+        $this->line("  ✓ Resume [{$period}] : conv={$data['conversations_count']}, res={$data['resolutions_count']}");
     }
 
-    // ─────────────────────────────────────────────────────
+    // ─── Agent stats ──────────────────────────────────────────────
 
     private function syncAgentStats(array $agentSummary, array $agentsMap, string $date, string $period): void
     {
         $entries = $agentSummary['data'] ?? $agentSummary;
-        if (empty($entries)) {
-            $this->line("    ~ Aucune donnee agent");
-            return;
-        }
+        if (empty($entries)) return;
 
-        $count = 0;
         foreach ($entries as $entry) {
             $agentId = $entry['id'] ?? null;
             if (!$agentId) continue;
-
-            $metric = $entry['metric'] ?? $entry;
+            $metric    = $entry['metric'] ?? $entry;
             $agentInfo = $agentsMap[$agentId] ?? null;
 
             SupportAgentStat::upsertForAgent($date, $period, (int) $agentId, [
@@ -132,27 +155,25 @@ class SyncSupportStats extends Command
                 'avg_first_response_time' => (int) ($metric['avg_first_response_time'] ?? 0),
                 'avg_resolution_time'     => (int) ($metric['avg_resolution_time'] ?? 0),
             ]);
-            $count++;
         }
-        $this->line("    ✓ {$count} agent(s) synchronises");
     }
 
-    // ─────────────────────────────────────────────────────
+    // ─── Helpers ─────────────────────────────────────────────────
 
     private function fetchCounts(): array
     {
         try {
             return $this->client->getConversationCounts();
         } catch (\Exception $e) {
-            $this->warn('  ~ Impossible de recuperer les compteurs: ' . $e->getMessage());
-            return ['open_count' => 0, 'pending_count' => 0, 'resolved_count' => 0, 'all_count' => 0, 'mine_count' => 0, 'unassigned_count' => 0, 'assigned_count' => 0];
+            return ['open_count' => 0, 'pending_count' => 0, 'resolved_count' => 0,
+                    'all_count' => 0, 'mine_count' => 0, 'unassigned_count' => 0, 'assigned_count' => 0];
         }
     }
 
     private function checkReportsApi(): bool
     {
-        [$since, $until] = $this->resolvePeriod('today');
         try {
+            [$since, $until] = [$this->ts(Carbon::today()), $this->ts(Carbon::now())];
             $this->client->getAccountSummary($since, $until);
             return true;
         } catch (\Exception $e) {
@@ -163,30 +184,25 @@ class SyncSupportStats extends Command
     private function fetchAgentsMap(): array
     {
         try {
-            $agents = $this->client->listAgents();
-            return collect($agents)->keyBy('id')->toArray();
+            return collect($this->client->listAgents())->keyBy('id')->toArray();
         } catch (\Exception $e) {
             return [];
-        }
-    }
-
-    private function safeFetch(callable $fn, mixed $default = []): mixed
-    {
-        try {
-            return $fn();
-        } catch (\Exception $e) {
-            return $default;
         }
     }
 
     private function resolvePeriod(string $period): array
     {
         return match ($period) {
-            'today'   => [(string) Carbon::today()->timestamp,                  (string) Carbon::now()->timestamp],
-            'week'    => [(string) Carbon::now()->startOfWeek()->timestamp,     (string) Carbon::now()->timestamp],
-            'month'   => [(string) Carbon::now()->startOfMonth()->timestamp,    (string) Carbon::now()->timestamp],
-            'quarter' => [(string) Carbon::now()->firstOfQuarter()->timestamp,  (string) Carbon::now()->timestamp],
-            default   => [(string) Carbon::today()->timestamp,                  (string) Carbon::now()->timestamp],
+            'today'   => [$this->ts(Carbon::today()),                 $this->ts(Carbon::now())],
+            'week'    => [$this->ts(Carbon::now()->startOfWeek()),    $this->ts(Carbon::now())],
+            'month'   => [$this->ts(Carbon::now()->startOfMonth()),   $this->ts(Carbon::now())],
+            'quarter' => [$this->ts(Carbon::now()->firstOfQuarter()), $this->ts(Carbon::now())],
+            default   => [$this->ts(Carbon::today()),                 $this->ts(Carbon::now())],
         };
+    }
+
+    private function ts(Carbon $dt): string
+    {
+        return (string) $dt->timestamp;
     }
 }
