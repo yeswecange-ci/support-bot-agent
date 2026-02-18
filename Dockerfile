@@ -11,13 +11,13 @@ RUN npm run build
 # ── Stage 2: PHP app ──────────────────────────────
 FROM php:8.3-cli
 
-# Install system dependencies
+# Install only the system libs and extensions NOT already in the base image
+# php:8.3-cli already includes: mbstring, xml, curl, ctype, tokenizer, pdo, json, etc.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git unzip curl libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev libxml2-dev libcurl4-openssl-dev libicu-dev \
+    unzip libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype-dev \
+    libicu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring xml curl ctype fileinfo \
-       bcmath tokenizer zip gd intl pcntl \
+    && docker-php-ext-install pdo_mysql bcmath zip gd intl pcntl fileinfo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
@@ -27,13 +27,13 @@ WORKDIR /app
 
 # Copy composer files and install dependencies
 COPY composer.json composer.lock* ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Copy application code
 COPY . .
 
 # Re-run composer scripts (post-autoload-dump)
-RUN composer dump-autoload --optimize
+RUN COMPOSER_MEMORY_LIMIT=-1 composer dump-autoload --optimize
 
 # Copy built assets from stage 1
 COPY --from=assets /app/public/build public/build
