@@ -9,8 +9,31 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
-                <p class="text-sm text-gray-500 mt-0.5">Vue d'ensemble de l'activite support</p>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    Vue d'ensemble de l'activite support
+                    @if($lastSynced)
+                        &nbsp;·&nbsp;<span class="text-xs text-gray-400" id="last-synced-label" title="{{ $lastSynced->format('d/m/Y H:i:s') }}">
+                            Synchro : {{ $lastSynced->diffForHumans() }}
+                        </span>
+                    @else
+                        &nbsp;·&nbsp;<span class="text-xs text-amber-500" id="last-synced-label">Jamais synchronise</span>
+                    @endif
+                </p>
             </div>
+            <div class="flex items-center gap-3">
+                {{-- Bouton synchronisation manuelle --}}
+                <button id="sync-btn" onclick="syncStats(this)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-lg hover:bg-indigo-100 border border-indigo-200 transition"
+                    title="Synchroniser les stats depuis Chatwoot">
+                    <svg id="sync-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <svg id="sync-spinner" class="w-3.5 h-3.5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                    <span id="sync-label">Synchroniser</span>
+                </button>
             <div class="flex gap-1 bg-gray-100 rounded-lg p-0.5" id="period-selector">
                 @foreach(['today' => "Aujourd'hui", 'week' => 'Semaine', 'month' => 'Mois', 'quarter' => 'Trimestre'] as $p => $label)
                     <button onclick="changePeriod('{{ $p }}')"
@@ -20,6 +43,7 @@
                         {{ $label }}
                     </button>
                 @endforeach
+            </div>
             </div>
         </div>
     </div>
@@ -546,6 +570,48 @@
         },
     });
 
+    // ═══ Sync Stats ═══
+    window.syncStats = async function(btn) {
+        const icon = document.getElementById('sync-icon');
+        const spinner = document.getElementById('sync-spinner');
+        const label = document.getElementById('sync-label');
+        btn.disabled = true;
+        icon.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        label.textContent = 'Sync...';
+
+        try {
+            const r = await fetch('{{ route("ajax.dashboard.sync") }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': TOKEN, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ period: 'all' }),
+            });
+            const res = await r.json();
+            if (res.success) {
+                label.textContent = 'Synchroniser';
+                const syncLabel = document.getElementById('last-synced-label');
+                if (syncLabel && res.lastSynced) {
+                    const d = new Date(res.lastSynced);
+                    syncLabel.textContent = 'Synchro : a l\'instant';
+                    syncLabel.classList.remove('text-amber-500');
+                    syncLabel.classList.add('text-gray-400');
+                }
+                // Recharger les donnees du tableau de bord
+                await changePeriod(currentPeriod, true);
+            } else {
+                label.textContent = 'Erreur';
+                setTimeout(() => { label.textContent = 'Synchroniser'; }, 3000);
+            }
+        } catch(e) {
+            label.textContent = 'Erreur reseau';
+            setTimeout(() => { label.textContent = 'Synchroniser'; }, 3000);
+        } finally {
+            btn.disabled = false;
+            icon.classList.remove('hidden');
+            spinner.classList.add('hidden');
+        }
+    };
+
     // ═══ Period Switching (AJAX) ═══
     let currentPeriod = '{{ $period }}';
     const activeClass = 'bg-white shadow-sm text-indigo-700';
@@ -558,8 +624,8 @@
         });
     }
 
-    window.changePeriod = async function(period) {
-        if (period === currentPeriod) return;
+    window.changePeriod = async function(period, force = false) {
+        if (period === currentPeriod && !force) return;
         currentPeriod = period;
         updatePeriodButtons(period);
 
@@ -631,6 +697,15 @@
             agentChart.data.datasets[0].data = newAgentData.convs;
             agentChart.data.datasets[1].data = newAgentData.resolved;
             agentChart.update('none');
+
+            // Update source badge
+            const syncLabel = document.getElementById('last-synced-label');
+            if (syncLabel && data.lastSynced) {
+                const d = new Date(data.lastSynced);
+                const diff = Math.round((Date.now() - d.getTime()) / 60000);
+                const diffText = diff < 1 ? 'a l\'instant' : diff < 60 ? 'il y a ' + diff + 'min' : 'il y a ' + Math.round(diff/60) + 'h';
+                syncLabel.textContent = 'Synchro : ' + diffText;
+            }
 
         } catch(e) {
             console.error('[Dashboard] Period change error:', e);

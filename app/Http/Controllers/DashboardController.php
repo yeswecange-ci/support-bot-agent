@@ -7,6 +7,7 @@ use App\Services\Chatwoot\ConversationService;
 use App\Services\Chatwoot\ChatwootClient;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
@@ -35,13 +36,13 @@ class DashboardController extends Controller
             $agents = [];
         }
 
-        return view('dashboard.index', [
-            'stats'      => $this->reports->getDashboardStats($period),
-            'agents'     => $agents,
-            'agentStats' => $this->reports->getAgentLeaderboard($period),
-            'counts'     => $counts,
-            'period'     => $period,
-        ]);
+        $stats      = $this->reports->getDashboardStats($period);
+        $agentStats = $this->reports->getAgentLeaderboard($period);
+        $lastSynced = $this->reports->lastSyncedAt();
+
+        return view('dashboard.index', compact(
+            'stats', 'agents', 'agentStats', 'counts', 'period', 'lastSynced'
+        ));
     }
 
     /**
@@ -52,17 +53,42 @@ class DashboardController extends Controller
         $period = $request->get('period', 'week');
 
         try {
-            $stats = $this->reports->getDashboardStats($period);
+            $stats      = $this->reports->getDashboardStats($period);
             $agentStats = $this->reports->getAgentLeaderboard($period);
-            $counts = $this->conversations->getCounts();
+            $counts     = $this->conversations->getCounts();
+            $lastSynced = $this->reports->lastSyncedAt();
 
             return response()->json([
                 'stats'      => $stats,
                 'agentStats' => $agentStats,
                 'counts'     => $counts,
+                'lastSynced' => $lastSynced?->toIso8601String(),
+                'source'     => $stats['source'] ?? 'api',
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * AJAX — Lancer une synchronisation manuelle
+     */
+    public function syncStats(Request $request): JsonResponse
+    {
+        try {
+            $period = $request->get('period', 'all');
+            Artisan::call('stats:sync', ['--period' => $period]);
+
+            $lastSynced = $this->reports->lastSyncedAt();
+
+            return response()->json([
+                'success'    => true,
+                'message'    => 'Synchronisation effectuee',
+                'lastSynced' => $lastSynced?->toIso8601String(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[Dashboard] Sync failed', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

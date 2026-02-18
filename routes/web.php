@@ -161,9 +161,11 @@ Route::middleware('auth')->group(function () {
 
             // Statistics
             Route::get('/statistics/data', [StatisticsController::class, 'data'])->name('ajax.statistics.data');
+            Route::post('/statistics/sync', [StatisticsController::class, 'syncStats'])->name('ajax.statistics.sync');
 
             // Dashboard
             Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('ajax.dashboard.data');
+            Route::post('/dashboard/sync', [DashboardController::class, 'syncStats'])->name('ajax.dashboard.sync');
         });
 
         // ── Campagnes AJAX (accessible a tous) ───────────
