@@ -13,6 +13,7 @@ use App\Http\Controllers\InboxController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CampaignContactController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 // ── Route principale → login ──────────────────────────
@@ -48,6 +49,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/agents', [AgentController::class, 'index'])->name('agents.index');
         Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     });
 
     // AJAX — Polling & Actions
@@ -166,6 +168,14 @@ Route::middleware('auth')->group(function () {
             // Dashboard
             Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('ajax.dashboard.data');
             Route::post('/dashboard/sync', [DashboardController::class, 'syncStats'])->name('ajax.dashboard.sync');
+
+            // Settings
+            Route::post('/settings/update', [SettingsController::class, 'update'])->name('ajax.settings.update');
+            Route::post('/settings/test-chatwoot', [SettingsController::class, 'testChatwoot'])->name('ajax.settings.testChatwoot');
+            Route::post('/settings/test-twilio', [SettingsController::class, 'testTwilio'])->name('ajax.settings.testTwilio');
+            Route::post('/settings/test-database', [SettingsController::class, 'testDatabase'])->name('ajax.settings.testDatabase');
+            Route::get('/settings/logs', [SettingsController::class, 'getLogs'])->name('ajax.settings.logs');
+            Route::delete('/settings/logs', [SettingsController::class, 'clearLogs'])->name('ajax.settings.clearLogs');
         });
 
         // ── Campagnes AJAX (accessible a tous) ───────────

@@ -99,6 +99,15 @@ class TwilioService
     }
 
     /**
+     * Tester la connexion Twilio (appel API léger)
+     */
+    public function ping(): void
+    {
+        // Appel minimal : récupération du compte courant
+        $this->client->api->v2010->accounts->read(['limit' => 1]);
+    }
+
+    /**
      * Récupérer le statut d'un message Twilio par son SID
      */
     public function fetchMessage(string $sid): object
