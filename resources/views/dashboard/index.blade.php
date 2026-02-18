@@ -322,6 +322,50 @@
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.plugins.legend.display = false;
 
+    // ═══ Plugin : message "Aucune donnée" quand le chart est vide ═══
+    const noDataPlugin = {
+        id: 'noData',
+        afterDraw(chart) {
+            const hasData = chart.data.datasets.some(ds => {
+                if (!Array.isArray(ds.data) || ds.data.length === 0) return false;
+                return ds.data.some(v => v !== null && v !== undefined && Number(v) > 0);
+            });
+            if (hasData) return;
+
+            const { ctx, chartArea: a } = chart;
+            if (!a) return;
+            ctx.save();
+            const cx = a.left + (a.right - a.left) / 2;
+            const cy = a.top  + (a.bottom - a.top) / 2;
+
+            // Fond léger
+            ctx.fillStyle = 'rgba(249,250,251,0.85)';
+            ctx.fillRect(a.left, a.top, a.right - a.left, a.bottom - a.top);
+
+            // Icône cercle barré
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy - 18, 14, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx - 10, cy - 18 - 10);
+            ctx.lineTo(cx + 10, cy - 18 + 10);
+            ctx.stroke();
+
+            // Texte
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Aucune donnée disponible', cx, cy + 8);
+            ctx.font = '10px Inter, sans-serif';
+            ctx.fillStyle = '#d1d5db';
+            ctx.fillText('Synchronisez les données pour afficher ce graphique', cx, cy + 26);
+            ctx.restore();
+        },
+    };
+    Chart.register(noDataPlugin);
+
     // ═══ Helper: format timestamps to labels ═══
     function formatTimestamps(data) {
         if (!Array.isArray(data)) return { labels: [], values: [] };

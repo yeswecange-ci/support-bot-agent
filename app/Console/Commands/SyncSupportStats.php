@@ -35,20 +35,23 @@ class SyncSupportStats extends Command
             $this->warn('  ~ API Reports non disponible — compteurs conversation uniquement');
         }
 
-        // 3. Toujours stocker un enregistrement journalier (period='day')
-        //    C'est ce qui permet de construire les courbes de tendance
+        // 3. Stats agents depuis l'API conversations (fonctionne toujours)
+        $agentStatsFromConv = $this->buildAgentStatsFromConversations();
+        $this->line("  → Stats agents (conversations) : " . count($agentStatsFromConv) . " agent(s) detecte(s)");
+
+        // 4. Snapshot journalier (pour les courbes)
         $this->syncDailySnapshot($counts, $reportsAvailable);
 
-        // 4. Stocker les resumes par periode (pour les KPIs)
+        // 5. Resumes par periode + stats agents
         foreach (['today', 'week', 'month', 'quarter'] as $p) {
-            $this->syncPeriodSummary($p, $counts, $reportsAvailable);
+            $this->syncPeriodSummary($p, $counts, $reportsAvailable, $agentStatsFromConv);
         }
 
         $this->info('[stats:sync] Synchronisation terminee.');
         return self::SUCCESS;
     }
 
-    // ─── Snapshot journalier (pour les courbes de tendance) ──────
+    // ─── Snapshot journalier ──────────────────────────────────────
 
     private function syncDailySnapshot(array $counts, bool $reportsAvailable): void
     {
@@ -67,7 +70,6 @@ class SyncSupportStats extends Command
             'trend_data'              => null,
         ];
 
-        // Enrichir avec l'API si disponible
         if ($reportsAvailable) {
             [$since, $until] = [$this->ts(Carbon::today()), $this->ts(Carbon::now())];
             try {
@@ -79,7 +81,7 @@ class SyncSupportStats extends Command
                 $data['avg_first_response_time'] = (int) ($summary['avg_first_response_time'] ?? 0);
                 $data['avg_resolution_time']     = (int) ($summary['avg_resolution_time'] ?? 0);
             } catch (\Exception $e) {
-                // garde les valeurs issues des compteurs
+                // garde valeurs live
             }
         }
 
@@ -87,9 +89,9 @@ class SyncSupportStats extends Command
         $this->line("  ✓ Snapshot journalier [{$today}] : conv={$data['conversations_count']}, res={$data['resolutions_count']}");
     }
 
-    // ─── Resume par periode (KPIs) ────────────────────────────────
+    // ─── Resume par periode ───────────────────────────────────────
 
-    private function syncPeriodSummary(string $period, array $counts, bool $reportsAvailable): void
+    private function syncPeriodSummary(string $period, array $counts, bool $reportsAvailable, array $agentStats): void
     {
         $today = Carbon::today()->toDateString();
 
@@ -120,23 +122,89 @@ class SyncSupportStats extends Command
                 // garde valeurs live
             }
 
-            // Agent stats
+            // Agent stats API (si disponible)
             try {
-                $agentSummary = $this->client->getAgentSummary($since, $until);
-                $agents = $this->fetchAgentsMap();
-                $this->syncAgentStats($agentSummary, $agents, $today, $period);
+                $agentSummary = $this->client->getAgentSummary(...$this->resolvePeriod($period));
+                $agentMap     = $this->fetchAgentsMap();
+                $this->storeAgentStats($agentSummary, $agentMap, $today, $period);
             } catch (\Exception $e) {
-                // pas de stats agent
+                // Agent stats depuis conversations à la place
+                $this->storeAgentStatsFromCounts($agentStats, $today, $period);
             }
+        } else {
+            // Toujours stocker les stats agents depuis les conversations
+            $this->storeAgentStatsFromCounts($agentStats, $today, $period);
         }
 
         SupportDailyStat::upsertForPeriod($today, $period, $data);
         $this->line("  ✓ Resume [{$period}] : conv={$data['conversations_count']}, res={$data['resolutions_count']}");
     }
 
-    // ─── Agent stats ──────────────────────────────────────────────
+    // ─── Stats agents depuis API conversations ────────────────────
 
-    private function syncAgentStats(array $agentSummary, array $agentsMap, string $date, string $period): void
+    /**
+     * Construit des stats agents en paginant les conversations ouvertes et résolues.
+     * Retourne un tableau indexé par agent_id.
+     */
+    private function buildAgentStatsFromConversations(): array
+    {
+        $agentCounts = []; // [agent_id => ['name'=>, 'email'=>, 'open'=>, 'resolved'=>]]
+
+        // Conversations ouvertes (max 5 pages = 500 conversations)
+        foreach (['open', 'resolved'] as $status) {
+            $maxPages = $status === 'open' ? 5 : 5;
+            for ($page = 1; $page <= $maxPages; $page++) {
+                try {
+                    $response = $this->client->listConversations($status, 'all', $page);
+                    $convs    = $response['data']['payload'] ?? [];
+
+                    if (empty($convs)) break;
+
+                    foreach ($convs as $conv) {
+                        $assignee = $conv['meta']['assignee'] ?? null;
+                        if (!$assignee || empty($assignee['id'])) continue;
+
+                        $aid = (int) $assignee['id'];
+                        if (!isset($agentCounts[$aid])) {
+                            $agentCounts[$aid] = [
+                                'name'      => $assignee['name'] ?? ('Agent #' . $aid),
+                                'email'     => $assignee['email'] ?? null,
+                                'open'      => 0,
+                                'resolved'  => 0,
+                            ];
+                        }
+                        $agentCounts[$aid][$status === 'open' ? 'open' : 'resolved']++;
+                    }
+
+                    // Derniere page atteinte
+                    $meta    = $response['data']['meta'] ?? [];
+                    $allCount = $meta['all_count'] ?? count($convs);
+                    if ($page * 25 >= $allCount) break;
+
+                } catch (\Exception $e) {
+                    break;
+                }
+            }
+        }
+
+        return $agentCounts;
+    }
+
+    private function storeAgentStatsFromCounts(array $agentStats, string $date, string $period): void
+    {
+        foreach ($agentStats as $agentId => $data) {
+            SupportAgentStat::upsertForAgent($date, $period, $agentId, [
+                'agent_name'              => $data['name'],
+                'agent_email'             => $data['email'],
+                'conversations_count'     => ($data['open'] ?? 0) + ($data['resolved'] ?? 0),
+                'resolutions_count'       => $data['resolved'] ?? 0,
+                'avg_first_response_time' => 0,
+                'avg_resolution_time'     => 0,
+            ]);
+        }
+    }
+
+    private function storeAgentStats(array $agentSummary, array $agentsMap, string $date, string $period): void
     {
         $entries = $agentSummary['data'] ?? $agentSummary;
         if (empty($entries)) return;
@@ -193,11 +261,11 @@ class SyncSupportStats extends Command
     private function resolvePeriod(string $period): array
     {
         return match ($period) {
-            'today'   => [$this->ts(Carbon::today()),                 $this->ts(Carbon::now())],
-            'week'    => [$this->ts(Carbon::now()->startOfWeek()),    $this->ts(Carbon::now())],
-            'month'   => [$this->ts(Carbon::now()->startOfMonth()),   $this->ts(Carbon::now())],
-            'quarter' => [$this->ts(Carbon::now()->firstOfQuarter()), $this->ts(Carbon::now())],
-            default   => [$this->ts(Carbon::today()),                 $this->ts(Carbon::now())],
+            'today'   => [$this->ts(Carbon::today()),                  $this->ts(Carbon::now())],
+            'week'    => [$this->ts(Carbon::now()->startOfWeek()),     $this->ts(Carbon::now())],
+            'month'   => [$this->ts(Carbon::now()->startOfMonth()),    $this->ts(Carbon::now())],
+            'quarter' => [$this->ts(Carbon::now()->firstOfQuarter()),  $this->ts(Carbon::now())],
+            default   => [$this->ts(Carbon::today()),                  $this->ts(Carbon::now())],
         };
     }
 

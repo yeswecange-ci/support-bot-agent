@@ -9,10 +9,16 @@ use Illuminate\Http\JsonResponse;
 
 class ContactController extends Controller
 {
+    // TwilioService injecté en lazy via app() pour éviter un crash
+    // si Twilio n'est pas configuré sur le serveur
     public function __construct(
         private ChatwootClient $chatwoot,
-        private TwilioService $twilio,
     ) {}
+
+    private function twilio(): TwilioService
+    {
+        return app(TwilioService::class);
+    }
 
     /**
      * Page contacts
@@ -20,28 +26,30 @@ class ContactController extends Controller
      */
     public function index(Request $request)
     {
-        $page = max(1, min((int) $request->get('page', 1), 100));
-        $search = $request->get('q');
+        $page    = max(1, min((int) $request->get('page', 1), 100));
+        $search  = $request->get('q');
         $perPage = 15;
 
-        if ($search) {
-            $data = $this->chatwoot->searchContacts($search);
-            $contacts = $data['payload'] ?? [];
-            $meta = [
-                'total' => count($contacts),
-                'current_page' => 1,
-                'pages' => 1,
-            ];
-        } else {
-            $data = $this->chatwoot->listContacts($page, '-last_activity_at');
-            $contacts = $data['payload'] ?? [];
-            $rawMeta = $data['meta'] ?? [];
-            $total = $rawMeta['count'] ?? $rawMeta['total'] ?? count($contacts);
-            $meta = [
-                'total' => $total,
-                'current_page' => $rawMeta['current_page'] ?? $page,
-                'pages' => $total > 0 ? (int) ceil($total / $perPage) : 1,
-            ];
+        try {
+            if ($search) {
+                $data     = $this->chatwoot->searchContacts($search);
+                $contacts = $data['payload'] ?? [];
+                $meta     = ['total' => count($contacts), 'current_page' => 1, 'pages' => 1];
+            } else {
+                $data     = $this->chatwoot->listContacts($page, '-last_activity_at');
+                $contacts = $data['payload'] ?? [];
+                $rawMeta  = $data['meta'] ?? [];
+                $total    = $rawMeta['count'] ?? $rawMeta['total'] ?? count($contacts);
+                $meta     = [
+                    'total'        => $total,
+                    'current_page' => $rawMeta['current_page'] ?? $page,
+                    'pages'        => $total > 0 ? (int) ceil($total / $perPage) : 1,
+                ];
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('[Contacts] API unavailable', ['error' => $e->getMessage()]);
+            $contacts = [];
+            $meta     = ['total' => 0, 'current_page' => 1, 'pages' => 1];
         }
 
         return view('contacts.index', [
@@ -187,7 +195,7 @@ class ContactController extends Controller
             'template_name' => 'nullable|string',
         ]);
 
-        if (!$this->twilio->isConfigured()) {
+        if (!$this->twilio()->isConfigured()) {
             return response()->json(['error' => 'Twilio non configuré'], 500);
         }
 
@@ -200,7 +208,7 @@ class ContactController extends Controller
             }
 
             $variables = $request->input('variables', []);
-            $this->twilio->sendTemplate($phone, $request->content_sid, $variables);
+            $this->twilio()->sendTemplate($phone, $request->content_sid, $variables);
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class TwilioService
 {
     private ?Client $client = null;
-    private ?string $from;
+    private ?string $from = null;
 
     public function __construct()
     {
