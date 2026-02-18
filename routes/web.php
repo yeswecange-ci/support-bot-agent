@@ -124,6 +124,8 @@ Route::middleware('auth')->group(function () {
             ->name('ajax.contact.notes.destroy');
         Route::delete('/contacts/{contactId}', [ContactController::class, 'destroy'])
             ->name('ajax.contact.destroy');
+        Route::post('/contacts/{contactId}/send-template', [ContactController::class, 'sendTemplate'])
+            ->name('ajax.contact.sendTemplate');
 
         // Notifications
         Route::get('/notifications', [NotificationController::class, 'list'])
@@ -170,6 +172,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/campagnes/{campaign}', [CampaignController::class, 'destroy'])->name('ajax.campagnes.destroy');
         Route::post('/campagnes/{campaign}/send', [CampaignController::class, 'sendPush'])->name('ajax.campagnes.send');
         Route::post('/campagnes/{campaign}/schedule', [CampaignController::class, 'schedulePush'])->name('ajax.campagnes.schedule');
+        Route::delete('/campagnes/{campaign}/schedule', [CampaignController::class, 'cancelSchedule'])->name('ajax.campagnes.cancelSchedule');
         Route::post('/campagnes/{campaign}/send-single', [CampaignController::class, 'sendSingle'])->name('ajax.campagnes.sendSingle');
         Route::post('/campagnes/{campaign}/contacts', [CampaignController::class, 'attachContacts'])->name('ajax.campagnes.attachContacts');
         Route::delete('/campagnes/{campaign}/contacts', [CampaignController::class, 'detachContacts'])->name('ajax.campagnes.detachContacts');

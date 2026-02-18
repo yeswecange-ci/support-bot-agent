@@ -28,10 +28,6 @@ class CampaignController extends Controller
     {
         $query = Campaign::with('creator')->withCount('contacts', 'messages');
 
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
-        }
-
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -130,6 +126,17 @@ class CampaignController extends Controller
         $this->campaignService->schedule($campaign, $data['scheduled_at']);
 
         return response()->json(['success' => true, 'message' => 'Campagne planifiee']);
+    }
+
+    public function cancelSchedule(Campaign $campaign): JsonResponse
+    {
+        if ($campaign->status !== 'scheduled') {
+            return response()->json(['success' => false, 'message' => 'Aucune planification active'], 422);
+        }
+
+        $this->campaignService->cancelSchedule($campaign);
+
+        return response()->json(['success' => true, 'message' => 'Planification annulee']);
     }
 
     public function sendSingle(Request $request, Campaign $campaign): JsonResponse

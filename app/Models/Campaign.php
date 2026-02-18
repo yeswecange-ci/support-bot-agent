@@ -46,10 +46,18 @@ class Campaign extends Model
         return $this->hasMany(CampaignMessage::class);
     }
 
+    public function hasPendingSchedule(): bool
+    {
+        return $this->status === 'scheduled'
+            && $this->scheduled_at !== null
+            && $this->scheduled_at->isFuture();
+    }
+
     public function statusLabel(): string
     {
         return match ($this->status) {
             'draft'     => 'Brouillon',
+            'scheduled' => 'Planifiee',
             'active'    => 'Active',
             'completed' => 'Terminee',
             'paused'    => 'En pause',
@@ -61,6 +69,7 @@ class Campaign extends Model
     {
         return match ($this->status) {
             'draft'     => 'bg-gray-100 text-gray-600',
+            'scheduled' => 'bg-purple-100 text-purple-700',
             'active'    => 'bg-blue-100 text-blue-700',
             'completed' => 'bg-green-100 text-green-700',
             'paused'    => 'bg-yellow-100 text-yellow-700',

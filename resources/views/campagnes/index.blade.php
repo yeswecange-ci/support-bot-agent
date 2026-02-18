@@ -17,25 +17,13 @@
             </a>
         </div>
 
-        {{-- Recherche + Filtres --}}
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-            <form method="GET" class="relative max-w-xs flex-shrink-0">
-                @if(request('status'))
-                <input type="hidden" name="status" value="{{ request('status') }}">
-                @endif
+        {{-- Recherche --}}
+        <div class="mb-5">
+            <form method="GET" class="relative max-w-xs">
                 <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher une campagne..."
                        class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition shadow-sm">
             </form>
-            <div class="flex items-center gap-2">
-                @php $filters = ['' => 'Toutes', 'draft' => 'Brouillons', 'active' => 'Actives', 'completed' => 'Terminees', 'paused' => 'En pause']; @endphp
-                @foreach($filters as $val => $label)
-                <a href="{{ route('campagnes.index', array_filter(['status' => $val ?: null, 'search' => request('search')])) }}"
-                   class="px-3.5 py-1.5 text-xs font-medium rounded-lg transition {{ request('status', '') === $val ? 'bg-primary-500 text-white shadow-sm' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
-                    {{ $label }}
-                </a>
-                @endforeach
-            </div>
         </div>
 
         @if($campaigns->count())
@@ -50,9 +38,17 @@
                         <p class="text-xs text-gray-400 mt-0.5 line-clamp-1">{{ $campaign->description }}</p>
                         @endif
                     </div>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium ml-2 flex-shrink-0 {{ $campaign->statusBadgeClass() }}">
-                        {{ $campaign->statusLabel() }}
-                    </span>
+                    <div class="flex items-center gap-1.5 ml-2 flex-shrink-0">
+                        @if($campaign->hasPendingSchedule())
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700" title="{{ $campaign->scheduled_at->format('d/m/Y H:i') }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ $campaign->scheduled_at->format('d/m H:i') }}
+                        </span>
+                        @endif
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium {{ $campaign->statusBadgeClass() }}">
+                            {{ $campaign->statusLabel() }}
+                        </span>
+                    </div>
                 </div>
 
                 @if($campaign->template_name)

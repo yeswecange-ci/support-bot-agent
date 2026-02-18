@@ -48,6 +48,11 @@ class SendCampaignMessages implements ShouldQueue
             $delay++;
         }
 
+        $this->campaign->update([
+            'status'  => 'active',
+            'sent_at' => now(),
+        ]);
+
         Log::info('Campagne orchestrée', [
             'campaign' => $this->campaign->id,
             'contacts' => $contacts->count(),

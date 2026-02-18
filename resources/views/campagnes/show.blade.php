@@ -113,10 +113,31 @@
             {{-- COLONNE DROITE (1/3) --}}
             <div class="space-y-5">
 
+                {{-- PLANIFICATION EN COURS --}}
+                @if($campaign->hasPendingSchedule())
+                <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <h3 class="text-sm font-semibold text-purple-900">Envoi planifie</h3>
+                    </div>
+                    <div class="bg-white rounded-lg px-4 py-3 border border-purple-100 mb-3">
+                        <p class="text-[10px] text-purple-500 uppercase font-semibold mb-0.5">Date prevue</p>
+                        <p class="text-sm font-bold text-purple-900">{{ $campaign->scheduled_at->format('d/m/Y \a H:i') }}</p>
+                        <p class="text-xs text-purple-600 mt-0.5">{{ $campaign->scheduled_at->diffForHumans() }}</p>
+                    </div>
+                    <p class="text-xs text-purple-700 mb-3">Le template <strong>{{ $campaign->template_name }}</strong> sera envoyé à <strong>{{ $totalTargetContacts }} contact(s)</strong>.</p>
+                    <button onclick="doCancelSchedule(this)" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white text-purple-700 text-xs font-medium rounded-lg border border-purple-200 hover:bg-purple-100 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Annuler la planification
+                    </button>
+                </div>
+                @endif
+
                 {{-- ACTIONS --}}
-                @if($campaign->status === 'draft')
+                @if(in_array($campaign->status, ['draft', 'scheduled']))
                 <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
                     <h3 class="text-sm font-semibold text-gray-900">Actions</h3>
+                    @if($campaign->status === 'draft')
                     <button onclick="openSendModal()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                         Envoyer maintenant
@@ -125,6 +146,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Planifier
                     </button>
+                    @endif
                 </div>
                 @endif
 
@@ -471,7 +493,7 @@
     let targetSearchTimeout = null;
     let targetCurrentPage = 1;
     let targetCurrentQuery = '';
-    const canSend = {{ ($campaign->status === 'draft' || $campaign->status === 'active') ? 'true' : 'false' }};
+    const canSend = {{ in_array($campaign->status, ['draft', 'active', 'scheduled']) ? 'true' : 'false' }};
 
     function loadTargetContacts(page = 1, q = '') {
         targetCurrentPage = page;
@@ -618,6 +640,20 @@
             if (res.success) { closeScheduleModal(); toast(res.message || 'Campagne planifiee'); setTimeout(() => location.reload(), 1000); }
             else { toast(res.message || 'Erreur', 'error'); btnReset(btn); }
         } catch(e) { toast('Erreur reseau', 'error'); btnReset(btn); }
+    };
+
+    window.doCancelSchedule = async function(btn) {
+        if (!confirm('Annuler la planification de cette campagne ?')) return;
+        btn.disabled = true;
+        try {
+            const r = await fetch('{{ route("ajax.campagnes.cancelSchedule", $campaign) }}', {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': TOKEN, 'Accept': 'application/json' }
+            });
+            const res = await r.json();
+            if (res.success) { toast(res.message || 'Planification annulee'); setTimeout(() => location.reload(), 800); }
+            else { toast(res.message || 'Erreur', 'error'); btn.disabled = false; }
+        } catch(e) { toast('Erreur reseau', 'error'); btn.disabled = false; }
     };
 
     window.doDelete = async function(btn) {

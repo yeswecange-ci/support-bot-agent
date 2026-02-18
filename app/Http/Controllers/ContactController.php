@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Chatwoot\ChatwootClient;
+use App\Services\Twilio\TwilioService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -10,6 +11,7 @@ class ContactController extends Controller
 {
     public function __construct(
         private ChatwootClient $chatwoot,
+        private TwilioService $twilio,
     ) {}
 
     /**
@@ -171,6 +173,39 @@ class ContactController extends Controller
         $result = $this->chatwoot->createContactNote($contactId, $request->content);
 
         return response()->json($result, 201);
+    }
+
+    /**
+     * AJAX — Envoyer un template WhatsApp à un contact
+     * POST /ajax/contacts/{id}/send-template
+     */
+    public function sendTemplate(int $contactId, Request $request): JsonResponse
+    {
+        $request->validate([
+            'content_sid'   => 'required|string|starts_with:HX',
+            'variables'     => 'nullable|array',
+            'template_name' => 'nullable|string',
+        ]);
+
+        if (!$this->twilio->isConfigured()) {
+            return response()->json(['error' => 'Twilio non configuré'], 500);
+        }
+
+        try {
+            $contact = $this->chatwoot->getContact($contactId);
+            $phone = $contact['phone_number'] ?? null;
+
+            if (!$phone) {
+                return response()->json(['error' => 'Ce contact n\'a pas de numéro de téléphone'], 422);
+            }
+
+            $variables = $request->input('variables', []);
+            $this->twilio->sendTemplate($phone, $request->content_sid, $variables);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**

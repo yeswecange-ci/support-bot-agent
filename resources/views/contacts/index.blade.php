@@ -83,6 +83,11 @@
                     </td>
                     <td class="px-6 py-3 text-right" onclick="event.stopPropagation()">
                         <div class="flex items-center justify-end gap-1">
+                            @if(!empty($contact['phone_number']))
+                            <button onclick="openSendTemplate({{ $contact['id'] }}, '{{ addslashes($contact['name'] ?? '') }}', '{{ addslashes($contact['phone_number']) }}')" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition" title="Envoyer un template WhatsApp">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            </button>
+                            @endif
                             <button onclick="openContactDetail({{ $contact['id'] }})" class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition" title="Editer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </button>
@@ -146,6 +151,67 @@
         <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
             <button onclick="closeModal('modal-create-contact')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Annuler</button>
             <button onclick="saveNewContact()" id="btn-save-contact" class="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition">Creer</button>
+        </div>
+    </div>
+</div>
+
+{{-- Modal : Envoyer template WhatsApp --}}
+<div id="modal-send-template" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white rounded-2xl shadow-2xl w-[480px] max-w-[95vw] overflow-hidden flex flex-col">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 text-sm">Envoyer un template WhatsApp</h3>
+            </div>
+            <button onclick="closeModal('modal-send-template')" class="w-7 h-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="px-5 py-4 space-y-4 overflow-y-auto max-h-[70vh]">
+            {{-- Destinataire --}}
+            <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-100">
+                <div class="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-semibold text-sm flex-shrink-0" id="st-avatar">?</div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900" id="st-name">—</p>
+                    <p class="text-xs text-gray-400" id="st-phone">—</p>
+                </div>
+            </div>
+
+            {{-- Sélection template --}}
+            <div>
+                <label class="text-xs font-medium text-gray-600">Template</label>
+                <div id="st-template-loading" class="mt-1 flex items-center gap-2 text-xs text-gray-400">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    Chargement des templates...
+                </div>
+                <select id="st-template-select" class="hidden w-full mt-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" onchange="onTemplateChange()">
+                    <option value="">-- Choisir un template --</option>
+                </select>
+                <p id="st-template-error" class="hidden mt-1 text-xs text-red-500"></p>
+            </div>
+
+            {{-- Variables dynamiques --}}
+            <div id="st-variables-section" class="hidden space-y-2">
+                <label class="text-xs font-medium text-gray-600">Variables</label>
+                <div id="st-variables-inputs" class="space-y-2"></div>
+            </div>
+
+            {{-- Aperçu --}}
+            <div id="st-preview-section" class="hidden">
+                <label class="text-xs font-medium text-gray-600">Aperçu</label>
+                <div id="st-preview-body" class="mt-1 px-3 py-2.5 bg-green-50 border border-green-100 rounded-lg text-sm text-gray-700 whitespace-pre-wrap"></div>
+            </div>
+        </div>
+
+        <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end gap-2 flex-shrink-0">
+            <button onclick="closeModal('modal-send-template')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Annuler</button>
+            <button onclick="submitSendTemplate()" id="btn-send-template" disabled class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                Envoyer
+            </button>
         </div>
     </div>
 </div>
@@ -442,16 +508,182 @@
         }
     };
 
+    // ── Send Template ─────────────────────────────────────
+    let _stContactId = null;
+    let _stTemplates = null; // cache
+
+    window.openSendTemplate = async function(contactId, name, phone) {
+        _stContactId = contactId;
+
+        // Fill recipient info
+        document.getElementById('st-name').textContent = name || 'Contact #' + contactId;
+        document.getElementById('st-phone').textContent = phone || '—';
+        document.getElementById('st-avatar').textContent = (name || '?').charAt(0).toUpperCase();
+
+        // Reset UI
+        document.getElementById('st-variables-section').classList.add('hidden');
+        document.getElementById('st-preview-section').classList.add('hidden');
+        document.getElementById('st-template-error').classList.add('hidden');
+        document.getElementById('btn-send-template').disabled = true;
+
+        document.getElementById('modal-send-template').classList.remove('hidden');
+
+        // Load templates (cached)
+        if (_stTemplates !== null) {
+            renderTemplateSelect(_stTemplates);
+            return;
+        }
+
+        document.getElementById('st-template-loading').classList.remove('hidden');
+        document.getElementById('st-template-select').classList.add('hidden');
+
+        try {
+            const r = await fetch('/ajax/twilio/templates');
+            if (!r.ok) throw new Error('Erreur ' + r.status);
+            _stTemplates = await r.json();
+            renderTemplateSelect(_stTemplates);
+        } catch(e) {
+            document.getElementById('st-template-loading').classList.add('hidden');
+            const err = document.getElementById('st-template-error');
+            err.textContent = 'Impossible de charger les templates : ' + e.message;
+            err.classList.remove('hidden');
+        }
+    };
+
+    function renderTemplateSelect(templates) {
+        const loading = document.getElementById('st-template-loading');
+        const select  = document.getElementById('st-template-select');
+        loading.classList.add('hidden');
+
+        if (!Array.isArray(templates) || templates.length === 0) {
+            const err = document.getElementById('st-template-error');
+            err.textContent = 'Aucun template disponible.';
+            err.classList.remove('hidden');
+            return;
+        }
+
+        select.innerHTML = '<option value="">-- Choisir un template --</option>';
+        templates.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.sid;
+            opt.dataset.body = t.body || '';
+            opt.dataset.vars = JSON.stringify(t.variables || []);
+            opt.dataset.name = t.friendly_name || t.sid;
+            opt.textContent = t.friendly_name || t.sid;
+            select.appendChild(opt);
+        });
+        select.classList.remove('hidden');
+    }
+
+    window.onTemplateChange = function() {
+        const select = document.getElementById('st-template-select');
+        const opt = select.selectedOptions[0];
+        const btn = document.getElementById('btn-send-template');
+
+        document.getElementById('st-variables-section').classList.add('hidden');
+        document.getElementById('st-preview-section').classList.add('hidden');
+        btn.disabled = true;
+
+        if (!opt || !opt.value) return;
+
+        const body = opt.dataset.body || '';
+        const vars = JSON.parse(opt.dataset.vars || '[]');
+
+        // Variables
+        if (vars.length > 0) {
+            const container = document.getElementById('st-variables-inputs');
+            container.innerHTML = '';
+            vars.forEach(v => {
+                const div = document.createElement('div');
+                div.innerHTML = `<label class="text-[10px] font-medium text-gray-500 uppercase">Variable {{${v}}}</label>
+                    <input type="text" data-var="${v}" placeholder="Valeur pour {{${v}}}"
+                        class="st-var-input w-full mt-0.5 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        oninput="updatePreview()">`;
+                container.appendChild(div);
+            });
+            document.getElementById('st-variables-section').classList.remove('hidden');
+        }
+
+        // Preview
+        document.getElementById('st-preview-body').textContent = body;
+        document.getElementById('st-preview-section').classList.remove('hidden');
+
+        btn.disabled = (vars.length > 0); // enable only once vars filled (or no vars)
+        if (vars.length === 0) btn.disabled = false;
+    };
+
+    window.updatePreview = function() {
+        const select = document.getElementById('st-template-select');
+        const opt = select.selectedOptions[0];
+        if (!opt || !opt.value) return;
+
+        let body = opt.dataset.body || '';
+        const inputs = document.querySelectorAll('.st-var-input');
+        let allFilled = true;
+
+        inputs.forEach(inp => {
+            const val = inp.value.trim();
+            if (!val) allFilled = false;
+            body = body.replaceAll(`{{${inp.dataset.var}}}`, val || `{{${inp.dataset.var}}}`);
+        });
+
+        document.getElementById('st-preview-body').textContent = body;
+        document.getElementById('btn-send-template').disabled = !allFilled;
+    };
+
+    window.submitSendTemplate = async function() {
+        if (!_stContactId) return;
+        const select = document.getElementById('st-template-select');
+        const opt = select.selectedOptions[0];
+        if (!opt || !opt.value) return;
+
+        const vars = JSON.parse(opt.dataset.vars || '[]');
+        const variables = {};
+        document.querySelectorAll('.st-var-input').forEach(inp => {
+            variables[inp.dataset.var] = inp.value.trim();
+        });
+
+        const btn = document.getElementById('btn-send-template');
+        const origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Envoi...';
+
+        try {
+            const r = await fetch(`/ajax/contacts/${_stContactId}/send-template`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
+                body: JSON.stringify({
+                    content_sid: opt.value,
+                    variables: Object.keys(variables).length > 0 ? variables : undefined,
+                    template_name: opt.dataset.name,
+                })
+            });
+            const data = await r.json();
+            if (!r.ok) throw new Error(data.error || 'Erreur ' + r.status);
+
+            // Success feedback
+            btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Envoyé !';
+            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            btn.classList.add('bg-green-500');
+            setTimeout(() => closeModal('modal-send-template'), 1200);
+        } catch(e) {
+            alert('Erreur : ' + e.message);
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+    };
+
     // Close modals on Escape
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             closeModal('modal-create-contact');
             closeModal('modal-contact-detail');
+            closeModal('modal-send-template');
         }
     });
 
     // Close modals on backdrop click
-    ['modal-create-contact', 'modal-contact-detail'].forEach(id => {
+    ['modal-create-contact', 'modal-contact-detail', 'modal-send-template'].forEach(id => {
         document.getElementById(id)?.addEventListener('click', e => {
             if (e.target.id === id) closeModal(id);
         });

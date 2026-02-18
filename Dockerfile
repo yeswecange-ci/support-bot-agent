@@ -52,5 +52,6 @@ CMD php artisan migrate --force \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache \
-    && php artisan queue:work --daemon --tries=3 --timeout=90 & \
+    && php artisan queue:work --tries=3 --timeout=90 & \
+    while true; do sleep 60 && php artisan schedule:run --no-interaction 2>&1; done & \
     php artisan serve --host=0.0.0.0 --port=8080

@@ -51,20 +51,26 @@ class CampaignService
 
     /**
      * Planifier l'envoi de la campagne
+     * Le statut passe à 'scheduled' ; la commande console campaigns:send-scheduled
+     * se chargera de déclencher l'envoi à la bonne heure.
      */
     public function schedule(Campaign $campaign, string $scheduledAt): void
     {
         $campaign->update([
-            'status' => 'active',
-            'scheduled_at' => $scheduledAt,
+            'status'       => 'scheduled',
+            'scheduled_at' => \Illuminate\Support\Carbon::parse($scheduledAt),
         ]);
+    }
 
-        $delay = now()->diffInSeconds($scheduledAt, false);
-        if ($delay > 0) {
-            SendCampaignMessages::dispatch($campaign, Auth::id())->delay(now()->addSeconds($delay));
-        } else {
-            SendCampaignMessages::dispatch($campaign, Auth::id());
-        }
+    /**
+     * Annuler une planification (repasse en brouillon)
+     */
+    public function cancelSchedule(Campaign $campaign): void
+    {
+        $campaign->update([
+            'status'       => 'draft',
+            'scheduled_at' => null,
+        ]);
     }
 
     /**
