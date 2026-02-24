@@ -64,7 +64,7 @@ class ClientController extends Controller
             'total_conversations' => Client::sum('conversation_count'),
         ];
 
-        return view('dashboard.clients.index', compact('clients', 'stats'));
+        return view('bot-tracking.clients.index', compact('clients', 'stats'));
     }
 
     /**
@@ -117,7 +117,7 @@ class ClientController extends Controller
             ->pluck('count', 'event_type')
             ->toArray();
 
-        return view('dashboard.clients.show', compact('client', 'conversations', 'interactionStats', 'allEvents', 'eventBreakdown'));
+        return view('bot-tracking.clients.show', compact('client', 'conversations', 'interactionStats', 'allEvents', 'eventBreakdown'));
     }
 
     /**
@@ -126,7 +126,7 @@ class ClientController extends Controller
     public function edit($id)
     {
         $client = Client::findOrFail($id);
-        return view('dashboard.clients.edit', compact('client'));
+        return view('bot-tracking.clients.edit', compact('client'));
     }
 
     /**

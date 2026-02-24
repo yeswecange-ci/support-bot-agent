@@ -76,7 +76,7 @@ class ConversationController extends Controller
             ->limit(10)
             ->get();
 
-        return view('dashboard.index', compact('stats', 'dailyStats', 'menuStats', 'recentConversations', 'dateFrom', 'dateTo'));
+        return view('bot-tracking.conversations.index', compact('stats', 'dailyStats', 'menuStats', 'recentConversations', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -89,7 +89,7 @@ class ConversationController extends Controller
             ->orderBy('last_activity_at', 'desc')
             ->get();
 
-        return view('dashboard.active', compact('activeConversations'));
+        return view('bot-tracking.conversations.active', compact('activeConversations'));
     }
 
     /**
@@ -181,7 +181,7 @@ class ConversationController extends Controller
             'transferred' => (clone $baseStatsQuery)->where('status', 'transferred')->count(),
         ];
 
-        return view('dashboard.conversations', compact('conversations', 'totalStats', 'dateFrom', 'dateTo'));
+        return view('bot-tracking.conversations.list', compact('conversations', 'totalStats', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -193,7 +193,7 @@ class ConversationController extends Controller
             $query->orderBy('created_at', 'asc');
         }])->findOrFail($id);
 
-        return view('dashboard.show', compact('conversation'));
+        return view('bot-tracking.conversations.show', compact('conversation'));
     }
 
     /**
@@ -297,7 +297,7 @@ class ConversationController extends Controller
             ->orderBy('count', 'desc')
             ->get();
 
-        return view('dashboard.statistics', compact('stats', 'dailyStats', 'menuStats', 'statusStats', 'popularPaths', 'peakHours', 'eventStats', 'widgetStats', 'dateFrom', 'dateTo'));
+        return view('bot-tracking.analytics.index', compact('stats', 'dailyStats', 'menuStats', 'statusStats', 'popularPaths', 'peakHours', 'eventStats', 'widgetStats', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -324,6 +324,6 @@ class ConversationController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('dashboard.search', compact('freeInputs'));
+        return view('bot-tracking.analytics.search', compact('freeInputs'));
     }
 }
