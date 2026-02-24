@@ -1,274 +1,162 @@
 @extends('layouts.app')
 
-@section('title', 'Détail Conversation - Mercedes-Benz Bot')
-@section('page-title', 'Détail de la conversation')
-
 @section('content')
-<!-- Back Button -->
-<div class="mb-6">
-    <a href="{{ route('bot-tracking.conversations') }}" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors duration-200">
-        <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-        </svg>
-        Retour aux conversations
-    </a>
-</div>
+<div class="flex-1 overflow-y-auto bg-gray-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
 
-    <!-- Conversation Header -->
-    <div class="bg-white shadow rounded-lg mb-6">
-        <div class="px-6 py-5 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-gray-900">
-                    Conversation #{{ $conversation->id }}
-                </h2>
-                @if($conversation->status === 'active')
-                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Active
-                    </span>
-                @elseif($conversation->status === 'completed')
-                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        Terminée
-                    </span>
-                @elseif($conversation->status === 'transferred')
-                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                        Transférée
-                    </span>
-                @elseif($conversation->status === 'timeout')
-                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Timeout
-                    </span>
-                @else
-                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                        {{ ucfirst($conversation->status) }}
-                    </span>
+        {{-- Back + Header --}}
+        <div class="flex items-center gap-3 mb-6">
+            <a href="{{ route('bot-tracking.conversations') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Conversations
+            </a>
+            <span class="text-gray-300">/</span>
+            <span class="text-sm font-medium text-gray-900">{{ $conversation->display_name ?? $conversation->phone_number }}</span>
+        </div>
+
+        {{-- Conversation Header Card --}}
+        <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                        <span class="text-xl font-bold text-indigo-700">{{ strtoupper(substr($conversation->display_name ?? '?', 0, 1)) }}</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">{{ $conversation->display_name ?? 'Inconnu' }}</h1>
+                        <p class="text-sm text-gray-500">{{ $conversation->phone_number }}</p>
+                        @if($conversation->email)
+                        <p class="text-sm text-gray-400">{{ $conversation->email }}</p>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    @php
+                        $sm = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'transferred' => 'bg-purple-100 text-purple-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
+                        $sc = $sm[$conversation->status] ?? 'bg-gray-100 text-gray-600';
+                    @endphp
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $sc }}">{{ ucfirst($conversation->status) }}</span>
+                    @if($conversation->is_client === true || $conversation->is_client == 1)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700">Client Mercedes</span>
+                    @elseif($conversation->is_client === false || $conversation->is_client == 0)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">Non-client</span>
+                    @endif
+                    @if($conversation->carte_vip)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700">VIP</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Info Grid --}}
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-gray-100">
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Session ID</p>
+                    <p class="text-sm font-mono text-gray-700 mt-0.5 truncate">{{ $conversation->session_id ?? '&mdash;' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Menu actuel</p>
+                    <p class="text-sm text-gray-700 mt-0.5">{{ $conversation->current_menu ?? '&mdash;' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">VIN</p>
+                    <p class="text-sm font-mono text-gray-700 mt-0.5">{{ $conversation->vin ?? '&mdash;' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Carte VIP</p>
+                    <p class="text-sm text-gray-700 mt-0.5">{{ $conversation->carte_vip ?? '&mdash;' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Debut</p>
+                    <p class="text-sm text-gray-700 mt-0.5">@if($conversation->started_at){{ \Carbon\Carbon::parse($conversation->started_at)->format('d/m/Y H:i') }}@else&mdash;@endif</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Fin</p>
+                    <p class="text-sm text-gray-700 mt-0.5">@if($conversation->ended_at){{ \Carbon\Carbon::parse($conversation->ended_at)->format('d/m/Y H:i') }}@else&mdash;@endif</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Duree</p>
+                    <p class="text-sm text-gray-700 mt-0.5">@if($conversation->duration_seconds){{ round($conversation->duration_seconds / 60) }}min@else&mdash;@endif</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">ID Chatwoot</p>
+                    <p class="text-sm font-mono text-gray-700 mt-0.5">{{ $conversation->chatwoot_conversation_id ?? '&mdash;' }}</p>
+                </div>
+                @if($conversation->transferred_at)
+                <div class="col-span-2">
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Transfere le</p>
+                    <p class="text-sm text-gray-700 mt-0.5">{{ \Carbon\Carbon::parse($conversation->transferred_at)->format('d/m/Y H:i') }}</p>
+                </div>
                 @endif
             </div>
         </div>
 
-        <!-- Conversation Info Grid -->
-        <div class="px-6 py-5">
-            <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Nom du client</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->display_name ?? 'N/A' }}</dd>
-                </div>
+        {{-- Menu Path --}}
+        @if(!empty($conversation->menu_path ?? []))
+        <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">Parcours menu</h3>
+            <div class="flex flex-wrap items-center gap-2">
+                @foreach(($conversation->menu_path ?? []) as $step)
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">{{ $step }}</span>
+                @if(!$loop->last)<span class="text-gray-300 text-sm">&rarr;</span>@endif
+                @endforeach
+            </div>
+        </div>
+        @endif
 
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Téléphone</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->phone_number }}</dd>
-                </div>
-
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Email</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->email ?? 'N/A' }}</dd>
-                </div>
-
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Type de client</dt>
-                    <dd class="mt-1 text-sm">
-                        @if($conversation->is_client)
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                Client Mercedes
-                            </span>
-                        @else
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                Non-client
-                            </span>
+        {{-- Events Timeline --}}
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 class="text-sm font-semibold text-gray-700 mb-6">Historique des evenements ({{ $conversation->events->count() }})</h3>
+            @if($conversation->events->isEmpty())
+                <p class="text-sm text-gray-400 text-center py-8">Aucun evenement enregistre.</p>
+            @else
+            <div class="relative pl-6 space-y-6">
+                <div class="absolute left-2 top-2 bottom-2 w-px bg-gray-200"></div>
+                @foreach($conversation->events as $event)
+                @php
+                    $typeColors = [
+                        'menu_choice'     => 'bg-indigo-500',  'free_input'       => 'bg-purple-500',
+                        'message_received' => 'bg-green-500',  'message_sent'      => 'bg-blue-500',
+                        'agent_transfer'  => 'bg-amber-500',  'error'             => 'bg-red-500',
+                        'invalid_input'   => 'bg-red-400',
+                    ];
+                    $dot = $typeColors[$event->event_type] ?? 'bg-gray-400';
+                    $ts  = $event->event_at ?? $event->created_at;
+                @endphp
+                <div class="relative">
+                    <div class="absolute -left-6 mt-1 w-3 h-3 rounded-full {{ $dot }} ring-2 ring-white"></div>
+                    <div class="pl-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ str_replace([ '_'], 
+\, $event->event_type) }}</span>
+                            <span class="text-xs text-gray-400">{{ $ts ? \Carbon\Carbon::parse($ts)->format('d/m/Y H:i:s') : '' }}</span>
+                        </div>
+                        @if($event->user_input)
+                        <div class="bg-gray-50 rounded-lg px-3 py-2 mb-1 border-l-2 border-indigo-400">
+                            <p class="text-xs text-gray-500 mb-0.5">Saisie utilisateur</p>
+                            <p class="text-sm text-gray-800">{{ $event->user_input }}</p>
+                        </div>
                         @endif
-                    </dd>
-                </div>
-
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Session ID</dt>
-                    <dd class="mt-1 text-sm text-gray-900 font-mono text-xs">{{ $conversation->session_id }}</dd>
-                </div>
-
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Menu actuel</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->current_menu ?? 'N/A' }}</dd>
-                </div>
-
-                @if($conversation->vin)
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">VIN</dt>
-                    <dd class="mt-1 text-sm text-gray-900 font-mono">{{ $conversation->vin }}</dd>
-                </div>
-                @endif
-
-                @if($conversation->carte_vip)
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Carte VIP</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->carte_vip }}</dd>
-                </div>
-                @endif
-
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Début de la conversation</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->started_at ? $conversation->started_at->format('d/m/Y H:i:s') : 'N/A' }}</dd>
-                </div>
-
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Dernière activité</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->last_activity_at ? $conversation->last_activity_at->format('d/m/Y H:i:s') : 'N/A' }}</dd>
-                </div>
-
-                @if($conversation->ended_at)
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Fin de la conversation</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->ended_at->format('d/m/Y H:i:s') }}</dd>
-                </div>
-                @endif
-
-                @if($conversation->duration_seconds)
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Durée totale</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ gmdate('H:i:s', $conversation->duration_seconds) }}</dd>
-                </div>
-                @endif
-
-                @if($conversation->transferred_at)
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Transférée le</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->transferred_at->format('d/m/Y H:i:s') }}</dd>
-                </div>
-                @endif
-
-                @if($conversation->chatwoot_conversation_id)
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">ID Chatwoot</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $conversation->chatwoot_conversation_id }}</dd>
-                </div>
-                @endif
-            </dl>
-
-            @if($conversation->menu_path)
-            <div class="mt-6">
-                <dt class="text-sm font-medium text-gray-500 mb-2">Parcours du client</dt>
-                <dd class="flex flex-wrap gap-2">
-                    @foreach(json_decode($conversation->menu_path, true) ?? [] as $menu)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ $menu }}
-                        </span>
-                        @if(!$loop->last)
-                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
+                        @if($event->bot_message)
+                        <div class="bg-blue-50 rounded-lg px-3 py-2 mb-1 border-l-2 border-blue-400">
+                            <p class="text-xs text-blue-500 mb-0.5">Message bot</p>
+                            <p class="text-sm text-gray-800">{{ $event->bot_message }}</p>
+                        </div>
                         @endif
-                    @endforeach
-                </dd>
+                        @if($event->widget_name)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">Widget: {{ $event->widget_name }}</span>
+                        @endif
+                        @if($event->metadata)
+                        <details class="mt-1">
+                            <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600">Metadata</summary>
+                            <pre class="text-xs text-gray-600 bg-gray-50 rounded p-2 mt-1 overflow-x-auto">{{ is_array($event->metadata) ? json_encode($event->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $event->metadata }}</pre>
+                        </details>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
             </div>
             @endif
         </div>
-    </div>
 
-    <!-- Timeline of Events -->
-    <div class="bg-white shadow rounded-lg">
-        <div class="px-6 py-5 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">
-                Timeline des événements ({{ $conversation->events->count() }})
-            </h3>
-        </div>
-
-        <div class="px-6 py-5">
-            <div class="flow-root">
-                <ul class="-mb-8">
-                    @forelse($conversation->events as $event)
-                    <li>
-                        <div class="relative pb-8">
-                            @if(!$loop->last)
-                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                            @endif
-
-                            <div class="relative flex space-x-3">
-                                <div>
-                                    @if($event->event_type === 'menu_choice')
-                                        <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
-                                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                            </svg>
-                                        </span>
-                                    @elseif($event->event_type === 'free_input')
-                                        <span class="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center ring-8 ring-white">
-                                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                            </svg>
-                                        </span>
-                                    @elseif($event->event_type === 'agent_transfer')
-                                        <span class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center ring-8 ring-white">
-                                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                            </svg>
-                                        </span>
-                                    @elseif($event->event_type === 'message_sent')
-                                        <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                                            </svg>
-                                        </span>
-                                    @elseif($event->event_type === 'error' || $event->event_type === 'invalid_input')
-                                        <span class="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center ring-8 ring-white">
-                                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                        </span>
-                                    @else
-                                        <span class="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center ring-8 ring-white">
-                                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                        </span>
-                                    @endif
-                                </div>
-
-                                <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                    <div class="flex-1">
-                                        <p class="text-sm font-medium text-gray-900">
-                                            {{ ucfirst(str_replace('_', ' ', $event->event_type)) }}
-                                        </p>
-
-                                        @if($event->user_input)
-                                        <p class="mt-1 text-sm text-gray-700 bg-gray-50 p-2 rounded">
-                                            <span class="font-medium">Saisie utilisateur:</span> {{ $event->user_input }}
-                                        </p>
-                                        @endif
-
-                                        @if($event->bot_message)
-                                        <p class="mt-1 text-sm text-gray-600 bg-blue-50 p-2 rounded">
-                                            <span class="font-medium">Message bot:</span> {{ $event->bot_message }}
-                                        </p>
-                                        @endif
-
-                                        @if($event->widget_name)
-                                        <p class="mt-1 text-xs text-gray-500">
-                                            Widget: <span class="font-mono">{{ $event->widget_name }}</span>
-                                        </p>
-                                        @endif
-
-                                        @if($event->metadata)
-                                        <details class="mt-2">
-                                            <summary class="text-xs text-gray-500 cursor-pointer hover:text-gray-700">Métadonnées</summary>
-                                            <pre class="mt-1 text-xs bg-gray-100 p-2 rounded overflow-x-auto">{{ json_encode($event->metadata, JSON_PRETTY_PRINT) }}</pre>
-                                        </details>
-                                        @endif
-                                    </div>
-
-                                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                                        <time datetime="{{ $event->created_at }}">
-                                            {{ $event->created_at->format('H:i:s') }}
-                                        </time>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    @empty
-                    <li class="text-center text-gray-500 py-8">
-                        Aucun événement enregistré pour cette conversation
-                    </li>
-                    @endforelse
-                </ul>
-            </div>
-        </div>
     </div>
 </div>
 @endsection
