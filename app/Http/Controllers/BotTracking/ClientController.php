@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Conversation;
 use App\Models\ConversationEvent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ClientController extends Controller
 {
@@ -148,15 +149,11 @@ class ClientController extends Controller
         $oldData = $client->toArray();
         $client->update($validated);
 
-        \App\Models\ActivityLog::log(
-            'client_updated',
-            "Client {$client->display_name} ({$client->phone_number}) a été mis à jour",
-            $client,
-            [
-                'old' => $oldData,
-                'new' => $client->fresh()->toArray(),
-            ]
-        );
+        Log::info('client_updated', [
+            'message' => "Client {$client->display_name} ({$client->phone_number}) a été mis à jour",
+            'old' => $oldData,
+            'new' => $client->fresh()->toArray(),
+        ]);
 
         return redirect()->route('dashboard.clients.show', $client->id)
             ->with('success', 'Les informations du client ont été mises à jour avec succès.');
