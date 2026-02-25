@@ -44,37 +44,35 @@ class ProfileController extends Controller
 
     /**
      * AJAX — Toggle availability (online/offline/busy)
+     * Sauvegarde en DB locale pour persistance fiable, sync Chatwoot en best-effort.
      */
     public function toggleAvailability(Request $request): JsonResponse
     {
         $request->validate(['availability' => 'required|in:online,offline,busy']);
 
+        $status = $request->availability;
+
+        // Persistance locale — source de vérité
+        $request->user()->update(['availability' => $status]);
+
+        // Sync Chatwoot en best-effort (ne bloque pas si échoue)
         try {
-            $chatwoot = app(ChatwootClient::class);
-            $result = $chatwoot->updateAvailability($request->availability);
-            return response()->json(['success' => true, 'availability' => $request->availability]);
+            app(ChatwootClient::class)->updateAvailability($status);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+            // Ignoré volontairement — la valeur locale est déjà sauvegardée
         }
+
+        return response()->json(['success' => true, 'availability' => $status]);
     }
 
     /**
-     * AJAX — Get current availability
+     * AJAX — Get current availability (lit depuis la DB locale)
      */
     public function getAvailability(): JsonResponse
     {
-        try {
-            $chatwoot = app(ChatwootClient::class);
-            // Get agents list and find current user
-            $agents = $chatwoot->listAgents();
-            $userEmail = auth()->user()->email ?? '';
-            $current = collect($agents)->firstWhere('email', $userEmail);
-            return response()->json([
-                'availability' => $current['availability_status'] ?? 'offline',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['availability' => 'offline']);
-        }
+        $availability = auth()->user()->availability ?? 'online';
+
+        return response()->json(['availability' => $availability]);
     }
 
     /**
