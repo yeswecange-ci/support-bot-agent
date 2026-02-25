@@ -22,6 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminOnly::class,
             'role'  => \App\Http\Middleware\CheckRole::class,
         ]);
+        // Exclure les webhooks Twilio de la vérification CSRF
+        // (Twilio envoie des POST sans token CSRF)
+        $middleware->validateCsrfTokens(except: [
+            'bot-tracking/twilio/*',
+            'bot-tracking/webhooks/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
