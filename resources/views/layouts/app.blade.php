@@ -261,6 +261,35 @@
       </div>
   </div>
 
+                    {{-- Menu déroulant Gamification --}}
+                    <div>
+                        <button onclick="toggleGamificationMenu()" id="gamification-menu-btn"
+                                class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                                       {{ request()->routeIs('gamification.*') ? 'bg-violet-50 text-violet-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Gamification</span>
+                            </div>
+                            <svg class="w-4 h-4 menu-chevron {{ request()->routeIs('gamification.*') ? 'rotated' : '' }}"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        <div id="gamification-submenu" class="submenu {{ request()->routeIs('gamification.*') ? 'open' : '' }} pl-4 mt-1 space-y-1">
+                            <a href="{{ route('gamification.index') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                                      {{ request()->routeIs('gamification.*') ? 'bg-violet-50 text-violet-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                Jeux
+                            </a>
+                        </div>
+                    </div>
+
                     {{-- Separator --}}
                     <div class="my-3 border-t border-gray-100"></div>
 
@@ -556,6 +585,18 @@
             window.toggleBotTrackingMenu = function() {
                 const submenu = document.getElementById('bot-tracking-submenu');
                 const chevron = document.querySelector('#bot-tracking-menu-btn .menu-chevron');
+                if (submenu.classList.contains('open')) {
+                    submenu.classList.remove('open');
+                    chevron.classList.remove('rotated');
+                } else {
+                    submenu.classList.add('open');
+                    chevron.classList.add('rotated');
+                }
+            };
+
+            window.toggleGamificationMenu = function() {
+                const submenu = document.getElementById('gamification-submenu');
+                const chevron = document.querySelector('#gamification-menu-btn .menu-chevron');
                 if (submenu.classList.contains('open')) {
                     submenu.classList.remove('open');
                     chevron.classList.remove('rotated');

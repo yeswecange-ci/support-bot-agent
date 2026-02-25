@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
       then: function () {
           Route::middleware('web')
               ->group(base_path('routes/bot-tracking.php'));
+          Route::middleware('web')
+              ->group(base_path('routes/gamification.php'));
       },
   )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -27,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'bot-tracking/twilio/*',
             'bot-tracking/webhooks/*',
+            'gamification/webhook/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
