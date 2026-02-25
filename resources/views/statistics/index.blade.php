@@ -338,15 +338,14 @@
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.plugins.legend.display = false;
 
-    // ═══ Plugin : message "Aucune donnée" quand le chart est vide ═══
+    // ═══ Plugin : message "Aucune donnée" quand le chart est vraiment vide (pas de labels) ═══
     const noDataPlugin = {
         id: 'noData',
         afterDraw(chart) {
-            const hasData = chart.data.datasets.some(ds => {
-                if (!Array.isArray(ds.data) || ds.data.length === 0) return false;
-                return ds.data.some(v => v !== null && v !== undefined && Number(v) > 0);
-            });
-            if (hasData) return;
+            // On masque uniquement quand il n'y a aucun label (données non chargées du tout).
+            // Des valeurs à 0 restent un résultat valide — le graphique doit s'afficher.
+            const hasLabels = Array.isArray(chart.data.labels) && chart.data.labels.length > 0;
+            if (hasLabels) return;
 
             const { ctx, chartArea: a } = chart;
             if (!a) return;

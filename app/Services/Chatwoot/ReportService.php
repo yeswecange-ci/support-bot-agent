@@ -84,6 +84,17 @@ class ReportService
         $outTrend = $this->buildTrendFromDailyRows($period, 'outgoing_messages_count');
 
         if ($dbRow) {
+            // Si les tendances messages sont toutes à 0 (API Reports indisponible lors du sync),
+            // on tente un appel direct pour récupérer les vraies données.
+            $allInZero  = empty(array_filter(array_column($inTrend,  'value')));
+            $allOutZero = empty(array_filter(array_column($outTrend, 'value')));
+
+            if ($allInZero || $allOutZero) {
+                [$since, $until] = $this->resolvePeriod($period);
+                $inTrend  = $this->safeReport('incoming_messages_count', $since, $until) ?: $inTrend;
+                $outTrend = $this->safeReport('outgoing_messages_count', $since, $until) ?: $outTrend;
+            }
+
             return [
                 'summary'           => $this->summaryFromRow($dbRow),
                 'counts'            => [

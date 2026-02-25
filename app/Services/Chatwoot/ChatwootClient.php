@@ -410,8 +410,15 @@ class ChatwootClient
      */
     public function getAccountReport(string $metric, string $since, string $until): array
     {
+        // Endpoint Chatwoot v1 pour les séries temporelles :
+        // GET /api/v1/accounts/{id}/reports?type=account&metric=...&since=...&until=...
         return $this->client()
-            ->get($this->url('reports/account'), compact('metric', 'since', 'until'))
+            ->get($this->url('reports'), [
+                'type'   => 'account',
+                'metric' => $metric,
+                'since'  => $since,
+                'until'  => $until,
+            ])
             ->throw()
             ->json();
     }
