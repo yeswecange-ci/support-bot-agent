@@ -130,6 +130,10 @@
                         class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
                     Logs
                 </button>
+                <button onclick="switchTab('twilio-flow')" id="tab-twilio-flow"
+                        class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
+                    Twilio Flow API
+                </button>
             </div>
 
             {{-- ── Tab Chatwoot ────────────────────────────────── --}}
@@ -325,6 +329,297 @@
 <span class="text-gray-500 italic">Cliquez sur "Rafraîchir" pour charger les logs.</span></pre>
             </div>
         </div>
+
+        {{-- ── Tab Twilio Flow API ──────────────────────────── --}}
+        @php $baseUrl = rtrim(config('app.url'), '/'); @endphp
+        <div id="panel-twilio-flow" class="tab-panel hidden p-6 space-y-6">
+
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-900">Documentation des endpoints Twilio Flow</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Intégrez ces endpoints dans vos widgets HTTP de Twilio Studio.</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 border border-green-200 text-green-700 text-xs font-medium rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    Pas d'authentification requise
+                </span>
+            </div>
+
+            {{-- URL de base --}}
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-medium text-indigo-600 uppercase tracking-wide mb-1">URL de base</p>
+                    <code class="text-sm font-mono text-indigo-900 select-all" id="base-url-text">{{ $baseUrl }}</code>
+                </div>
+                <button onclick="copyText('{{ $baseUrl }}', this)" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-white border border-indigo-200 rounded-lg hover:bg-indigo-100 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    Copier
+                </button>
+            </div>
+
+            {{-- ───────── Endpoint 1 ───────── --}}
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white uppercase tracking-wide">POST</span>
+                    <code class="text-sm font-mono text-gray-800 flex-1 select-all" id="url-incoming">{{ $baseUrl }}/bot-tracking/twilio/incoming</code>
+                    <button onclick="copyText('{{ $baseUrl }}/bot-tracking/twilio/incoming', this)" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Copier
+                    </button>
+                </div>
+                <div class="px-5 py-4 space-y-4">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-700 mb-1">Description</p>
+                        <p class="text-sm text-gray-600">Point d'entrée principal. À appeler en premier à chaque message WhatsApp reçu. Crée ou retrouve la conversation active et retourne l'état du client.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Paramètres envoyés <span class="text-gray-400 font-normal">(form-urlencoded)</span></p>
+                            <div class="space-y-1.5">
+                                @foreach([
+                                    ['From','required','Numéro WhatsApp expéditeur (ex: whatsapp:+212XXXXXX)'],
+                                    ['Body','optional','Corps du message reçu'],
+                                    ['MessageSid','required','Identifiant unique du message Twilio'],
+                                    ['ProfileName','optional','Nom de profil WhatsApp de l\'utilisateur'],
+                                    ['NumMedia','optional','Nombre de médias joints (0 par défaut)'],
+                                ] as [$param, $req, $desc])
+                                <div class="flex items-start gap-2 text-xs">
+                                    <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
+                                    <span class="px-1 py-0.5 rounded text-[10px] font-medium {{ $req === 'required' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500' }} whitespace-nowrap">{{ $req === 'required' ? 'requis' : 'optionnel' }}</span>
+                                    <span class="text-gray-500">{{ $desc }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Réponse JSON</p>
+                            <div class="space-y-1.5">
+                                @foreach([
+                                    ['conversation_id','ID interne de la conversation'],
+                                    ['current_menu','Menu actuel du bot'],
+                                    ['is_client','true/false — Client Mercedes ?'],
+                                    ['client_full_name','Nom complet du client (ou null)'],
+                                    ['agent_mode','"true" si transféré à un agent'],
+                                    ['pending_agent','"true" si en attente d\'agent'],
+                                    ['client_exists','"true" si le client existe en BDD'],
+                                    ['client_has_name','"true" si un nom est enregistré'],
+                                    ['client_status_known','"true" si is_client est défini'],
+                                ] as [$field, $desc])
+                                <div class="flex items-start gap-2 text-xs">
+                                    <code class="font-mono text-green-700 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $field }}</code>
+                                    <span class="text-gray-500">{{ $desc }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                        <p class="text-xs font-semibold text-amber-700 mb-1">Configuration dans Twilio Studio (Widget HTTP)</p>
+                        <div class="space-y-1 text-xs text-amber-800 font-mono">
+                            <p><span class="text-amber-500">Request Method:</span> POST</p>
+                            <p><span class="text-amber-500">Request URL:</span> {{ $baseUrl }}/bot-tracking/twilio/incoming</p>
+                            <p><span class="text-amber-500">Parameters:</span> From={{'{{'}}trigger.message.From{{'}}'}}, Body={{'{{'}}trigger.message.Body{{'}}'}}, MessageSid={{'{{'}}trigger.message.MessageSid{{'}}'}}, ProfileName={{'{{'}}trigger.message.ProfileName{{'}}'}}</p>
+                            <p class="text-amber-600 mt-1">→ Variables dispo : {{'{{'}}widgets.NOM_WIDGET.parsed.conversation_id{{'}}'}}, {{'{{'}}widgets.NOM_WIDGET.parsed.is_client{{'}}'}}, etc.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ───────── Endpoint 2 ───────── --}}
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white uppercase tracking-wide">POST</span>
+                    <code class="text-sm font-mono text-gray-800 flex-1 select-all">{{ $baseUrl }}/bot-tracking/twilio/menu-choice</code>
+                    <button onclick="copyText('{{ $baseUrl }}/bot-tracking/twilio/menu-choice', this)" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Copier
+                    </button>
+                </div>
+                <div class="px-5 py-4 space-y-4">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-700 mb-1">Description</p>
+                        <p class="text-sm text-gray-600">Enregistre le choix de menu fait par l'utilisateur. Met à jour le menu courant et historise le parcours. À appeler après chaque branche de menu.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Paramètres envoyés</p>
+                            <div class="space-y-1.5">
+                                @foreach([
+                                    ['conversation_id','required','ID retourné par l\'endpoint incoming'],
+                                    ['menu_choice','required','Identifiant du menu (ex: menu_sav, vehicules_neufs...)'],
+                                    ['user_input','optional','Texte brut saisi par l\'utilisateur'],
+                                ] as [$param, $req, $desc])
+                                <div class="flex items-start gap-2 text-xs">
+                                    <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
+                                    <span class="px-1 py-0.5 rounded text-[10px] font-medium {{ $req === 'required' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500' }} whitespace-nowrap">{{ $req === 'required' ? 'requis' : 'optionnel' }}</span>
+                                    <span class="text-gray-500">{{ $desc }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Réponse JSON</p>
+                            <div class="space-y-1.5">
+                                @foreach([
+                                    ['success','true si enregistré avec succès'],
+                                    ['current_menu','Menu courant mis à jour'],
+                                    ['menu_path','Tableau du parcours complet'],
+                                ] as [$field, $desc])
+                                <div class="flex items-start gap-2 text-xs">
+                                    <code class="font-mono text-green-700 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $field }}</code>
+                                    <span class="text-gray-500">{{ $desc }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                        <p class="text-xs font-semibold text-amber-700 mb-1">Exemple de configuration Twilio Studio</p>
+                        <div class="space-y-1 text-xs text-amber-800 font-mono">
+                            <p><span class="text-amber-500">Parameters:</span> conversation_id={{'{{'}}widgets.init_tracking.parsed.conversation_id{{'}}'}}, menu_choice=menu_sav, user_input={{'{{'}}trigger.message.Body{{'}}'}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ───────── Endpoint 3 ───────── --}}
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white uppercase tracking-wide">POST</span>
+                    <code class="text-sm font-mono text-gray-800 flex-1 select-all">{{ $baseUrl }}/bot-tracking/twilio/free-input</code>
+                    <button onclick="copyText('{{ $baseUrl }}/bot-tracking/twilio/free-input', this)" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Copier
+                    </button>
+                </div>
+                <div class="px-5 py-4 space-y-4">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-700 mb-1">Description</p>
+                        <p class="text-sm text-gray-600">Enregistre une saisie libre de l'utilisateur et met à jour automatiquement la fiche client selon le <code class="text-xs bg-gray-100 px-1 rounded">widget_name</code> transmis.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Paramètres envoyés</p>
+                            <div class="space-y-1.5">
+                                @foreach([
+                                    ['conversation_id','required','ID de la conversation'],
+                                    ['user_input','required','Texte saisi par l\'utilisateur'],
+                                    ['widget_name','optional','Contexte de la saisie (voir tableau ci-dessous)'],
+                                ] as [$param, $req, $desc])
+                                <div class="flex items-start gap-2 text-xs">
+                                    <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
+                                    <span class="px-1 py-0.5 rounded text-[10px] font-medium {{ $req === 'required' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500' }} whitespace-nowrap">{{ $req === 'required' ? 'requis' : 'optionnel' }}</span>
+                                    <span class="text-gray-500">{{ $desc }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Valeurs de <code class="text-xs bg-gray-100 px-1 rounded">widget_name</code> reconnues</p>
+                            <div class="space-y-1.5">
+                                @foreach([
+                                    ['collect_name','Enregistre le nom complet du client'],
+                                    ['collect_email','Enregistre l\'adresse email'],
+                                    ['collect_vin','Enregistre le numéro VIN du véhicule'],
+                                    ['collect_carte_vip','Enregistre le numéro carte VIP'],
+                                    ['check_client','Définit is_client (1/oui → true)'],
+                                ] as [$val, $desc])
+                                <div class="flex items-start gap-2 text-xs">
+                                    <code class="font-mono text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $val }}</code>
+                                    <span class="text-gray-500">{{ $desc }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                        <p class="text-xs font-semibold text-amber-700 mb-1">Exemple — Collecte du nom</p>
+                        <div class="text-xs text-amber-800 font-mono">
+                            <p><span class="text-amber-500">Parameters:</span> conversation_id={{'{{'}}widgets.init_tracking.parsed.conversation_id{{'}}'}}, user_input={{'{{'}}widgets.ask_name.inbound.Body{{'}}'}}, widget_name=collect_name</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ───────── Endpoint 4 ───────── --}}
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white uppercase tracking-wide">POST</span>
+                    <code class="text-sm font-mono text-gray-800 flex-1 select-all">{{ $baseUrl }}/bot-tracking/twilio/complete</code>
+                    <button onclick="copyText('{{ $baseUrl }}/bot-tracking/twilio/complete', this)" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Copier
+                    </button>
+                </div>
+                <div class="px-5 py-4 space-y-4">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-700 mb-1">Description</p>
+                        <p class="text-sm text-gray-600">Clôture la conversation, calcule la durée totale et passe le statut à <code class="text-xs bg-gray-100 px-1 rounded">completed</code>. À appeler en fin de flow (widget "End Flow").</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Paramètres envoyés</p>
+                            <div class="flex items-start gap-2 text-xs">
+                                <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">conversation_id</code>
+                                <span class="px-1 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-600">requis</span>
+                                <span class="text-gray-500">ID de la conversation à clôturer</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Réponse JSON</p>
+                            <div class="space-y-1.5">
+                                @foreach([
+                                    ['success','true si clôturé avec succès'],
+                                    ['completed','true'],
+                                    ['duration_seconds','Durée totale de la conversation en secondes'],
+                                ] as [$field, $desc])
+                                <div class="flex items-start gap-2 text-xs">
+                                    <code class="font-mono text-green-700 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $field }}</code>
+                                    <span class="text-gray-500">{{ $desc }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                        <p class="text-xs font-semibold text-amber-700 mb-1">Exemple de configuration Twilio Studio</p>
+                        <div class="text-xs text-amber-800 font-mono">
+                            <p><span class="text-amber-500">Parameters:</span> conversation_id={{'{{'}}widgets.init_tracking.parsed.conversation_id{{'}}'}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Schéma du flow recommandé --}}
+            <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <p class="text-sm font-semibold text-gray-900 mb-4">Schéma d'intégration recommandé dans Twilio Studio</p>
+                <div class="overflow-x-auto">
+                    <div class="flex items-start gap-2 min-w-max text-xs">
+                        @foreach([
+                            ['trigger','Trigger\n(Message reçu)','bg-gray-100 text-gray-700 border-gray-200'],
+                            ['→','',''],
+                            ['init','HTTP\ninit_tracking\n→ /twilio/incoming','bg-blue-50 text-blue-700 border-blue-200'],
+                            ['→','',''],
+                            ['split','Split\nagent_mode = "true" ?','bg-yellow-50 text-yellow-700 border-yellow-200'],
+                            ['→','',''],
+                            ['menu','HTTP\ntrack_menu\n→ /twilio/menu-choice','bg-indigo-50 text-indigo-700 border-indigo-200'],
+                            ['→','',''],
+                            ['input','HTTP\ntrack_input\n→ /twilio/free-input','bg-purple-50 text-purple-700 border-purple-200'],
+                            ['→','',''],
+                            ['complete','HTTP\ncomplete_conv\n→ /twilio/complete','bg-green-50 text-green-700 border-green-200'],
+                        ] as [$key, $label, $style])
+                            @if($key === '→')
+                                <div class="flex items-center self-center pt-0"><svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+                            @else
+                                <div class="border rounded-lg px-3 py-2 text-center font-mono whitespace-pre-line leading-snug {{ $style }}">{{ $label }}</div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-3">Note : le widget <strong class="text-gray-600">init_tracking</strong> est appelé en premier. Son <code class="bg-gray-100 px-1 rounded">conversation_id</code> est passé en paramètre à tous les widgets suivants.</p>
+            </div>
+
+        </div>{{-- /panel-twilio-flow --}}
 
     </div>
 </div>
@@ -548,5 +843,18 @@ function showToast(message, type = 'success') {
 }
 
 function escH(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+// ═══ Copy to clipboard ══════════════════════════════
+async function copyText(text, btn) {
+    try {
+        await navigator.clipboard.writeText(text);
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copié !';
+        btn.classList.add('text-green-600', 'border-green-300', 'bg-green-50');
+        setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('text-green-600', 'border-green-300', 'bg-green-50'); }, 2000);
+    } catch {
+        showToast('Impossible de copier dans le presse-papier', 'error');
+    }
+}
 </script>
 @endpush
