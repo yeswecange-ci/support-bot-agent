@@ -418,8 +418,8 @@
                         <div class="space-y-1 text-xs text-amber-800 font-mono">
                             <p><span class="text-amber-500">Request Method:</span> POST</p>
                             <p><span class="text-amber-500">Request URL:</span> {{ $baseUrl }}/bot-tracking/twilio/incoming</p>
-                            <p><span class="text-amber-500">Parameters:</span> From={{'{{'}}trigger.message.From{{'}}'}}, Body={{'{{'}}trigger.message.Body{{'}}'}}, MessageSid={{'{{'}}trigger.message.MessageSid{{'}}'}}, ProfileName={{'{{'}}trigger.message.ProfileName{{'}}'}}</p>
-                            <p class="text-amber-600 mt-1">→ Variables dispo : {{'{{'}}widgets.NOM_WIDGET.parsed.conversation_id{{'}}'}}, {{'{{'}}widgets.NOM_WIDGET.parsed.is_client{{'}}'}}, etc.</p>
+                            <p><span class="text-amber-500">Parameters:</span> From=@{{trigger.message.From}}, Body=@{{trigger.message.Body}}, MessageSid=@{{trigger.message.MessageSid}}, ProfileName=@{{trigger.message.ProfileName}}</p>
+                            <p class="text-amber-600 mt-1">→ Variables dispo : @{{widgets.NOM_WIDGET.parsed.conversation_id}}, @{{widgets.NOM_WIDGET.parsed.is_client}}, etc.</p>
                         </div>
                     </div>
                 </div>
@@ -476,7 +476,7 @@
                     <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
                         <p class="text-xs font-semibold text-amber-700 mb-1">Exemple de configuration Twilio Studio</p>
                         <div class="space-y-1 text-xs text-amber-800 font-mono">
-                            <p><span class="text-amber-500">Parameters:</span> conversation_id={{'{{'}}widgets.init_tracking.parsed.conversation_id{{'}}'}}, menu_choice=menu_sav, user_input={{'{{'}}trigger.message.Body{{'}}'}}</p>
+                            <p><span class="text-amber-500">Parameters:</span> conversation_id=@{{widgets.init_tracking.parsed.conversation_id}}, menu_choice=menu_sav, user_input=@{{trigger.message.Body}}</p>
                         </div>
                     </div>
                 </div>
@@ -535,7 +535,7 @@
                     <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
                         <p class="text-xs font-semibold text-amber-700 mb-1">Exemple — Collecte du nom</p>
                         <div class="text-xs text-amber-800 font-mono">
-                            <p><span class="text-amber-500">Parameters:</span> conversation_id={{'{{'}}widgets.init_tracking.parsed.conversation_id{{'}}'}}, user_input={{'{{'}}widgets.ask_name.inbound.Body{{'}}'}}, widget_name=collect_name</p>
+                            <p><span class="text-amber-500">Parameters:</span> conversation_id=@{{widgets.init_tracking.parsed.conversation_id}}, user_input=@{{widgets.ask_name.inbound.Body}}, widget_name=collect_name</p>
                         </div>
                     </div>
                 </div>
@@ -584,7 +584,7 @@
                     <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
                         <p class="text-xs font-semibold text-amber-700 mb-1">Exemple de configuration Twilio Studio</p>
                         <div class="text-xs text-amber-800 font-mono">
-                            <p><span class="text-amber-500">Parameters:</span> conversation_id={{'{{'}}widgets.init_tracking.parsed.conversation_id{{'}}'}}</p>
+                            <p><span class="text-amber-500">Parameters:</span> conversation_id=@{{widgets.init_tracking.parsed.conversation_id}}</p>
                         </div>
                     </div>
                 </div>
