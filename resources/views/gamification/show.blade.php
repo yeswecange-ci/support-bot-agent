@@ -67,7 +67,7 @@
                 </a>
                 <a href="{{ route('gamification.flow', $game->slug) }}"
                    class="px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition">
-                    Flow Twilio
+                    Flow Studio
                 </a>
                 <a href="{{ route('gamification.export', $game->slug) }}"
                    class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition shadow-sm">
