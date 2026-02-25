@@ -215,15 +215,21 @@
     </div>
 </template>
 
+@php
+    $jsQuestions = $game
+        ? $game->questions->sortBy('order')->values()->map(fn($q) => [
+            'text'           => $q->text,
+            'type'           => $q->type,
+            'options'        => $q->options ? implode("\n", $q->options) : '',
+            'correct_answer' => $q->correct_answer ?? '',
+        ])->toArray()
+        : [];
+@endphp
+
 @push('scripts')
 <script>
 // Questions existantes (pour le mode édition)
-const existingQuestions = @json($game ? $game->questions->sortBy('order')->values()->map(fn($q) => [
-    'text'           => $q->text,
-    'type'           => $q->type,
-    'options'        => $q->options ? implode("\n", $q->options) : '',
-    'correct_answer' => $q->correct_answer ?? '',
-]) : []);
+const existingQuestions = @json($jsQuestions);
 
 let questionIndex = 0;
 
