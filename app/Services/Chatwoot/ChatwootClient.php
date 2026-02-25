@@ -268,14 +268,15 @@ class ChatwootClient
         foreach ($attachments as $file) {
             $multipart[] = [
                 'name'     => 'attachments[]',
-                'contents' => fopen($file->getRealPath(), 'r'),
+                'contents' => fopen($file->getRealPath(), 'rb'),
                 'filename' => $file->getClientOriginalName(),
+                'headers'  => ['Content-Type' => $file->getMimeType() ?: 'application/octet-stream'],
             ];
         }
 
         $request = Http::baseUrl($this->baseUrl)
             ->withHeaders(['api_access_token' => $this->token])
-            ->timeout(30)
+            ->timeout(90)
             ->asMultipart();
 
         if (!app()->isProduction()) {

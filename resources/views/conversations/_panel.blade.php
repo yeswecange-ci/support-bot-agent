@@ -412,17 +412,20 @@
     let lastId = {{ collect($messages)->max('id') ?? 0 }};
     const displayedIds = new Set(@json(collect($messages)->pluck('id')->values()));
 
-    function showPanelToast(msg) {
+    function showPanelToast(msg, isError = false) {
         let t = document.getElementById('panel-toast');
         if (!t) {
             t = document.createElement('div');
             t.id = 'panel-toast';
-            t.className = 'fixed bottom-6 right-6 z-50 px-4 py-2 rounded-lg shadow-lg text-sm font-medium text-white bg-green-600 transition-all duration-300';
+            t.className = 'fixed bottom-6 right-6 z-50 px-4 py-2 rounded-lg shadow-lg text-sm font-medium text-white transition-all duration-300';
             document.body.appendChild(t);
         }
         t.textContent = msg;
+        t.className = t.className.replace(/bg-\w+-\d+/g, '');
+        t.classList.add(isError ? 'bg-red-600' : 'bg-green-600');
         t.classList.remove('hidden');
-        setTimeout(() => t.classList.add('hidden'), 2500);
+        clearTimeout(t._hideTimer);
+        t._hideTimer = setTimeout(() => t.classList.add('hidden'), isError ? 4000 : 2500);
     }
     let cannedResponses = [];
     let allLabels = [];
@@ -760,7 +763,6 @@
     async function doSend(isPrivate) {
         const c = input.value.trim();
         if (!c && selectedFiles.length === 0) return;
-        input.value = '';
         hideCanned();
         setSending(true);
 
@@ -780,14 +782,16 @@
             const r = await fetch(`/ajax/conversations/${CID}/messages`, { method: 'POST', headers, body });
             if (!r.ok) {
                 const err = await r.json().catch(() => null);
-                alert(err?.message || 'Erreur envoi');
+                showPanelToast(err?.message || 'Erreur lors de l\'envoi', true);
                 return;
             }
             const m = await r.json();
-            appendMsg(m);
-            lastId = Math.max(lastId, m.id);
+            // Effacer input et fichiers seulement après succès confirmé
+            input.value = '';
             selectedFiles = [];
             renderFilePreview();
+            appendMsg(m);
+            lastId = Math.max(lastId, m.id);
             scroll();
             // Mettre a jour la sidebar : remonter la conversation en haut avec le dernier message
             if (window._ensureConvInSidebar) {
@@ -797,8 +801,10 @@
                     contactThumbnail: '{{ $contact["thumbnail"] ?? "" }}',
                 });
             }
-        } catch(e) { console.error('Send:', e); }
-        finally {
+        } catch(e) {
+            console.error('Send:', e);
+            showPanelToast('Erreur réseau — vérifiez votre connexion et réessayez', true);
+        } finally {
             setSending(false);
             input.focus();
         }
