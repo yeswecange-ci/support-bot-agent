@@ -229,6 +229,12 @@ Route::middleware('auth')->group(function () {
         ->name('ajax.availability');
     Route::get('/ajax/profile/availability', [ProfileController::class, 'getAvailability'])
         ->name('ajax.availability.get');
+
+    // AJAX — Profile modal updates
+    Route::post('/ajax/profile/update', [ProfileController::class, 'updateAjax'])
+        ->name('ajax.profile.update');
+    Route::post('/ajax/profile/password', [ProfileController::class, 'updatePasswordAjax'])
+        ->name('ajax.profile.password');
 });
 
 require __DIR__.'/auth.php';

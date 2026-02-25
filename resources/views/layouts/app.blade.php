@@ -298,58 +298,26 @@
                     </div>
                 </div>
 
-                {{-- User + Availability --}}
-                <div class="p-3 border-t border-gray-100 space-y-2">
-                    {{-- Availability toggle --}}
-                    <div class="px-3 flex items-center justify-between">
-                        <span class="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Disponibilite</span>
-                        <div id="avail-toggle" class="flex items-center gap-1 bg-gray-100 rounded-full p-0.5">
-                            <button onclick="setAvailability('online')" data-avail="online" title="En ligne"
-                                    class="avail-btn w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition">
-                                <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                            </button>
-                            <button onclick="setAvailability('busy')" data-avail="busy" title="Occupe"
-                                    class="avail-btn w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition">
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                            </button>
-                            <button onclick="setAvailability('offline')" data-avail="offline" title="Hors ligne"
-                                    class="avail-btn w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition">
-                                <span class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-3 px-3 py-2">
-                        <div class="relative">
-                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                <span class="text-xs font-semibold text-gray-600">
+                {{-- User profile button (ouvre le modal compte) --}}
+                <div class="p-3 border-t border-gray-100">
+                    <button onclick="openProfileModal()"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-all duration-200 group text-left">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center ring-2 ring-white">
+                                <span class="text-sm font-bold text-indigo-700 sidebar-user-initials">
                                     {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}
                                 </span>
                             </div>
-                            <span id="avail-dot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-400"></span>
+                            <span id="avail-dot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-green-500 transition-colors"></span>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()?->name ?? 'Agent' }}</p>
-                            <p id="avail-label" class="text-[10px] text-gray-400">Hors ligne</p>
+                            <p class="text-sm font-semibold text-gray-900 truncate sidebar-user-name">{{ auth()->user()?->name ?? 'Agent' }}</p>
+                            <p id="avail-label" class="text-[11px] font-medium text-green-600 transition-colors">En ligne</p>
                         </div>
-                        @if(auth()->user()?->isAdmin())
-                        <a href="{{ route('settings.index') }}" title="Paramètres système"
-                           class="text-gray-400 hover:text-gray-600 transition {{ request()->routeIs('settings.*') ? 'text-indigo-600' : '' }}">
-                            <!-- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg> -->
-                        </a>
-                        @endif
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-gray-400 hover:text-red-500 transition" title="Deconnexion">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
                 </div>
             </aside>
 
@@ -392,6 +360,160 @@
 
         {{-- Toast notifications container (WhatsApp-style) --}}
         <div id="msg-toasts" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+        {{-- ══════════════════════════════════════════
+             Modal — Mon compte
+        ══════════════════════════════════════════ --}}
+        @auth
+        <div id="profile-modal" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center">
+            {{-- Backdrop --}}
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeProfileModal()"></div>
+            {{-- Panel --}}
+            <div class="relative w-full md:w-[400px] bg-white md:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col max-h-[92vh] md:max-h-[82vh] overflow-hidden">
+
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+                    <h2 class="text-sm font-semibold text-gray-900">Mon compte</h2>
+                    <button onclick="closeProfileModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Identité --}}
+                <div class="px-5 py-4 flex items-center gap-4 bg-gradient-to-r from-indigo-50 to-white border-b border-gray-100 flex-shrink-0">
+                    <div class="relative flex-shrink-0">
+                        <div class="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center ring-4 ring-white shadow-sm">
+                            <span class="text-xl font-bold text-indigo-700 sidebar-user-initials">{{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}</span>
+                        </div>
+                        <span id="modal-avail-dot" class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white bg-green-500 transition-colors"></span>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-semibold text-gray-900 sidebar-user-name">{{ auth()->user()?->name ?? 'Agent' }}</p>
+                        <p class="text-xs text-gray-500 truncate">{{ auth()->user()?->email ?? '' }}</p>
+                        <p id="modal-avail-label" class="text-xs font-medium text-green-600 mt-0.5">En ligne</p>
+                    </div>
+                </div>
+
+                {{-- Onglets --}}
+                <div class="flex border-b border-gray-100 px-5 flex-shrink-0">
+                    <button onclick="switchProfileTab('status')"  id="tab-status"   class="profile-tab active   py-3 px-1 mr-6 text-xs font-medium border-b-2 border-indigo-600 text-indigo-600 transition-colors">Statut</button>
+                    <button onclick="switchProfileTab('profil')"  id="tab-profil"   class="profile-tab inactive py-3 px-1 mr-6 text-xs font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">Profil</button>
+                    <button onclick="switchProfileTab('password')" id="tab-password" class="profile-tab inactive py-3 px-1      text-xs font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">Mot de passe</button>
+                </div>
+
+                {{-- Contenu onglets --}}
+                <div class="flex-1 overflow-y-auto">
+
+                    {{-- ── Statut ── --}}
+                    <div id="tab-content-status" class="p-5 space-y-2.5">
+                        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Changer le statut</p>
+
+                        <button onclick="setAvailability('online')" data-status="online"
+                                class="status-option status-option-online w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-green-200 bg-green-50 transition-all hover:border-green-300">
+                            <span class="w-3.5 h-3.5 rounded-full bg-green-500 flex-shrink-0 shadow-sm shadow-green-200"></span>
+                            <div class="text-left flex-1">
+                                <p class="text-sm font-semibold text-green-800">En ligne</p>
+                                <p class="text-[11px] text-green-600 opacity-75">Disponible pour les conversations</p>
+                            </div>
+                            <svg id="check-online" class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </button>
+
+                        <button onclick="setAvailability('busy')" data-status="busy"
+                                class="status-option status-option-busy w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-transparent bg-gray-50 transition-all hover:border-amber-200 hover:bg-amber-50">
+                            <span class="w-3.5 h-3.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                            <div class="text-left flex-1">
+                                <p class="text-sm font-semibold text-gray-700">Occupé</p>
+                                <p class="text-[11px] text-gray-500">Ne pas déranger</p>
+                            </div>
+                            <svg id="check-busy" class="w-4 h-4 text-amber-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </button>
+
+                        <button onclick="setAvailability('offline')" data-status="offline"
+                                class="status-option status-option-offline w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-transparent bg-gray-50 transition-all hover:border-gray-200 hover:bg-gray-100">
+                            <span class="w-3.5 h-3.5 rounded-full bg-gray-400 flex-shrink-0"></span>
+                            <div class="text-left flex-1">
+                                <p class="text-sm font-semibold text-gray-700">Hors ligne</p>
+                                <p class="text-[11px] text-gray-500">Apparaître hors ligne</p>
+                            </div>
+                            <svg id="check-offline" class="w-4 h-4 text-gray-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- ── Profil ── --}}
+                    <div id="tab-content-profil" class="p-5 hidden">
+                        <form id="profile-form" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1.5">Nom complet</label>
+                                <input type="text" name="name" id="profile-name"
+                                       value="{{ auth()->user()?->name ?? '' }}"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition placeholder-gray-400"
+                                       placeholder="Votre nom complet">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1.5">Adresse email</label>
+                                <input type="email" name="email" id="profile-email"
+                                       value="{{ auth()->user()?->email ?? '' }}"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition placeholder-gray-400"
+                                       placeholder="votre@email.com">
+                            </div>
+                            <div id="profile-msg" class="hidden text-xs py-2.5 px-3.5 rounded-lg font-medium"></div>
+                            <button type="submit"
+                                    class="w-full py-2.5 px-4 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 active:bg-indigo-800 transition shadow-sm flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Enregistrer les modifications
+                            </button>
+                        </form>
+                    </div>
+
+                    {{-- ── Mot de passe ── --}}
+                    <div id="tab-content-password" class="p-5 hidden">
+                        <form id="password-form" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1.5">Mot de passe actuel</label>
+                                <input type="password" name="current_password"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                                       placeholder="••••••••" autocomplete="current-password">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1.5">Nouveau mot de passe</label>
+                                <input type="password" name="password"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                                       placeholder="••••••••" autocomplete="new-password">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1.5">Confirmer le mot de passe</label>
+                                <input type="password" name="password_confirmation"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                                       placeholder="••••••••" autocomplete="new-password">
+                            </div>
+                            <div id="password-msg" class="hidden text-xs py-2.5 px-3.5 rounded-lg font-medium"></div>
+                            <button type="submit"
+                                    class="w-full py-2.5 px-4 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 active:bg-indigo-800 transition shadow-sm flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                Changer le mot de passe
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                {{-- Pied — Déconnexion --}}
+                <div class="px-5 py-4 border-t border-gray-100 flex-shrink-0">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 active:bg-red-200 transition border border-red-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Se déconnecter
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        @endauth
 
         @stack('scripts')
 
@@ -702,18 +824,35 @@
             // Expose globally pour les pollings
             window._playNotifSound = playNotifSound;
 
-            // ═══ Availability toggle ═══
-            const availLabels = { online: 'En ligne', busy: 'Occupe', offline: 'Hors ligne' };
-            const availDotColors = { online: 'bg-green-500', busy: 'bg-amber-500', offline: 'bg-gray-400' };
+            // ═══ Availability ═══
+            const _availCfg = {
+                online:  { dot: 'bg-green-500',  label: 'text-green-600',  text: 'En ligne',   btnActive: 'status-option status-option-online  w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-green-200 bg-green-50 transition-all hover:border-green-300', btnInactive: 'status-option status-option-online  w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-transparent bg-gray-50 transition-all hover:border-green-200 hover:bg-green-50' },
+                busy:    { dot: 'bg-amber-500',  label: 'text-amber-600',  text: 'Occupé',     btnActive: 'status-option status-option-busy    w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-amber-200 bg-amber-50 transition-all hover:border-amber-300', btnInactive: 'status-option status-option-busy    w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-transparent bg-gray-50 transition-all hover:border-amber-200 hover:bg-amber-50' },
+                offline: { dot: 'bg-gray-400',   label: 'text-gray-400',   text: 'Hors ligne', btnActive: 'status-option status-option-offline w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-gray-200 bg-gray-100 transition-all', btnInactive: 'status-option status-option-offline w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 border-transparent bg-gray-50 transition-all hover:border-gray-200 hover:bg-gray-100' },
+            };
 
             function updateAvailUI(status) {
+                const cfg = _availCfg[status] || _availCfg.offline;
+
+                // Sidebar dot + label
                 const dot = document.getElementById('avail-dot');
                 const label = document.getElementById('avail-label');
-                if (dot) { dot.className = `absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${availDotColors[status] || 'bg-gray-400'}`; }
-                if (label) { label.textContent = availLabels[status] || status; label.className = `text-[10px] ${status === 'online' ? 'text-green-600' : status === 'busy' ? 'text-amber-600' : 'text-gray-400'}`; }
-                document.querySelectorAll('.avail-btn').forEach(btn => {
-                    const a = btn.dataset.avail;
-                    btn.className = `avail-btn w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition ${a === status ? 'bg-white shadow-sm ring-1 ring-gray-200' : 'hover:bg-gray-200'}`;
+                if (dot) dot.className = `absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${cfg.dot} transition-colors`;
+                if (label) { label.textContent = cfg.text; label.className = `text-[11px] font-medium ${cfg.label} transition-colors`; }
+
+                // Modal dot + label
+                const mDot = document.getElementById('modal-avail-dot');
+                const mLabel = document.getElementById('modal-avail-label');
+                if (mDot) mDot.className = `absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${cfg.dot} transition-colors`;
+                if (mLabel) { mLabel.textContent = cfg.text; mLabel.className = `text-xs font-medium ${cfg.label} mt-0.5`; }
+
+                // Modal status buttons
+                ['online', 'busy', 'offline'].forEach(s => {
+                    const c = _availCfg[s];
+                    const btn = document.querySelector(`.status-option-${s}`);
+                    const chk = document.getElementById(`check-${s}`);
+                    if (btn) btn.className = s === status ? c.btnActive : c.btnInactive;
+                    if (chk) chk.classList.toggle('hidden', s !== status);
                 });
             }
 
@@ -728,13 +867,13 @@
                 } catch(e) { console.error('Availability:', e); }
             };
 
-            // Load initial availability
+            // Chargement initial (défaut : online = vert)
             (async function() {
                 try {
                     const r = await fetch('/ajax/profile/availability');
                     const d = await r.json();
-                    updateAvailUI(d.availability || 'offline');
-                } catch(e) { updateAvailUI('offline'); }
+                    updateAvailUI(d.availability || 'online');
+                } catch(e) { updateAvailUI('online'); }
             })();
 
             // ═══ Raccourcis clavier globaux ═══
@@ -785,6 +924,109 @@
                     toggleShortcutsHelp();
                     return;
                 }
+            });
+
+            // ═══ Modal — Mon compte ═══
+            window.openProfileModal = function() {
+                const m = document.getElementById('profile-modal');
+                if (!m) return;
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            };
+            window.closeProfileModal = function() {
+                const m = document.getElementById('profile-modal');
+                if (!m) return;
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            };
+            window.switchProfileTab = function(tab) {
+                ['status', 'profil', 'password'].forEach(t => {
+                    const btn = document.getElementById(`tab-${t}`);
+                    const panel = document.getElementById(`tab-content-${t}`);
+                    if (!btn || !panel) return;
+                    const isActive = t === tab;
+                    btn.className = `profile-tab ${isActive ? 'active' : 'inactive'} py-3 px-1 ${t !== 'password' ? 'mr-6' : ''} text-xs font-medium border-b-2 ${isActive ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'} transition-colors`;
+                    panel.classList.toggle('hidden', !isActive);
+                });
+            };
+
+            // Fermer sur Escape
+            document.addEventListener('keydown', function(ev) {
+                if (ev.key === 'Escape') {
+                    const m = document.getElementById('profile-modal');
+                    if (m && m.classList.contains('flex')) { closeProfileModal(); ev.stopPropagation(); }
+                }
+            }, true);
+
+            // Formulaire — Profil
+            document.getElementById('profile-form')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const form = e.target;
+                const msg  = document.getElementById('profile-msg');
+                const name  = form.querySelector('[name=name]').value.trim();
+                const email = form.querySelector('[name=email]').value.trim();
+                try {
+                    const r = await fetch('/ajax/profile/update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
+                        body: JSON.stringify({ name, email }),
+                    });
+                    const res = await r.json();
+                    if (res.success) {
+                        msg.textContent = 'Profil mis à jour avec succès';
+                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-green-50 text-green-700';
+                        msg.classList.remove('hidden');
+                        // Mettre à jour les éléments affichant le nom
+                        document.querySelectorAll('.sidebar-user-name').forEach(el => el.textContent = name);
+                        document.querySelectorAll('.sidebar-user-initials').forEach(el => el.textContent = name.substring(0, 2).toUpperCase());
+                    } else {
+                        const errs = res.errors ? Object.values(res.errors).flat().join(' ') : (res.message || 'Erreur');
+                        msg.textContent = errs;
+                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-red-50 text-red-700';
+                        msg.classList.remove('hidden');
+                    }
+                } catch(_) {
+                    msg.textContent = 'Erreur réseau';
+                    msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-red-50 text-red-700';
+                    msg.classList.remove('hidden');
+                }
+                setTimeout(() => msg.classList.add('hidden'), 4500);
+            });
+
+            // Formulaire — Mot de passe
+            document.getElementById('password-form')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const form = e.target;
+                const msg  = document.getElementById('password-msg');
+                const data = {
+                    current_password:      form.querySelector('[name=current_password]').value,
+                    password:              form.querySelector('[name=password]').value,
+                    password_confirmation: form.querySelector('[name=password_confirmation]').value,
+                };
+                try {
+                    const r = await fetch('/ajax/profile/password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN },
+                        body: JSON.stringify(data),
+                    });
+                    const res = await r.json();
+                    if (res.success) {
+                        msg.textContent = 'Mot de passe changé avec succès';
+                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-green-50 text-green-700';
+                        msg.classList.remove('hidden');
+                        form.reset();
+                    } else {
+                        const errs = res.errors ? Object.values(res.errors).flat().join(' ') : (res.message || 'Erreur');
+                        msg.textContent = errs;
+                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-red-50 text-red-700';
+                        msg.classList.remove('hidden');
+                    }
+                } catch(_) {
+                    msg.textContent = 'Erreur réseau';
+                    msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-red-50 text-red-700';
+                    msg.classList.remove('hidden');
+                }
+                setTimeout(() => msg.classList.add('hidden'), 4500);
             });
 
             // ═══ Shortcuts help modal ═══
