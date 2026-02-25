@@ -32,16 +32,6 @@
                         @error('email')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">VIN</label>
-                        <input type="text" name="vin" value="{{ old('vin', $client->vin) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white @error('vin') border-red-400 @enderror">
-                        @error('vin')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Carte VIP</label>
-                        <input type="text" name="carte_vip" value="{{ old('carte_vip', $client->carte_vip) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white @error('carte_vip') border-red-400 @enderror">
-                        @error('carte_vip')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Type de client</label>
                         <select name="is_client" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
                             <option value="" {{ old('is_client', $client->is_client) === null ? 'selected' : '' }}>Non defini</option>

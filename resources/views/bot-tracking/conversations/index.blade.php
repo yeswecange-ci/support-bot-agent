@@ -156,9 +156,21 @@
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Inconnu</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $conv->current_menu ?? '&mdash;' }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">@if($conv->duration_seconds){{ round($conv->duration_seconds / 60) }}min@else&mdash;@endif</td>
-                            <td class="px-4 py-3 text-sm text-gray-500">@if($conv->started_at){{ \Carbon\Carbon::parse($conv->started_at)->diffForHumans() }}@else&mdash;@endif</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $conv->current_menu ?: '—' }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                @if($conv->duration_seconds)
+                                    {{ round($conv->duration_seconds / 60) }}min
+                                @else
+                                    —
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-500">
+                                @if($conv->started_at)
+                                    {{ \Carbon\Carbon::parse($conv->started_at)->diffForHumans() }}
+                                @else
+                                    —
+                                @endif
+                            </td>
                             <td class="px-4 py-3 text-right"><a href="{{ route('bot-tracking.conversations.show', $conv->id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir &rarr;</a></td>
                         </tr>
                         @empty
