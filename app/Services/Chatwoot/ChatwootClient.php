@@ -436,8 +436,9 @@ class ChatwootClient
 
     public function getAccountSummary(string $since, string $until): array
     {
+        // Endpoint Chatwoot v1 : GET /api/v1/accounts/{id}/reports/summary
         return $this->client()
-            ->get($this->url('reports/account/summary'), compact('since', 'until'))
+            ->get($this->url('reports/summary'), compact('since', 'until'))
             ->throw()
             ->json();
     }

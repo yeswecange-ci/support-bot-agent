@@ -338,42 +338,53 @@
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.plugins.legend.display = false;
 
-    // ═══ Plugin : message "Aucune donnée" quand le chart est vraiment vide (pas de labels) ═══
+    // ═══ Plugin : message "Aucune donnée" ═══
     const noDataPlugin = {
         id: 'noData',
         afterDraw(chart) {
-            // On masque uniquement quand il n'y a aucun label (données non chargées du tout).
-            // Des valeurs à 0 restent un résultat valide — le graphique doit s'afficher.
             const hasLabels = Array.isArray(chart.data.labels) && chart.data.labels.length > 0;
-            if (hasLabels) return;
-
             const { ctx, chartArea: a } = chart;
             if (!a) return;
-            ctx.save();
-            const cx = a.left + (a.right - a.left) / 2;
-            const cy = a.top  + (a.bottom - a.top) / 2;
 
-            ctx.fillStyle = 'rgba(249,250,251,0.85)';
-            ctx.fillRect(a.left, a.top, a.right - a.left, a.bottom - a.top);
+            if (!hasLabels) {
+                // Aucun label du tout — données pas encore chargées
+                ctx.save();
+                const cx = a.left + (a.right - a.left) / 2;
+                const cy = a.top  + (a.bottom - a.top) / 2;
+                ctx.fillStyle = 'rgba(249,250,251,0.9)';
+                ctx.fillRect(a.left, a.top, a.right - a.left, a.bottom - a.top);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '12px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Aucune donnée disponible', cx, cy + 4);
+                ctx.font = '10px Inter, sans-serif';
+                ctx.fillStyle = '#d1d5db';
+                ctx.fillText('Synchronisez les données pour afficher ce graphique', cx, cy + 22);
+                ctx.restore();
+                return;
+            }
 
-            ctx.strokeStyle = '#d1d5db';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(cx, cy - 18, 14, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(cx - 10, cy - 18 - 10);
-            ctx.lineTo(cx + 10, cy - 18 + 10);
-            ctx.stroke();
-
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = '12px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Aucune donnée disponible', cx, cy + 8);
-            ctx.font = '10px Inter, sans-serif';
-            ctx.fillStyle = '#d1d5db';
-            ctx.fillText('Synchronisez les données pour afficher ce graphique', cx, cy + 26);
-            ctx.restore();
+            // Pour les graphiques barre : indiquer si toutes les valeurs sont à 0
+            if (chart.config.type === 'bar') {
+                const allZero = chart.data.datasets.every(ds =>
+                    (ds.data || []).every(v => !v || v === 0)
+                );
+                if (allZero) {
+                    ctx.save();
+                    const cx = a.left + (a.right - a.left) / 2;
+                    const cy = a.top  + (a.bottom - a.top) / 2;
+                    ctx.fillStyle = 'rgba(249,250,251,0.8)';
+                    ctx.fillRect(a.left + 1, a.top + 1, a.right - a.left - 2, a.bottom - a.top - 2);
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.font = '12px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Aucun message enregistré pour cette période', cx, cy + 4);
+                    ctx.font = '10px Inter, sans-serif';
+                    ctx.fillStyle = '#d1d5db';
+                    ctx.fillText('Cliquez sur "Synchroniser" pour actualiser les données', cx, cy + 22);
+                    ctx.restore();
+                }
+            }
         },
     };
     Chart.register(noDataPlugin);
@@ -465,6 +476,10 @@
     const msgCtx = document.getElementById('msgTrendChart').getContext('2d');
     const inData = formatTimestamps(initIncoming);
     const outData = formatTimestamps(initOutgoing);
+    console.log('[Stats] source:', '{{ $stats["source"] ?? "?" }}');
+    console.log('[Stats] incoming_trends:', initIncoming?.length, 'points', initIncoming?.slice(0,3));
+    console.log('[Stats] outgoing_trends:', initOutgoing?.length, 'points', initOutgoing?.slice(0,3));
+    console.log('[Stats] inData.labels:', inData.labels?.length, '| values sum:', inData.values?.reduce((a,b)=>a+b,0));
 
     const msgTrendChart = new Chart(msgCtx, {
         type: 'bar',
