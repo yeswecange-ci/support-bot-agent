@@ -119,8 +119,7 @@
                     <div class="absolute -left-6 mt-1 w-3 h-3 rounded-full {{ $dot }} ring-2 ring-white"></div>
                     <div class="pl-2">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ str_replace([ '_'], 
-\, $event->event_type) }}</span>
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ str_replace('_', ' ', $event->event_type) }}</span>
                             <span class="text-xs text-gray-400">{{ $ts ? \Carbon\Carbon::parse($ts)->format('d/m/Y H:i:s') : '' }}</span>
                         </div>
                         @if($event->user_input)
