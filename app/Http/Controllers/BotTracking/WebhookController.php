@@ -122,12 +122,13 @@ class WebhookController extends Controller
     public function updateUserData(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'session_id' => 'required|string',
-            'nom_prenom' => 'nullable|string',
-            'is_client' => 'nullable|boolean',
-            'email' => 'nullable|email',
-            'vin' => 'nullable|string|max:17',
-            'carte_vip' => 'nullable|string',
+            'session_id'       => 'required|string',
+            'nom_prenom'       => 'nullable|string',   // legacy — mappé vers client_full_name
+            'client_full_name' => 'nullable|string',
+            'is_client'        => 'nullable|boolean',
+            'email'            => 'nullable|email',
+            'vin'              => 'nullable|string|max:17',
+            'carte_vip'        => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -147,8 +148,13 @@ class WebhookController extends Controller
                 ], 404);
             }
 
-            // Mettre à jour les champs fournis
-            $fieldsToUpdate = ['nom_prenom', 'is_client', 'email', 'vin', 'carte_vip'];
+            // Mapping legacy : nom_prenom (n8n) → client_full_name (colonne réelle)
+            if ($request->has('nom_prenom') && !$request->has('client_full_name')) {
+                $conversation->client_full_name = $request->nom_prenom;
+            }
+
+            // Champs directs
+            $fieldsToUpdate = ['client_full_name', 'is_client', 'email', 'vin', 'carte_vip'];
             foreach ($fieldsToUpdate as $field) {
                 if ($request->has($field)) {
                     $conversation->$field = $request->$field;

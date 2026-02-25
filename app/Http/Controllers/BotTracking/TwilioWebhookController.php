@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\ConversationEvent;
 use App\Models\DailyStatistic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Twilio\TwiML\MessagingResponse;
 
@@ -42,60 +43,60 @@ class TwilioWebhookController extends Controller
             // Clean phone number (remove whatsapp: prefix)
             $phoneNumber = str_replace('whatsapp:', '', $from);
 
-            // Check if there's an existing active conversation (with 24h timeout)
-            $conversation = Conversation::where('phone_number', $phoneNumber)
-                ->where('status', 'active')
-                ->where('last_activity_at', '>', now()->subHours(24))
-                ->latest()
-                ->first();
-
             // Synchronize with Client table FIRST to get existing data
             $client = \App\Models\Client::findOrCreateByPhone($phoneNumber);
 
             // Check if client already exists (has interaction history)
             $clientExists = $client->wasRecentlyCreated === false && $client->client_full_name !== null;
 
-            // If no active or transferred conversation, create a new one
-            if (!$conversation) {
-                $conversation = Conversation::create([
-                    'phone_number' => $phoneNumber,
-                    'session_id' => uniqid('session_', true),
-                    'whatsapp_profile_name' => $profileName ?? 'Client WhatsApp',
-                    // ⚠️ IMPORTANT : Copier le nom complet du client existant
-                    'client_full_name' => $client->client_full_name,
-                    'is_client' => $client->is_client,
-                    'email' => $client->email,
-                    'vin' => $client->vin,
-                    'carte_vip' => $client->carte_vip,
-                    'started_at' => now(),
-                    'last_activity_at' => now(),
-                    'current_menu' => 'main_menu',
-                    'status' => 'active',
-                ]);
+            // Transaction + verrou pour éviter les doublons de conversations (race condition Twilio retries)
+            $conversation = DB::transaction(function () use ($phoneNumber, $profileName, $client) {
+                $conversation = Conversation::where('phone_number', $phoneNumber)
+                    ->where('status', 'active')
+                    ->where('last_activity_at', '>', now()->subHours(24))
+                    ->latest()
+                    ->lockForUpdate()
+                    ->first();
 
-                Log::info('New conversation created with existing client data', [
-                    'phone' => $phoneNumber,
-                    'client_full_name' => $client->client_full_name,
-                    'conversation_id' => $conversation->id
-                ]);
+                if (!$conversation) {
+                    $conversation = Conversation::create([
+                        'phone_number'          => $phoneNumber,
+                        'session_id'            => uniqid('session_', true),
+                        'whatsapp_profile_name' => $profileName ?? 'Client WhatsApp',
+                        'client_full_name'      => $client->client_full_name,
+                        'is_client'             => $client->is_client,
+                        'email'                 => $client->email,
+                        'vin'                   => $client->vin,
+                        'carte_vip'             => $client->carte_vip,
+                        'started_at'            => now(),
+                        'last_activity_at'      => now(),
+                        'current_menu'          => 'main_menu',
+                        'status'                => 'active',
+                    ]);
 
-                // Incrémenter le compteur quotidien de nouvelles conversations
-                DailyStatistic::today()->increment('total_conversations');
-            } else {
-                // Update last activity and profile name if changed
-                $updates = ['last_activity_at' => now()];
+                    Log::info('New conversation created', [
+                        'phone'            => $phoneNumber,
+                        'client_full_name' => $client->client_full_name,
+                        'conversation_id'  => $conversation->id,
+                    ]);
 
-                if ($profileName && $conversation->whatsapp_profile_name !== $profileName) {
-                    $updates['whatsapp_profile_name'] = $profileName;
+                    DailyStatistic::today()->increment('total_conversations');
+                } else {
+                    $updates = ['last_activity_at' => now()];
+
+                    if ($profileName && $conversation->whatsapp_profile_name !== $profileName) {
+                        $updates['whatsapp_profile_name'] = $profileName;
+                    }
+
+                    if (!$conversation->client_full_name && $client->client_full_name) {
+                        $updates['client_full_name'] = $client->client_full_name;
+                    }
+
+                    $conversation->update($updates);
                 }
 
-                // ⚠️ IMPORTANT : Copier le nom du client si la conversation n'en a pas
-                if (!$conversation->client_full_name && $client->client_full_name) {
-                    $updates['client_full_name'] = $client->client_full_name;
-                }
-
-                $conversation->update($updates);
-            }
+                return $conversation;
+            });
 
             // Update client information - update WhatsApp profile name (always)
             if ($profileName) {

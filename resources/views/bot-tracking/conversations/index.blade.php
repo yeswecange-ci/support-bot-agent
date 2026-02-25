@@ -215,8 +215,8 @@
     }
     var dailyCtx = document.getElementById('dailyChart');
     if (dailyCtx) {
-        var labels = {!! json_encode($dailyStats->pluck('date')->map(fn($d) => (string)$d)->toArray()) !!};
-        var data   = {!! json_encode($dailyStats->pluck('total_conversations')->toArray()) !!};
+        var labels = @json($dailyStats->pluck('date')->map(fn($d) => (string)$d)->toArray());
+        var data   = @json($dailyStats->pluck('total_conversations')->toArray());
         new Chart(dailyCtx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Conversations', data: data, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.08)', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#6366f1', fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } } } });
     }
 })();

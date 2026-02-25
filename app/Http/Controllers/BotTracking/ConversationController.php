@@ -29,7 +29,7 @@ class ConversationController extends Controller
 
         $stats = [
             'total_conversations' => $conversationsInRange->count(),
-            'active_conversations' => Conversation::where('status', 'active')->count(),
+            'active_conversations' => (clone $conversationsInRange)->where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
             'total_clients' => (clone $clientsInRange)->where('is_client', true)->count(),
             'total_non_clients' => (clone $clientsInRange)->where('is_client', false)->count(),
@@ -50,7 +50,7 @@ class ConversationController extends Controller
                 ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
                 })->count(),
-            'unique_clients' => (clone $conversationsInRange)->distinct('phone_number')->count('phone_number'),
+            'unique_clients' => (clone $conversationsInRange)->distinct()->count('phone_number'),
             'new_clients' => \App\Models\Client::whereBetween('created_at', [$dateFromFull, $dateToFull])->count(),
         ];
 
@@ -105,21 +105,13 @@ class ConversationController extends Controller
     {
         $query = Conversation::with('events');
 
-        // Date range filter - CONSISTENT with dashboard and statistics
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
+        // Date range filter — défaut : 30 derniers jours pour cohérence avec dashboard
+        $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
+        $dateTo   = $request->input('date_to',   now()->format('Y-m-d'));
 
-        if ($dateFrom && $dateTo) {
-            $dateFromFull = $dateFrom . ' 00:00:00';
-            $dateToFull = $dateTo . ' 23:59:59';
-            $query->whereBetween('started_at', [$dateFromFull, $dateToFull]);
-        } elseif ($dateFrom) {
-            $dateFromFull = $dateFrom . ' 00:00:00';
-            $query->where('started_at', '>=', $dateFromFull);
-        } elseif ($dateTo) {
-            $dateToFull = $dateTo . ' 23:59:59';
-            $query->where('started_at', '<=', $dateToFull);
-        }
+        $dateFromFull = $dateFrom . ' 00:00:00';
+        $dateToFull   = $dateTo   . ' 23:59:59';
+        $query->whereBetween('started_at', [$dateFromFull, $dateToFull]);
 
         // Status filter
         if ($request->filled('status')) {
@@ -227,7 +219,7 @@ class ConversationController extends Controller
 
         $stats = [
             'total_conversations' => $conversationsInRange->count(),
-            'active_conversations' => Conversation::where('status', 'active')->count(),
+            'active_conversations' => (clone $conversationsInRange)->where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
             'total_clients' => (clone $clientsInRange)->where('is_client', true)->count(),
             'total_non_clients' => (clone $clientsInRange)->where('is_client', false)->count(),
@@ -248,7 +240,7 @@ class ConversationController extends Controller
                 ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
                 })->count(),
-            'unique_clients' => (clone $conversationsInRange)->distinct('phone_number')->count('phone_number'),
+            'unique_clients' => (clone $conversationsInRange)->distinct()->count('phone_number'),
             'new_clients' => \App\Models\Client::whereBetween('created_at', [$dateFromFull, $dateToFull])->count(),
         ];
 

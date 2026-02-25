@@ -276,9 +276,9 @@
         new Chart(sCtx, {
             type: 'pie',
             data: {
-                labels: {!! json_encode(array_keys($statusStats ?? [])) !!},
+                labels: @json(array_keys($statusStats ?? [])),
                 datasets: [{
-                    data: {!! json_encode(array_values($statusStats ?? [])) !!},
+                    data: @json(array_values($statusStats ?? [])),
                     backgroundColor: statusColors,
                     borderWidth: 0
                 }]
@@ -293,10 +293,10 @@
         new Chart(dCtx, {
             type: 'line',
             data: {
-                labels: {!! json_encode($dailyStats->pluck('date')->map(fn($d) => (string)$d)->toArray()) !!},
+                labels: @json($dailyStats->pluck('date')->map(fn($d) => (string)$d)->toArray()),
                 datasets: [{
                     label: 'Conversations',
-                    data: {!! json_encode($dailyStats->pluck('total_conversations')->toArray()) !!},
+                    data: @json($dailyStats->pluck('total_conversations')->toArray()),
                     borderColor: '#6366f1',
                     backgroundColor: 'rgba(99,102,241,0.08)',
                     borderWidth: 2,
@@ -341,10 +341,10 @@
         new Chart(pCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($peakHours->pluck('hour')->toArray()) !!}.map(function(h){ return h + 'h'; }),
+                labels: @json($peakHours->pluck('hour')->toArray()).map(function(h){ return h + 'h'; }),
                 datasets: [{
                     label: 'Conversations',
-                    data: {!! json_encode($peakHours->pluck('count')->toArray()) !!},
+                    data: @json($peakHours->pluck('count')->toArray()),
                     backgroundColor: 'rgba(99,102,241,0.7)',
                     borderRadius: 4
                 }]

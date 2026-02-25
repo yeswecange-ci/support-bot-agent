@@ -202,7 +202,7 @@ class ClientController extends Controller
             }
         }
 
-        return redirect()->route('dashboard.clients.index')
+        return redirect()->route('bot-tracking.clients.index')
             ->with('success', "Synchronisation terminée : {$synced} nouveaux clients, {$updated} clients mis à jour.");
     }
 }

@@ -32,7 +32,7 @@
       // Sous-menu : Clients
       Route::prefix('clients')->name('clients.')->group(function () {
           Route::get('/',          [ClientController::class, 'index'])->name('index');
-          Route::get('/sync',      [ClientController::class, 'sync'])->name('sync');
+          Route::get('/sync',      [ClientController::class, 'sync'])->name('sync')->middleware('role:super_admin,admin');
           Route::get('/{id}',      [ClientController::class, 'show'])->name('show');
           Route::get('/{id}/edit', [ClientController::class, 'edit'])->name('edit')->middleware('role:super_admin,admin');
           Route::put('/{id}',      [ClientController::class, 'update'])->name('update')->middleware('role:super_admin,admin');
