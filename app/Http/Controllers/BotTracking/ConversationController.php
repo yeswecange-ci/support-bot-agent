@@ -30,9 +30,14 @@ class ConversationController extends Controller
             'total_conversations'     => $conversationsInRange->count(),
             'active_conversations'    => (clone $conversationsInRange)->where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
-            // Clients/non-clients basés sur Conversation.is_client pour cohérence avec les badges dans les listes
-            'total_clients'           => (clone $conversationsInRange)->where('is_client', true)->count(),
-            'total_non_clients'       => (clone $conversationsInRange)->where('is_client', false)->count(),
+            // Clients/non-clients : source = Client.is_client (vérité définitive, éditable manuellement)
+            // Filtre période = conversations started_at (cohérent avec le reste des stats)
+            'total_clients'           => \App\Models\Client::where('is_client', true)
+                ->whereHas('conversations', fn($q) => $q->whereBetween('started_at', [$dateFromFull, $dateToFull]))
+                ->count(),
+            'total_non_clients'       => \App\Models\Client::where('is_client', false)
+                ->whereHas('conversations', fn($q) => $q->whereBetween('started_at', [$dateFromFull, $dateToFull]))
+                ->count(),
             'avg_duration'            => (clone $conversationsInRange)->whereNotNull('ended_at')->avg('duration_seconds'),
             'total_duration'          => (clone $conversationsInRange)->whereNotNull('ended_at')->sum('duration_seconds'),
             'total_events'            => ConversationEvent::whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
@@ -220,9 +225,14 @@ class ConversationController extends Controller
             'total_conversations'     => $conversationsInRange->count(),
             'active_conversations'    => (clone $conversationsInRange)->where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
-            // Clients/non-clients basés sur Conversation.is_client pour cohérence avec les badges dans les listes
-            'total_clients'           => (clone $conversationsInRange)->where('is_client', true)->count(),
-            'total_non_clients'       => (clone $conversationsInRange)->where('is_client', false)->count(),
+            // Clients/non-clients : source = Client.is_client (vérité définitive, éditable manuellement)
+            // Filtre période = conversations started_at (cohérent avec le reste des stats)
+            'total_clients'           => \App\Models\Client::where('is_client', true)
+                ->whereHas('conversations', fn($q) => $q->whereBetween('started_at', [$dateFromFull, $dateToFull]))
+                ->count(),
+            'total_non_clients'       => \App\Models\Client::where('is_client', false)
+                ->whereHas('conversations', fn($q) => $q->whereBetween('started_at', [$dateFromFull, $dateToFull]))
+                ->count(),
             'avg_duration' => (clone $conversationsInRange)->whereNotNull('ended_at')->avg('duration_seconds'),
             'total_duration' => (clone $conversationsInRange)->whereNotNull('ended_at')->sum('duration_seconds'),
             'total_events' => ConversationEvent::whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
