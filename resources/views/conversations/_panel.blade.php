@@ -779,13 +779,19 @@
                 body = JSON.stringify({ content: c, is_private: isPrivate });
                 headers = { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': TOKEN };
             }
+            headers['Accept'] = 'application/json';
             const r = await fetch(`/ajax/conversations/${CID}/messages`, { method: 'POST', headers, body });
             if (!r.ok) {
                 const err = await r.json().catch(() => null);
-                showPanelToast(err?.message || 'Erreur lors de l\'envoi', true);
+                const msg = err?.message || err?.error || `Erreur ${r.status}`;
+                showPanelToast(msg, true);
                 return;
             }
             const m = await r.json();
+            if (!m || !m.id) {
+                showPanelToast('Réponse inattendue du serveur', true);
+                return;
+            }
             // Effacer input et fichiers seulement après succès confirmé
             input.value = '';
             selectedFiles = [];
