@@ -63,7 +63,7 @@
                         ['label' => 'Complété', 'value' => $funnel['completed'], 'color' => 'bg-green-500'],
                         ['label' => 'Au moins 1 bonne réponse', 'value' => $funnel['at_least_1_correct'], 'color' => 'bg-blue-500'],
                     ];
-                    $maxVal = max(array_column($funnelItems, 'value'), 1);
+                    $maxVal = max(array_column($funnelItems, 'value')) ?: 1;
                 @endphp
                 @foreach($funnelItems as $i => $item)
                 <div class="flex-1 {{ $i > 0 ? 'ml-1' : '' }}">
@@ -158,7 +158,7 @@
                     <div>
                         <p class="text-xs font-medium text-gray-500 mb-2">Distribution des réponses</p>
                         <div class="space-y-1.5">
-                            @php $maxDist = max(array_column($qs['distribution'], 'count'), 1); @endphp
+                            @php $maxDist = max(array_column($qs['distribution'], 'count')) ?: 1; @endphp
                             @foreach(array_slice($qs['distribution'], 0, 8) as $dist)
                             <div class="flex items-center gap-2">
                                 <div class="flex-1 min-w-0">
