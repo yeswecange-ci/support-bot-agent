@@ -75,7 +75,7 @@
                         
                         {{-- Sous-menu --}}
                         <div id="chat-submenu" class="submenu {{ request()->routeIs(['dashboard', 'conversations.*', 'agents.*', 'teams.*', 'contacts.*', 'canned-responses.*', 'statistics.*']) ? 'open' : '' }} pl-4 mt-1 space-y-1">
-                            @if(auth()->user()->isAdmin())
+                            @if(auth()->user()?->isAdmin())
                             <a href="{{ route('dashboard') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
                                       {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -95,7 +95,7 @@
                                 Conversations
                             </a>
 
-                            @if(auth()->user()->isAdmin())
+                            @if(auth()->user()?->isAdmin())
                             <a href="{{ route('agents.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
                                       {{ request()->routeIs('agents.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -133,7 +133,7 @@
                                 Reponses rapides
                             </a>
 
-                            @if(auth()->user()->isAdmin())
+                            @if(auth()->user()?->isAdmin())
                             <a href="{{ route('statistics.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
                                       {{ request()->routeIs('statistics.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -323,16 +323,16 @@
                         <div class="relative">
                             <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                                 <span class="text-xs font-semibold text-gray-600">
-                                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 2)) }}
+                                    {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}
                                 </span>
                             </div>
                             <span id="avail-dot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-400"></span>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name ?? 'Agent' }}</p>
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()?->name ?? 'Agent' }}</p>
                             <p id="avail-label" class="text-[10px] text-gray-400">Hors ligne</p>
                         </div>
-                        @if(auth()->user()->isAdmin())
+                        @if(auth()->user()?->isAdmin())
                         <a href="{{ route('settings.index') }}" title="Paramètres système"
                            class="text-gray-400 hover:text-gray-600 transition {{ request()->routeIs('settings.*') ? 'text-indigo-600' : '' }}">
                             <!-- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -365,7 +365,7 @@
                         <span class="font-bold text-gray-900 text-sm">YesWeChange</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        @if(auth()->user()->isAdmin())
+                        @if(auth()->user()?->isAdmin())
                         <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         </a>

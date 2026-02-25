@@ -59,7 +59,7 @@
         {{-- Stat Cards Row 2 --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div class="bg-white rounded-xl border border-gray-200 p-5">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Clients Mercedes</p>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Clients Sportcash</p>
                 <p class="text-3xl font-bold text-indigo-600 mt-1">{{ number_format($stats['total_clients'] ?? 0) }}</p>
                 <p class="text-xs text-gray-400 mt-1">Identifies</p>
             </div>

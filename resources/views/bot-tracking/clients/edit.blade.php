@@ -45,7 +45,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Type de client</label>
                         <select name="is_client" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
                             <option value="" {{ old('is_client', $client->is_client) === null ? 'selected' : '' }}>Non defini</option>
-                            <option value="1" {{ (string)old('is_client', $client->is_client) === '1' ? 'selected' : '' }}>Client Mercedes</option>
+                            <option value="1" {{ (string)old('is_client', $client->is_client) === '1' ? 'selected' : '' }}>Client Sportcash</option>
                             <option value="0" {{ (string)old('is_client', $client->is_client) === '0' ? 'selected' : '' }}>Non-client</option>
                         </select>
                         @error('is_client')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror

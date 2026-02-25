@@ -32,7 +32,7 @@
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                         <h1 class="text-xl font-bold text-gray-900">{{ $client->client_full_name ?? $client->whatsapp_profile_name ?? 'Inconnu' }}</h1>
                         @if($client->is_client === true || $client->is_client == 1)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">Client Mercedes</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">Client Sportcash</span>
                         @elseif($client->is_client === false || $client->is_client == 0)
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                         @else

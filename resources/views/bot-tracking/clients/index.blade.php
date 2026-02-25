@@ -21,8 +21,8 @@
                 <p class="text-xs text-gray-500 mt-0.5">Total contacts</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-indigo-600">{{ number_format($stats['mercedes_clients'] ?? 0) }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">Clients Mercedes</p>
+                <p class="text-2xl font-bold text-indigo-600">{{ number_format($stats['sportcash_clients'] ?? 0) }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">Clients Sportcash</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
                 <p class="text-2xl font-bold text-orange-500">{{ number_format($stats['non_clients'] ?? 0) }}</p>
@@ -52,7 +52,7 @@
                     <label class="text-xs font-medium text-gray-600">Type</label>
                     <select name="is_client" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
                         <option value="">Tous</option>
-                        <option value="true">Clients Mercedes</option>
+                        <option value="true">Clients Sportcash</option>
                         <option value="false">Non-clients</option>
                     </select>
                 </div>
@@ -111,7 +111,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 @if($client->is_client === true || $client->is_client == 1)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">Client Mercedes</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">Client Sportcash</span>
                                 @elseif($client->is_client === false || $client->is_client == 0)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                                 @else

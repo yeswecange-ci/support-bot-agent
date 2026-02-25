@@ -36,7 +36,7 @@
                     @endphp
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $sc }}">{{ ucfirst($conversation->status) }}</span>
                     @if($conversation->is_client === true || $conversation->is_client == 1)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700">Client Mercedes</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700">Client Sportcash</span>
                     @elseif($conversation->is_client === false || $conversation->is_client == 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">Non-client</span>
                     @endif

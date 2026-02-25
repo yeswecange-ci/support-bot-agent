@@ -397,7 +397,7 @@
                                 @foreach([
                                     ['conversation_id','ID interne de la conversation'],
                                     ['current_menu','Menu actuel du bot'],
-                                    ['is_client','true/false — Client Mercedes ?'],
+                                    ['is_client','true/false — Client Sportcash ?'],
                                     ['client_full_name','Nom complet du client (ou null)'],
                                     ['agent_mode','"true" si transféré à un agent'],
                                     ['pending_agent','"true" si en attente d\'agent'],

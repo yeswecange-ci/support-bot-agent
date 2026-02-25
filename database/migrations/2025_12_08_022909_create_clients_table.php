@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('phone_number')->unique()->comment('Numéro de téléphone WhatsApp');
             $table->string('nom_prenom')->nullable()->comment('Nom complet du client');
             $table->string('email')->nullable()->comment('Email du client');
-            $table->boolean('is_client')->nullable()->comment('Est-ce un client Mercedes');
+            $table->boolean('is_client')->nullable()->comment('Est-ce un client Sportcash');
             $table->string('vin')->nullable()->comment('Numéro VIN du véhicule');
             $table->string('carte_vip')->nullable()->comment('Numéro carte VIP');
             $table->unsignedInteger('interaction_count')->default(0)->comment('Nombre total d\'interactions');
