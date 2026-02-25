@@ -85,10 +85,11 @@
                         <h1 class="text-xl font-bold text-gray-900">YesWeChange Support</h1>
                     </div>
 
-                    {{ $slot }}
+                    @yield('content')
                 </div>
             </div>
 
         </div>
+        @stack('scripts')
     </body>
 </html>
