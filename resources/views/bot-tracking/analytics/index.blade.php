@@ -29,7 +29,7 @@
         </div>
 
         {{-- Stats Row 1 --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_conversations'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Conversations</p>
@@ -41,10 +41,6 @@
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
                 <p class="text-2xl font-bold text-blue-600">{{ number_format($stats['completed_conversations'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Completees</p>
-            </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-purple-600">{{ number_format($stats['transferred_conversations'] ?? 0) }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">Transferees</p>
             </div>
         </div>
 
@@ -213,11 +209,10 @@
                         @php
                             $totalForPct = array_sum($statusStats ?? []);
                             $statusBadge = [
-                                'active'      => 'bg-green-100 text-green-700',
-                                'completed'   => 'bg-blue-100 text-blue-700',
-                                'transferred' => 'bg-purple-100 text-purple-700',
-                                'timeout'     => 'bg-amber-100 text-amber-700',
-                                'abandoned'   => 'bg-gray-100 text-gray-600',
+                                'active'    => 'bg-green-100 text-green-700',
+                                'completed' => 'bg-blue-100 text-blue-700',
+                                'timeout'   => 'bg-amber-100 text-amber-700',
+                                'abandoned' => 'bg-gray-100 text-gray-600',
                             ];
                         @endphp
                         @forelse($statusStats ?? [] as $status => $count)
@@ -246,7 +241,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 (function () {
-    var menuColors  = ['#6366f1','#0ea5e9','#f59e0b','#8b5cf6','#10b981'];
+    var menuColors  = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#64748b'];
     var statusColors = ['#10b981','#3b82f6','#8b5cf6','#f59e0b','#9ca3af'];
 
     // Menu Distribution Chart
@@ -255,14 +250,17 @@
         new Chart(mCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Vehicules','SAV','Reclamation','VIP','Agent'],
+                labels: ['Informations','Demandes','Paris','Encaissement','Reclamations','Plaintes','Conseiller','FAQ'],
                 datasets: [{
                     data: [
-                        {{ $menuStats['vehicules'] ?? 0 }},
-                        {{ $menuStats['sav'] ?? 0 }},
-                        {{ $menuStats['reclamation'] ?? 0 }},
-                        {{ $menuStats['vip'] ?? 0 }},
-                        {{ $menuStats['agent'] ?? 0 }}
+                        {{ $menuStats['informations'] ?? 0 }},
+                        {{ $menuStats['demandes'] ?? 0 }},
+                        {{ $menuStats['paris'] ?? 0 }},
+                        {{ $menuStats['encaissement'] ?? 0 }},
+                        {{ $menuStats['reclamations'] ?? 0 }},
+                        {{ $menuStats['plaintes'] ?? 0 }},
+                        {{ $menuStats['conseiller'] ?? 0 }},
+                        {{ $menuStats['faq'] ?? 0 }}
                     ],
                     backgroundColor: menuColors,
                     borderWidth: 0

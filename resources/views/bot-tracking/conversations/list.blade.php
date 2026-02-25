@@ -14,7 +14,7 @@
         </div>
 
         {{-- Summary Stats --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($totalStats['total'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Total</p>
@@ -26,10 +26,6 @@
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
                 <p class="text-2xl font-bold text-blue-600">{{ number_format($totalStats['completed'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Completees</p>
-            </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-purple-600">{{ number_format($totalStats['transferred'] ?? 0) }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">Transferees</p>
             </div>
         </div>
 
@@ -46,7 +42,6 @@
                         <option value="">Tous</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Actif</option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Complete</option>
-                        <option value="transferred" {{ request('status') == 'transferred' ? 'selected' : '' }}>Transfere</option>
                         <option value="timeout" {{ request('status') == 'timeout' ? 'selected' : '' }}>Timeout</option>
                         <option value="abandoned" {{ request('status') == 'abandoned' ? 'selected' : '' }}>Abandonne</option>
                     </select>
@@ -96,7 +91,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 @php
-                                    $sm = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'transferred' => 'bg-purple-100 text-purple-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
+                                    $sm = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
                                     $sc = $sm[$conv->status] ?? 'bg-gray-100 text-gray-600';
                                 @endphp
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sc }}">{{ ucfirst($conv->status) }}</span>

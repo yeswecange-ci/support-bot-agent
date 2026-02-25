@@ -17,14 +17,16 @@ class DailyStatistic extends Model
         'new_users',
         'returning_users',
         'completed_conversations',
-        'transferred_conversations',
         'timeout_conversations',
         'abandoned_conversations',
-        'menu_vehicules_neufs',
-        'menu_sav',
+        'menu_informations',
+        'menu_demandes',
+        'menu_paris',
+        'menu_encaissement',
         'menu_reclamations',
-        'menu_club_vip',
-        'menu_agent',
+        'menu_plaintes',
+        'menu_conseiller',
+        'menu_faq',
         'submenu_stats',
         'avg_session_duration_seconds',
         'avg_response_time_ms',
@@ -66,11 +68,14 @@ class DailyStatistic extends Model
     public function incrementMainMenu(string $menuChoice): self
     {
         $mapping = [
-            '1' => 'menu_vehicules_neufs',
-            '2' => 'menu_sav',
-            '3' => 'menu_reclamations',
-            '4' => 'menu_club_vip',
-            '5' => 'menu_agent',
+            '1' => 'menu_informations',
+            '2' => 'menu_demandes',
+            '3' => 'menu_paris',
+            '4' => 'menu_encaissement',
+            '5' => 'menu_reclamations',
+            '6' => 'menu_plaintes',
+            '7' => 'menu_conseiller',
+            '8' => 'menu_faq',
         ];
 
         if (isset($mapping[$menuChoice])) {
@@ -109,7 +114,6 @@ class DailyStatistic extends Model
 
         // Statuts
         $stat->completed_conversations = (clone $conversations)->where('status', 'completed')->count();
-        $stat->transferred_conversations = (clone $conversations)->where('status', 'transferred')->count();
         $stat->timeout_conversations = (clone $conversations)->where('status', 'timeout')->count();
         $stat->abandoned_conversations = (clone $conversations)->where('status', 'abandoned')->count();
 
@@ -158,13 +162,15 @@ class DailyStatistic extends Model
                 SUM(total_conversations) as total_conversations,
                 SUM(unique_users) as unique_users,
                 SUM(completed_conversations) as completed_conversations,
-                SUM(transferred_conversations) as transferred_conversations,
                 SUM(timeout_conversations) as timeout_conversations,
-                SUM(menu_vehicules_neufs) as menu_vehicules_neufs,
-                SUM(menu_sav) as menu_sav,
+                SUM(menu_informations) as menu_informations,
+                SUM(menu_demandes) as menu_demandes,
+                SUM(menu_paris) as menu_paris,
+                SUM(menu_encaissement) as menu_encaissement,
                 SUM(menu_reclamations) as menu_reclamations,
-                SUM(menu_club_vip) as menu_club_vip,
-                SUM(menu_agent) as menu_agent,
+                SUM(menu_plaintes) as menu_plaintes,
+                SUM(menu_conseiller) as menu_conseiller,
+                SUM(menu_faq) as menu_faq,
                 AVG(avg_session_duration_seconds) as avg_session_duration_seconds
             ')
             ->first()

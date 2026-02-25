@@ -99,10 +99,6 @@ class ClientController extends Controller
                 ->where('event_type', 'menu_choice')
                 ->count(),
 
-            'agent_transfers' => ConversationEvent::whereIn('conversation_id', $conversationIds)
-                ->where('event_type', 'agent_transfer')
-                ->count(),
-
             'total_duration' => $client->total_duration,
 
             'avg_duration' => Conversation::where('phone_number', $client->phone_number)

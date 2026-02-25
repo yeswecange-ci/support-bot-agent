@@ -31,7 +31,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     @php
-                        $sm = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'transferred' => 'bg-purple-100 text-purple-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
+                        $sm = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
                         $sc = $sm[$conversation->status] ?? 'bg-gray-100 text-gray-600';
                     @endphp
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $sc }}">{{ ucfirst($conversation->status) }}</span>
@@ -80,12 +80,6 @@
                     <p class="text-xs text-gray-400 uppercase tracking-wide">ID Chatwoot</p>
                     <p class="text-sm font-mono text-gray-700 mt-0.5">{{ $conversation->chatwoot_conversation_id ?? '&mdash;' }}</p>
                 </div>
-                @if($conversation->transferred_at)
-                <div class="col-span-2">
-                    <p class="text-xs text-gray-400 uppercase tracking-wide">Transfere le</p>
-                    <p class="text-sm text-gray-700 mt-0.5">{{ \Carbon\Carbon::parse($conversation->transferred_at)->format('d/m/Y H:i') }}</p>
-                </div>
-                @endif
             </div>
         </div>
 

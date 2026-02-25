@@ -5,6 +5,7 @@ namespace App\Http\Controllers\BotTracking;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\ConversationEvent;
+use App\Models\DailyStatistic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Twilio\TwiML\MessagingResponse;
@@ -43,7 +44,7 @@ class TwilioWebhookController extends Controller
 
             // Check if there's an existing active conversation (with 24h timeout)
             $conversation = Conversation::where('phone_number', $phoneNumber)
-                ->whereIn('status', ['active', 'transferred'])
+                ->where('status', 'active')
                 ->where('last_activity_at', '>', now()->subHours(24))
                 ->latest()
                 ->first();
@@ -77,6 +78,9 @@ class TwilioWebhookController extends Controller
                     'client_full_name' => $client->client_full_name,
                     'conversation_id' => $conversation->id
                 ]);
+
+                // Incrémenter le compteur quotidien de nouvelles conversations
+                DailyStatistic::today()->increment('total_conversations');
             } else {
                 // Update last activity and profile name if changed
                 $updates = ['last_activity_at' => now()];
@@ -134,10 +138,6 @@ class TwilioWebhookController extends Controller
                 'metadata' => $metadata,
             ]);
 
-            // Check if conversation is transferred to an agent
-            $isAgentMode = $conversation->status === 'transferred' && $conversation->agent_id !== null;
-            $isPendingAgent = $conversation->status === 'transferred' && $conversation->agent_id === null;
-
             // Return conversation data to Twilio Flow
             // IMPORTANT: Twilio Flow compare avec des chaînes "true"/"false", pas des booléens
             $responseData = [
@@ -152,8 +152,6 @@ class TwilioWebhookController extends Controller
                 'profile_name' => $profileName ?? $conversation->whatsapp_profile_name,
                 'message' => $body,
                 'status' => $conversation->status,
-                'agent_mode' => $isAgentMode ? 'true' : 'false',
-                'pending_agent' => $isPendingAgent ? 'true' : 'false',
                 'has_media' => $numMedia > 0 ? 'true' : 'false',
                 'media_count' => $numMedia,
                 'client_exists' => $clientExists ? 'true' : 'false',
@@ -234,6 +232,11 @@ class TwilioWebhookController extends Controller
                 'user_input' => $userInput,
                 'metadata' => ['menu_choice' => $menuChoice],
             ]);
+
+            // Incrémenter les statistiques quotidiennes du menu principal
+            if ($menuChoice === 'menu_principal' && $userInput !== null) {
+                DailyStatistic::today()->incrementMainMenu((string) $userInput);
+            }
 
             return response()->json([
                 'success' => true,

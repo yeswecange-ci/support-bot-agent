@@ -31,7 +31,6 @@ class ConversationController extends Controller
             'total_conversations' => $conversationsInRange->count(),
             'active_conversations' => Conversation::where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
-            'transferred_conversations' => (clone $conversationsInRange)->where('status', 'transferred')->count(),
             'total_clients' => (clone $clientsInRange)->where('is_client', true)->count(),
             'total_non_clients' => (clone $clientsInRange)->where('is_client', false)->count(),
             'avg_duration' => (clone $conversationsInRange)->whereNotNull('ended_at')->avg('duration_seconds'),
@@ -62,11 +61,14 @@ class ConversationController extends Controller
 
         // Get menu distribution
         $menuStats = [
-            'vehicules' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_vehicules_neufs'),
-            'sav' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_sav'),
-            'reclamation' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
-            'vip' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_club_vip'),
-            'agent' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_agent'),
+            'informations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_informations'),
+            'demandes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_demandes'),
+            'paris'         => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_paris'),
+            'encaissement'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_encaissement'),
+            'reclamations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
+            'plaintes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_plaintes'),
+            'conseiller'    => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_conseiller'),
+            'faq'           => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_faq'),
         ];
 
         // Recent conversations
@@ -178,7 +180,6 @@ class ConversationController extends Controller
             'total' => $conversations->total(),
             'active' => (clone $baseStatsQuery)->where('status', 'active')->count(),
             'completed' => (clone $baseStatsQuery)->where('status', 'completed')->count(),
-            'transferred' => (clone $baseStatsQuery)->where('status', 'transferred')->count(),
         ];
 
         return view('bot-tracking.conversations.list', compact('conversations', 'totalStats', 'dateFrom', 'dateTo'));
@@ -216,7 +217,6 @@ class ConversationController extends Controller
             'total_conversations' => $conversationsInRange->count(),
             'active_conversations' => Conversation::where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
-            'transferred_conversations' => (clone $conversationsInRange)->where('status', 'transferred')->count(),
             'total_clients' => (clone $clientsInRange)->where('is_client', true)->count(),
             'total_non_clients' => (clone $clientsInRange)->where('is_client', false)->count(),
             'avg_duration' => (clone $conversationsInRange)->whereNotNull('ended_at')->avg('duration_seconds'),
@@ -247,11 +247,14 @@ class ConversationController extends Controller
 
         // Get menu distribution
         $menuStats = [
-            'vehicules' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_vehicules_neufs'),
-            'sav' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_sav'),
-            'reclamation' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
-            'vip' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_club_vip'),
-            'agent' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_agent'),
+            'informations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_informations'),
+            'demandes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_demandes'),
+            'paris'         => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_paris'),
+            'encaissement'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_encaissement'),
+            'reclamations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
+            'plaintes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_plaintes'),
+            'conseiller'    => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_conseiller'),
+            'faq'           => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_faq'),
         ];
 
         // Status distribution

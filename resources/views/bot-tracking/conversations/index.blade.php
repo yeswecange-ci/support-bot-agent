@@ -33,7 +33,7 @@
         </div>
 
         {{-- Stat Cards Row 1 --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total conversations</p>
                 <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($stats['total_conversations'] ?? 0) }}</p>
@@ -48,11 +48,6 @@
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Completees</p>
                 <p class="text-3xl font-bold text-blue-600 mt-1">{{ number_format($stats['completed_conversations'] ?? 0) }}</p>
                 <p class="text-xs text-gray-400 mt-1">Terminees</p>
-            </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-5">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Transferees</p>
-                <p class="text-3xl font-bold text-purple-600 mt-1">{{ number_format($stats['transferred_conversations'] ?? 0) }}</p>
-                <p class="text-xs text-gray-400 mt-1">Vers un agent</p>
             </div>
         </div>
 
@@ -92,11 +87,14 @@
                 <div class="mt-4 space-y-1.5">
                     @php
                         $menuLegend = [
-                            'vehicules'   => ['label' => 'Vehicules',   'color' => '#6366f1'],
-                            'sav'         => ['label' => 'SAV',         'color' => '#0ea5e9'],
-                            'reclamation' => ['label' => 'Reclamation', 'color' => '#f59e0b'],
-                            'vip'         => ['label' => 'VIP',         'color' => '#8b5cf6'],
-                            'agent'       => ['label' => 'Agent',       'color' => '#10b981'],
+                            'informations' => ['label' => 'Informations',  'color' => '#6366f1'],
+                            'demandes'     => ['label' => 'Demandes',      'color' => '#0ea5e9'],
+                            'paris'        => ['label' => 'Paris',         'color' => '#10b981'],
+                            'encaissement' => ['label' => 'Encaissement',  'color' => '#f59e0b'],
+                            'reclamations' => ['label' => 'Reclamations',  'color' => '#ef4444'],
+                            'plaintes'     => ['label' => 'Plaintes',      'color' => '#8b5cf6'],
+                            'conseiller'   => ['label' => 'Conseiller',    'color' => '#ec4899'],
+                            'faq'          => ['label' => 'FAQ',           'color' => '#64748b'],
                         ];
                     @endphp
                     @foreach($menuLegend as $key => $meta)
@@ -144,7 +142,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 @php
-                                    $statusMap = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'transferred' => 'bg-purple-100 text-purple-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
+                                    $statusMap = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
                                     $sc = $statusMap[$conv->status] ?? 'bg-gray-100 text-gray-600';
                                 @endphp
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sc }}">{{ ucfirst($conv->status) }}</span>
@@ -184,10 +182,19 @@
         new Chart(menuCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Vehicules', 'SAV', 'Reclamation', 'VIP', 'Agent'],
+                labels: ['Informations','Demandes','Paris','Encaissement','Reclamations','Plaintes','Conseiller','FAQ'],
                 datasets: [{
-                    data: [{{ $menuStats['vehicules'] ?? 0 }},{{ $menuStats['sav'] ?? 0 }},{{ $menuStats['reclamation'] ?? 0 }},{{ $menuStats['vip'] ?? 0 }},{{ $menuStats['agent'] ?? 0 }}],
-                    backgroundColor: ['#6366f1','#0ea5e9','#f59e0b','#8b5cf6','#10b981'],
+                    data: [
+                        {{ $menuStats['informations'] ?? 0 }},
+                        {{ $menuStats['demandes'] ?? 0 }},
+                        {{ $menuStats['paris'] ?? 0 }},
+                        {{ $menuStats['encaissement'] ?? 0 }},
+                        {{ $menuStats['reclamations'] ?? 0 }},
+                        {{ $menuStats['plaintes'] ?? 0 }},
+                        {{ $menuStats['conseiller'] ?? 0 }},
+                        {{ $menuStats['faq'] ?? 0 }}
+                    ],
+                    backgroundColor: ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#64748b'],
                     borderWidth: 0, hoverOffset: 6
                 }]
             },
@@ -196,8 +203,8 @@
     }
     var dailyCtx = document.getElementById('dailyChart');
     if (dailyCtx) {
-        var labels = {!! json_encode($dailyStats->pluck('date')->toArray()) !!};
-        var data   = {!! json_encode($dailyStats->pluck('count')->toArray()) !!};
+        var labels = {!! json_encode($dailyStats->pluck('date')->map(fn($d) => (string)$d)->toArray()) !!};
+        var data   = {!! json_encode($dailyStats->pluck('total_conversations')->toArray()) !!};
         new Chart(dailyCtx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Conversations', data: data, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.08)', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#6366f1', fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } } } });
     }
 })();
