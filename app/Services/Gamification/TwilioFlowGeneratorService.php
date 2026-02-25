@@ -56,7 +56,7 @@ class TwilioFlowGeneratorService
                 'offset'       => ['x' => $x, 'y' => $y],
                 'method'       => 'POST',
                 'url'          => "{$webhookBase}/check",
-                'body'         => '',
+                'body'         => null,
                 'parameters'   => [
                     ['key' => 'phone', 'value' => '{{contact.channel.address}}'],
                 ],
@@ -167,7 +167,7 @@ class TwilioFlowGeneratorService
                 'offset'       => ['x' => $x - 350, 'y' => $y + $step],
                 'method'       => 'POST',
                 'url'          => "{$webhookBase}/save-name",
-                'body'         => '',
+                'body'         => null,
                 'parameters'   => [
                     ['key' => 'phone', 'value' => '{{contact.channel.address}}'],
                     ['key' => 'name',  'value' => '{{widgets.ask_name.inbound.Body}}'],
@@ -225,7 +225,7 @@ class TwilioFlowGeneratorService
                     'offset'       => ['x' => $x, 'y' => $y],
                     'method'       => 'POST',
                     'url'          => "{$webhookBase}/answer",
-                    'body'         => '',
+                    'body'         => null,
                     'parameters'   => [
                         ['key' => 'phone',          'value' => '{{contact.channel.address}}'],
                         ['key' => 'question_order', 'value' => (string) $qNum],
@@ -250,7 +250,7 @@ class TwilioFlowGeneratorService
                 'offset'       => ['x' => $x, 'y' => $y],
                 'method'       => 'POST',
                 'url'          => "{$webhookBase}/complete",
-                'body'         => '',
+                'body'         => null,
                 'parameters'   => [
                     ['key' => 'phone', 'value' => '{{contact.channel.address}}'],
                 ],
