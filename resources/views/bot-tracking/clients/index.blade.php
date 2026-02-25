@@ -67,10 +67,10 @@
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Trier par</label>
                     <select name="sort_by" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <option value="last_interaction">Derniere interaction</option>
-                        <option value="name">Nom</option>
-                        <option value="interactions">Nb interactions</option>
-                        <option value="created_at">Date creation</option>
+                        <option value="last_interaction_at" {{ request('sort_by') == 'last_interaction_at' ? 'selected' : '' }}>Derniere interaction</option>
+                        <option value="client_full_name" {{ request('sort_by') == 'client_full_name' ? 'selected' : '' }}>Nom</option>
+                        <option value="interaction_count" {{ request('sort_by') == 'interaction_count' ? 'selected' : '' }}>Nb interactions</option>
+                        <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Date creation</option>
                     </select>
                 </div>
                 <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">Filtrer</button>
@@ -118,7 +118,7 @@
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Non defini</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700">{{ $client->interactions_count ?? 0 }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">{{ $client->interaction_count ?? 0 }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500">{{ $client->last_interaction_at ? \Carbon\Carbon::parse($client->last_interaction_at)->diffForHumans() : '&mdash;' }}</td>
                             <td class="px-4 py-3 text-right"><a href="{{ route('bot-tracking.clients.show', $client->id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir &rarr;</a></td>
                         </tr>

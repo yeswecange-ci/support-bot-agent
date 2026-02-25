@@ -47,9 +47,10 @@ class ClientController extends Controller
             $query->whereDate('first_interaction_at', '<=', $request->date_to);
         }
 
-        // Sort
-        $sortBy = $request->input('sort_by', 'last_interaction_at');
-        $sortOrder = $request->input('sort_order', 'desc');
+        // Sort — whitelist pour éviter injection SQL
+        $allowedSorts = ['last_interaction_at', 'client_full_name', 'interaction_count', 'created_at'];
+        $sortBy = in_array($request->input('sort_by'), $allowedSorts) ? $request->input('sort_by') : 'last_interaction_at';
+        $sortOrder = $request->input('sort_order') === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
         $clients = $query->paginate(10)->withQueryString();
@@ -151,7 +152,7 @@ class ClientController extends Controller
             'new' => $client->fresh()->toArray(),
         ]);
 
-        return redirect()->route('dashboard.clients.show', $client->id)
+        return redirect()->route('bot-tracking.clients.show', $client->id)
             ->with('success', 'Les informations du client ont été mises à jour avec succès.');
     }
 
