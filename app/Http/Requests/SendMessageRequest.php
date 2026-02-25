@@ -24,6 +24,17 @@ class SendMessageRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            // DEBUG TEMPORAIRE — à supprimer
+            foreach ((array) $this->files->get('attachments') as $i => $f) {
+                \Illuminate\Support\Facades\Log::debug("upload_debug[$i]", [
+                    'name'     => $f?->getClientOriginalName(),
+                    'error'    => $f?->getError(),
+                    'valid'    => $f?->isValid(),
+                    'size'     => $f?->getSize(),
+                    'tmp_name' => $f?->getPathname(),
+                ]);
+            }
+
             $hasContent = filled($this->input('content'));
             $hasFiles   = $this->hasFile('attachments');
 
