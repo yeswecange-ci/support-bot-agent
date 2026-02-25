@@ -218,12 +218,11 @@ class TwilioWebhookController extends Controller
                 'last_activity_at' => now(),
             ]);
 
-            // Add menu to path
-            $menuPath = ($conversation->menu_path && is_string($conversation->menu_path))
-                ? json_decode($conversation->menu_path, true)
-                : [];
+            // Add menu to path — menu_path is cast as 'array', pass raw array (no json_encode)
+            $rawPath = $conversation->menu_path;
+            $menuPath = is_array($rawPath) ? $rawPath : (is_string($rawPath) ? (json_decode($rawPath, true) ?? []) : []);
             $menuPath[] = $menuChoice;
-            $conversation->update(['menu_path' => json_encode($menuPath)]);
+            $conversation->update(['menu_path' => $menuPath]);
 
             // Store event
             ConversationEvent::create([

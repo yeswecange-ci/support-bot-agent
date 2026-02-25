@@ -84,11 +84,15 @@
         </div>
 
         {{-- Menu Path --}}
-        @if(!empty($conversation->menu_path ?? []))
+        @php
+            $rawPath = $conversation->menu_path;
+            $menuPathArray = is_array($rawPath) ? $rawPath : (is_string($rawPath) ? (json_decode($rawPath, true) ?? []) : []);
+        @endphp
+        @if(!empty($menuPathArray))
         <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
             <h3 class="text-sm font-semibold text-gray-700 mb-3">Parcours menu</h3>
             <div class="flex flex-wrap items-center gap-2">
-                @foreach(($conversation->menu_path ?? []) as $step)
+                @foreach($menuPathArray as $step)
                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">{{ $step }}</span>
                 @if(!$loop->last)<span class="text-gray-300 text-sm">&rarr;</span>@endif
                 @endforeach
