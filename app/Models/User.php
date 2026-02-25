@@ -64,6 +64,11 @@ class User extends Authenticatable
         return $this->role === 'administrator';
     }
 
+    public function hasRole(array|string $roles): bool
+    {
+        return in_array($this->role, (array) $roles) || $this->isAdmin();
+    }
+
     public function campaigns(): HasMany
     {
         return $this->hasMany(Campaign::class, 'created_by');
