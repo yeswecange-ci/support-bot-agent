@@ -72,11 +72,18 @@
                 <h3 class="text-sm font-semibold text-gray-700 mb-4">Informations</h3>
                 <div class="space-y-3">
                     <div><p class="text-xs text-gray-400 uppercase tracking-wide">Telephone</p><p class="text-sm text-gray-700 mt-0.5">{{ $client->phone_number }}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Email</p><p class="text-sm text-gray-700 mt-0.5">{{ $client->email ?? '&mdash;' }}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase tracking-wide">VIN</p><p class="text-sm font-mono text-gray-700 mt-0.5">{{ $client->vin ?? '&mdash;' }}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Carte VIP</p><p class="text-sm text-gray-700 mt-0.5">{{ $client->carte_vip ?? '&mdash;' }}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Profil WhatsApp</p><p class="text-sm text-gray-700 mt-0.5">{{ $client->whatsapp_profile_name ?? '&mdash;' }}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Derniere interaction</p><p class="text-sm text-gray-700 mt-0.5">{{ $client->last_interaction_at ? \Carbon\Carbon::parse($client->last_interaction_at)->diffForHumans() : '&mdash;' }}</p></div>
+                    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Email</p><p class="text-sm text-gray-700 mt-0.5">{{ $client->email ?: '—' }}</p></div>
+                    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Profil WhatsApp</p><p class="text-sm text-gray-700 mt-0.5">{{ $client->whatsapp_profile_name ?: '—' }}</p></div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-wide">Derniere interaction</p>
+                        <p class="text-sm text-gray-700 mt-0.5">
+                            @if($client->last_interaction_at)
+                                {{ \Carbon\Carbon::parse($client->last_interaction_at)->diffForHumans() }}
+                            @else
+                                —
+                            @endif
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -89,7 +96,11 @@
                         <div>
                             @php $sm2 = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600']; @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sm2[$conv->status] ?? 'bg-gray-100 text-gray-600' }}">{{ ucfirst($conv->status) }}</span>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ $conv->current_menu ?? '&mdash;' }} &bull; @if($conv->duration_seconds){{ round($conv->duration_seconds / 60) }}min@else&mdash;@endif</p>
+                            <p class="text-xs text-gray-500 mt-0.5">{{ $conv->current_menu ?: '—' }} &bull;
+                                @if($conv->duration_seconds){{ round($conv->duration_seconds / 60) }}min
+                                @else —
+                                @endif
+                            </p>
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-gray-400">@if($conv->started_at){{ \Carbon\Carbon::parse($conv->started_at)->format('d/m/Y') }}@endif</p>

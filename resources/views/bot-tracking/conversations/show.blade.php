@@ -11,7 +11,7 @@
                 Conversations
             </a>
             <span class="text-gray-300">/</span>
-            <span class="text-sm font-medium text-gray-900">{{ $conversation->display_name ?? $conversation->phone_number }}</span>
+            <span class="text-sm font-medium text-gray-900">{{ $conversation->display_name }}</span>
         </div>
 
         {{-- Conversation Header Card --}}
@@ -19,13 +19,13 @@
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                        <span class="text-xl font-bold text-indigo-700">{{ strtoupper(substr($conversation->display_name ?? '?', 0, 1)) }}</span>
+                        <span class="text-xl font-bold text-indigo-700">{{ strtoupper(substr($conversation->display_name, 0, 1)) }}</span>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-900">{{ $conversation->display_name ?? 'Inconnu' }}</h1>
+                        <h1 class="text-xl font-bold text-gray-900">{{ $conversation->display_name }}</h1>
                         <p class="text-sm text-gray-500">{{ $conversation->phone_number }}</p>
                         @if($conversation->email)
-                        <p class="text-sm text-gray-400">{{ $conversation->email }}</p>
+                            <p class="text-sm text-gray-400">{{ $conversation->email }}</p>
                         @endif
                     </div>
                 </div>
@@ -40,45 +40,52 @@
                     @elseif($conversation->is_client === false || $conversation->is_client == 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">Non-client</span>
                     @endif
-                    @if($conversation->carte_vip)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700">VIP</span>
-                    @endif
                 </div>
             </div>
 
-            {{-- Info Grid --}}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-gray-100">
+            {{-- Info Grid (session uniquement, sans VIN ni VIP) --}}
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
                 <div>
                     <p class="text-xs text-gray-400 uppercase tracking-wide">Session ID</p>
-                    <p class="text-sm font-mono text-gray-700 mt-0.5 truncate">{{ $conversation->session_id ?? '&mdash;' }}</p>
+                    <p class="text-sm font-mono text-gray-700 mt-0.5 truncate">{{ $conversation->session_id ?: '—' }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-400 uppercase tracking-wide">Menu actuel</p>
-                    <p class="text-sm text-gray-700 mt-0.5">{{ $conversation->current_menu ?? '&mdash;' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wide">VIN</p>
-                    <p class="text-sm font-mono text-gray-700 mt-0.5">{{ $conversation->vin ?? '&mdash;' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wide">Carte VIP</p>
-                    <p class="text-sm text-gray-700 mt-0.5">{{ $conversation->carte_vip ?? '&mdash;' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wide">Debut</p>
-                    <p class="text-sm text-gray-700 mt-0.5">@if($conversation->started_at){{ \Carbon\Carbon::parse($conversation->started_at)->format('d/m/Y H:i') }}@else&mdash;@endif</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wide">Fin</p>
-                    <p class="text-sm text-gray-700 mt-0.5">@if($conversation->ended_at){{ \Carbon\Carbon::parse($conversation->ended_at)->format('d/m/Y H:i') }}@else&mdash;@endif</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wide">Duree</p>
-                    <p class="text-sm text-gray-700 mt-0.5">@if($conversation->duration_seconds){{ round($conversation->duration_seconds / 60) }}min@else&mdash;@endif</p>
+                    <p class="text-sm text-gray-700 mt-0.5">{{ $conversation->current_menu ?: '—' }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-400 uppercase tracking-wide">ID Chatwoot</p>
-                    <p class="text-sm font-mono text-gray-700 mt-0.5">{{ $conversation->chatwoot_conversation_id ?? '&mdash;' }}</p>
+                    <p class="text-sm font-mono text-gray-700 mt-0.5">{{ $conversation->chatwoot_conversation_id ?: '—' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Debut</p>
+                    <p class="text-sm text-gray-700 mt-0.5">
+                        @if($conversation->started_at)
+                            {{ $conversation->started_at->format('d/m/Y H:i') }}
+                        @else
+                            —
+                        @endif
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Fin</p>
+                    <p class="text-sm text-gray-700 mt-0.5">
+                        @if($conversation->ended_at)
+                            {{ $conversation->ended_at->format('d/m/Y H:i') }}
+                        @else
+                            —
+                        @endif
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Duree</p>
+                    <p class="text-sm text-gray-700 mt-0.5">
+                        @if($conversation->duration_seconds)
+                            {{ round($conversation->duration_seconds / 60) }}min
+                        @else
+                            —
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>
@@ -90,35 +97,112 @@
         @endphp
         @if(!empty($menuPathArray))
         <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
-            <h3 class="text-sm font-semibold text-gray-700 mb-3">Parcours menu</h3>
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">Parcours menu (cette session)</h3>
             <div class="flex flex-wrap items-center gap-2">
                 @foreach($menuPathArray as $step)
-                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">{{ $step }}</span>
-                @if(!$loop->last)<span class="text-gray-300 text-sm">&rarr;</span>@endif
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">{{ $step }}</span>
+                    @if(!$loop->last)<span class="text-gray-300 text-sm">&rarr;</span>@endif
                 @endforeach
             </div>
         </div>
         @endif
 
-        {{-- Events Timeline --}}
+        {{-- Toutes les sessions de ce numéro --}}
+        @if($phoneConversations->count() > 1)
+        <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">Toutes les sessions de ce numéro ({{ $phoneConversations->count() }})</h3>
+            <div class="space-y-2">
+                @foreach($phoneConversations as $sess)
+                @php
+                    $sessColors = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
+                    $sessBadge  = $sessColors[$sess->status] ?? 'bg-gray-100 text-gray-600';
+                    $isCurrent  = $sess->id === $conversation->id;
+                @endphp
+                <div class="flex items-center justify-between p-2.5 rounded-lg {{ $isCurrent ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50' }}">
+                    <div class="flex items-center gap-2">
+                        @if($isCurrent)
+                            <span class="text-xs font-medium text-indigo-600">&#9654; Session actuelle</span>
+                        @endif
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sessBadge }}">{{ ucfirst($sess->status) }}</span>
+                        <span class="text-xs text-gray-500">
+                            @if($sess->started_at){{ $sess->started_at->format('d/m/Y H:i') }}@endif
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-gray-400">
+                            @if($sess->duration_seconds)
+                                {{ round($sess->duration_seconds / 60) }}min
+                            @else
+                                —
+                            @endif
+                        </span>
+                        @if(!$isCurrent)
+                            <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir &rarr;</a>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Historique complet de toutes les interactions de ce numéro --}}
         <div class="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 class="text-sm font-semibold text-gray-700 mb-6">Historique des evenements ({{ $conversation->events->count() }})</h3>
-            @if($conversation->events->isEmpty())
+            <h3 class="text-sm font-semibold text-gray-700 mb-6">
+                Historique complet des interactions — {{ $conversation->phone_number }}
+                <span class="text-gray-400 font-normal">({{ $allEvents->count() }} événements)</span>
+            </h3>
+            @if($allEvents->isEmpty())
                 <p class="text-sm text-gray-400 text-center py-8">Aucun evenement enregistre.</p>
             @else
-            <div class="relative pl-6 space-y-6">
+            @php
+                $typeColors = [
+                    'menu_choice'      => 'bg-indigo-500',
+                    'free_input'       => 'bg-purple-500',
+                    'message_received' => 'bg-green-500',
+                    'message_sent'     => 'bg-blue-500',
+                    'agent_transfer'   => 'bg-amber-500',
+                    'error'            => 'bg-red-500',
+                    'invalid_input'    => 'bg-red-400',
+                    'flow_start'       => 'bg-teal-500',
+                    'flow_complete'    => 'bg-teal-400',
+                    'timeout'          => 'bg-orange-400',
+                    'timeout_warning'  => 'bg-orange-300',
+                ];
+                $currentSessionId = null;
+            @endphp
+            <div class="relative pl-6 space-y-4">
                 <div class="absolute left-2 top-2 bottom-2 w-px bg-gray-200"></div>
-                @foreach($conversation->events as $event)
+                @foreach($allEvents as $event)
                 @php
-                    $typeColors = [
-                        'menu_choice'     => 'bg-indigo-500',  'free_input'       => 'bg-purple-500',
-                        'message_received' => 'bg-green-500',  'message_sent'      => 'bg-blue-500',
-                        'agent_transfer'  => 'bg-amber-500',  'error'             => 'bg-red-500',
-                        'invalid_input'   => 'bg-red-400',
-                    ];
                     $dot = $typeColors[$event->event_type] ?? 'bg-gray-400';
                     $ts  = $event->event_at ?? $event->created_at;
+                    $sessId = $event->conversation_id;
                 @endphp
+
+                {{-- Séparateur de session --}}
+                @if($currentSessionId !== $sessId)
+                @php $currentSessionId = $sessId; $sess = $event->conversation; @endphp
+                <div class="relative flex items-center gap-2 py-1">
+                    <div class="absolute -left-6 w-3 h-3 rounded-full bg-gray-300 ring-2 ring-white flex items-center justify-center"></div>
+                    <div class="pl-2 flex items-center gap-2 flex-wrap">
+                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Session</span>
+                        @if($sess)
+                            @php $sc2 = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600']; @endphp
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sc2[$sess->status] ?? 'bg-gray-100 text-gray-600' }}">{{ ucfirst($sess->status) }}</span>
+                            <span class="text-xs text-gray-400">
+                                @if($sess->started_at){{ $sess->started_at->format('d/m/Y H:i') }}@endif
+                            </span>
+                            @if($sess->id !== $conversation->id)
+                                <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-indigo-500 hover:text-indigo-700">voir &rarr;</a>
+                            @else
+                                <span class="text-xs text-indigo-600 font-medium">session actuelle</span>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 <div class="relative">
                     <div class="absolute -left-6 mt-1 w-3 h-3 rounded-full {{ $dot }} ring-2 ring-white"></div>
                     <div class="pl-2">
@@ -139,12 +223,12 @@
                         </div>
                         @endif
                         @if($event->widget_name)
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">Widget: {{ $event->widget_name }}</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">Widget: {{ $event->widget_name }}</span>
                         @endif
                         @if($event->metadata)
                         <details class="mt-1">
                             <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600">Metadata</summary>
-                            <pre class="text-xs text-gray-600 bg-gray-50 rounded p-2 mt-1 overflow-x-auto">{{ is_array($event->metadata) ? json_encode($event->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $event->metadata }}</pre>
+                            <pre class="text-xs text-gray-600 bg-gray-50 rounded p-2 mt-1 overflow-x-auto">{{ json_encode($event->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </details>
                         @endif
                     </div>

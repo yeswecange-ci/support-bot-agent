@@ -191,10 +191,22 @@ class ConversationController extends Controller
     public function show($id)
     {
         $conversation = Conversation::with(['events' => function($query) {
-            $query->orderBy('created_at', 'asc');
+            $query->orderBy('event_at', 'asc')->orderBy('created_at', 'asc');
         }])->findOrFail($id);
 
-        return view('bot-tracking.conversations.show', compact('conversation'));
+        // All conversations from this phone number (for the sessions list)
+        $phoneConversations = Conversation::where('phone_number', $conversation->phone_number)
+            ->orderBy('started_at', 'desc')
+            ->get();
+
+        // All events across ALL conversations for this phone number
+        $allEvents = ConversationEvent::whereIn('conversation_id', $phoneConversations->pluck('id'))
+            ->with('conversation')
+            ->orderBy('event_at', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return view('bot-tracking.conversations.show', compact('conversation', 'phoneConversations', 'allEvents'));
     }
 
     /**
