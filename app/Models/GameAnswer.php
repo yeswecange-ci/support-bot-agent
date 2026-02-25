@@ -12,10 +12,12 @@ class GameAnswer extends Model
         'question_id',
         'answer_text',
         'answered_at',
+        'is_correct',
     ];
 
     protected $casts = [
         'answered_at' => 'datetime',
+        'is_correct'  => 'boolean',
     ];
 
     public function participation(): BelongsTo

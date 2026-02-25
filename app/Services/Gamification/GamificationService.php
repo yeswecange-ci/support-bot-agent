@@ -106,9 +106,11 @@ class GamificationService
             return false;
         }
 
+        $isCorrect = $question->checkAnswer($answer);
+
         GameAnswer::updateOrCreate(
             ['participation_id' => $participation->id, 'question_id' => $question->id],
-            ['answer_text' => $answer, 'answered_at' => now()]
+            ['answer_text' => $answer, 'answered_at' => now(), 'is_correct' => $isCorrect]
         );
 
         return true;

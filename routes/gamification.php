@@ -27,4 +27,5 @@ Route::middleware('auth')->prefix('gamification')->name('gamification.')->group(
     Route::post('/games/{slug}/close',             [GameController::class, 'close'])->name('close');
     Route::get('/games/{slug}/flow',               [GameController::class, 'showFlow'])->name('flow');
     Route::get('/games/{slug}/export',             [GameController::class, 'export'])->name('export');
+    Route::get('/games/{slug}/statistics',         [GameController::class, 'statistics'])->name('statistics');
 });

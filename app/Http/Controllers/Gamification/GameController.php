@@ -16,15 +16,23 @@ class GameController extends Controller
 {
     public function __construct(private TwilioFlowGeneratorService $flowGenerator) {}
 
-    // ── Liste ─────────────────────────────────────────────────────────────────
+    // ── Liste / Dashboard ─────────────────────────────────────────────────────
 
     public function index()
     {
-        $games = Game::withCount('participations')
-            ->orderByDesc('created_at')
-            ->paginate(20);
+        $games = Game::withCount([
+            'participations',
+            'participations as completed_count' => fn($q) => $q->where('status', 'completed'),
+        ])->orderByDesc('created_at')->get();
 
-        return view('gamification.index', compact('games'));
+        $globalStats = [
+            'active_count'       => $games->where('status', 'active')->count(),
+            'total_participants' => $games->sum('participations_count'),
+            'total_completed'    => $games->sum('completed_count'),
+            'total_games'        => $games->count(),
+        ];
+
+        return view('gamification.index', compact('games', 'globalStats'));
     }
 
     // ── Création ──────────────────────────────────────────────────────────────
@@ -45,12 +53,40 @@ class GameController extends Controller
             'end_date'          => 'nullable|date|after_or_equal:start_date',
             'max_participants'  => 'nullable|integer|min:1',
             'thank_you_message' => 'nullable|string',
+            'questions'         => 'nullable|array',
+            'questions.*.text'  => 'required_with:questions|string',
+            'questions.*.type'  => 'required_with:questions|in:mcq,free_text,vote,prediction',
+            'questions.*.options'        => 'nullable|string',
+            'questions.*.correct_answer' => 'nullable|string|max:255',
         ]);
 
         $validated['slug']   = Game::generateSlug($validated['name']);
         $validated['status'] = 'draft';
 
+        $questions = $validated['questions'] ?? [];
+        unset($validated['questions']);
+
         $game = Game::create($validated);
+
+        foreach ($questions as $i => $q) {
+            if (empty(trim($q['text'] ?? ''))) {
+                continue;
+            }
+
+            $options = null;
+            if (!empty($q['options'])) {
+                $options = array_values(array_filter(array_map('trim', explode("\n", $q['options']))));
+            }
+
+            GameQuestion::create([
+                'game_id'        => $game->id,
+                'order'          => $i + 1,
+                'text'           => $q['text'],
+                'type'           => $q['type'],
+                'options'        => $options ?: null,
+                'correct_answer' => $q['correct_answer'] ?? null,
+            ]);
+        }
 
         return redirect()->route('gamification.show', $game->slug)
             ->with('success', 'Jeu créé avec succès.');
@@ -71,7 +107,110 @@ class GameController extends Controller
             'started'   => $game->participations->where('status', 'started')->count(),
         ];
 
-        return view('gamification.show', compact('game', 'stats'));
+        // Taux de complétion
+        $stats['completion_rate'] = $stats['total'] > 0
+            ? round($stats['completed'] / $stats['total'] * 100)
+            : 0;
+
+        // Score par question (pour l'onglet stats dans show)
+        $questionStats = [];
+        foreach ($game->questions as $question) {
+            $answers = $question->answers;
+            $total   = $answers->count();
+            $correct = $answers->where('is_correct', true)->count();
+            $wrong   = $answers->where('is_correct', false)->count();
+
+            $questionStats[$question->id] = [
+                'total'   => $total,
+                'correct' => $correct,
+                'wrong'   => $wrong,
+                'null'    => $total - $correct - $wrong,
+                'rate'    => $total > 0 ? round($correct / $total * 100) : null,
+            ];
+        }
+
+        return view('gamification.show', compact('game', 'stats', 'questionStats'));
+    }
+
+    // ── Statistiques ──────────────────────────────────────────────────────────
+
+    public function statistics(string $slug)
+    {
+        $game = Game::where('slug', $slug)
+            ->with(['questions.answers'])
+            ->firstOrFail();
+
+        $participations = GameParticipation::where('game_id', $game->id)
+            ->with('answers')
+            ->get();
+
+        $total     = $participations->count();
+        $completed = $participations->where('status', 'completed')->count();
+        $started   = $participations->where('status', 'started')->count();
+        $abandoned = $participations->where('status', 'abandoned')->count();
+
+        $completionRate = $total > 0 ? round($completed / $total * 100) : 0;
+
+        // Score moyen (nb bonnes réponses / total questions, parmi les complétés)
+        $avgScore = null;
+        $totalQuestions = $game->questions->count();
+        if ($completed > 0 && $totalQuestions > 0) {
+            $totalCorrect = 0;
+            foreach ($participations->where('status', 'completed') as $p) {
+                $totalCorrect += $p->answers->where('is_correct', true)->count();
+            }
+            $avgScore = round($totalCorrect / ($completed * $totalQuestions) * 100);
+        }
+
+        // Stats par question
+        $questionStats = [];
+        foreach ($game->questions as $question) {
+            $answers = $question->answers;
+            $qTotal  = $answers->count();
+            $correct = $answers->where('is_correct', true)->count();
+            $wrong   = $answers->where('is_correct', false)->count();
+            $nullC   = $qTotal - $correct - $wrong;
+
+            // Distribution des réponses brutes
+            $distribution = $answers
+                ->groupBy(fn($a) => mb_strtolower(trim($a->answer_text)))
+                ->map(fn($group, $key) => [
+                    'text'  => $group->first()->answer_text,
+                    'count' => $group->count(),
+                ])
+                ->sortByDesc('count')
+                ->values()
+                ->toArray();
+
+            $questionStats[] = [
+                'question'     => $question,
+                'total'        => $qTotal,
+                'correct'      => $correct,
+                'wrong'        => $wrong,
+                'null_count'   => $nullC,
+                'rate'         => $qTotal > 0 ? round($correct / $qTotal * 100) : null,
+                'distribution' => $distribution,
+            ];
+        }
+
+        // Funnel
+        $atLeastOneCorrect = 0;
+        foreach ($participations as $p) {
+            if ($p->answers->where('is_correct', true)->count() > 0) {
+                $atLeastOneCorrect++;
+            }
+        }
+
+        $funnel = [
+            'started'           => $total,
+            'completed'         => $completed,
+            'at_least_1_correct' => $atLeastOneCorrect,
+        ];
+
+        return view('gamification.statistics', compact(
+            'game', 'total', 'completed', 'started', 'abandoned',
+            'completionRate', 'avgScore', 'questionStats', 'funnel'
+        ));
     }
 
     // ── Édition ───────────────────────────────────────────────────────────────
@@ -95,9 +234,41 @@ class GameController extends Controller
             'end_date'          => 'nullable|date|after_or_equal:start_date',
             'max_participants'  => 'nullable|integer|min:1',
             'thank_you_message' => 'nullable|string',
+            'questions'         => 'nullable|array',
+            'questions.*.text'  => 'required_with:questions|string',
+            'questions.*.type'  => 'required_with:questions|in:mcq,free_text,vote,prediction',
+            'questions.*.options'        => 'nullable|string',
+            'questions.*.correct_answer' => 'nullable|string|max:255',
         ]);
 
+        $questions = $validated['questions'] ?? null;
+        unset($validated['questions']);
+
         $game->update($validated);
+
+        // Recréer les questions si fournies
+        if ($questions !== null) {
+            $game->questions()->delete();
+            foreach ($questions as $i => $q) {
+                if (empty(trim($q['text'] ?? ''))) {
+                    continue;
+                }
+
+                $options = null;
+                if (!empty($q['options'])) {
+                    $options = array_values(array_filter(array_map('trim', explode("\n", $q['options']))));
+                }
+
+                GameQuestion::create([
+                    'game_id'        => $game->id,
+                    'order'          => $i + 1,
+                    'text'           => $q['text'],
+                    'type'           => $q['type'],
+                    'options'        => $options ?: null,
+                    'correct_answer' => $q['correct_answer'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('gamification.show', $game->slug)
             ->with('success', 'Jeu mis à jour.');
@@ -142,7 +313,7 @@ class GameController extends Controller
             'correct_answer' => $validated['correct_answer'] ?? null,
         ]);
 
-        return redirect()->route('gamification.show', $slug)
+        return redirect(route('gamification.edit', $slug) . '#questions')
             ->with('success', 'Question ajoutée.');
     }
 
@@ -209,6 +380,7 @@ class GameController extends Controller
             $headers = ['Nom', 'Téléphone', 'Statut', 'Début', 'Fin'];
             foreach ($game->questions as $question) {
                 $headers[] = "Q{$question->order}: " . mb_substr($question->text, 0, 50);
+                $headers[] = "Q{$question->order} Correct";
             }
             fputcsv($handle, $headers, ';');
 
@@ -226,6 +398,7 @@ class GameController extends Controller
                     $answer = $participation->answers
                         ->firstWhere('question_id', $question->id);
                     $row[] = $answer?->answer_text ?? '';
+                    $row[] = $answer?->is_correct === true ? 'Oui' : ($answer?->is_correct === false ? 'Non' : '');
                 }
 
                 fputcsv($handle, $row, ';');

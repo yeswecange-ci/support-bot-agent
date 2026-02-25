@@ -31,4 +31,33 @@ class GameQuestion extends Model
     {
         return $this->hasMany(GameAnswer::class, 'question_id');
     }
+
+    /**
+     * Vérifie si la réponse donnée est correcte.
+     * Retourne null si pas de bonne réponse définie.
+     */
+    public function checkAnswer(string $answer): ?bool
+    {
+        if (empty($this->correct_answer)) {
+            return null;
+        }
+
+        $given   = mb_strtolower(trim($answer));
+        $correct = mb_strtolower(trim($this->correct_answer));
+
+        // Comparaison directe
+        if ($given === $correct) {
+            return true;
+        }
+
+        // Pour MCQ/vote : l'utilisateur peut avoir tapé "1", "2", etc. (index 1-based)
+        if (in_array($this->type, ['mcq', 'vote']) && is_array($this->options)) {
+            $index = (int) $given - 1;
+            if ($index >= 0 && isset($this->options[$index])) {
+                return mb_strtolower(trim($this->options[$index])) === $correct;
+            }
+        }
+
+        return false;
+    }
 }
