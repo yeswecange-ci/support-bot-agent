@@ -346,12 +346,12 @@ class ConversationController extends Controller
             $variables = $request->input('variables', []);
             $this->twilio->sendTemplate($phone, $request->content_sid, $variables);
 
-            // Logger dans Chatwoot comme message sortant
+            // Logger dans Chatwoot comme NOTE PRIVÉE pour éviter le double envoi via webhook
             $templateName = $request->input('template_name', 'Template');
             $bodyPreview = $request->input('body_preview', '');
             $logContent = "[Template: {$templateName}]\n{$bodyPreview}";
 
-            $chatwootMsg = $this->chatwoot->sendMessage($conversationId, $logContent);
+            $chatwootMsg = $this->chatwoot->sendMessage($conversationId, $logContent, true);
 
             return response()->json($chatwootMsg);
         } catch (\Exception $e) {

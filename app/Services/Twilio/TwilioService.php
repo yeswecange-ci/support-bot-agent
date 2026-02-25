@@ -40,19 +40,26 @@ class TwilioService
     /**
      * Envoyer un message WhatsApp via Twilio
      */
-    public function sendWhatsApp(string $to, string $body): void
+    public function sendWhatsApp(string $to, string $body, array $mediaUrls = []): void
     {
         if (!str_starts_with($to, 'whatsapp:')) {
             $to = "whatsapp:{$to}";
         }
 
-        try {
-            $this->client->messages->create($to, [
-                'from' => $this->from,
-                'body' => $body,
-            ]);
+        $params = ['from' => $this->from, 'body' => $body];
 
-            Log::info('WhatsApp envoyé', ['to' => $to, 'body' => mb_substr($body, 0, 50)]);
+        if (!empty($mediaUrls)) {
+            $params['mediaUrl'] = $mediaUrls;
+        }
+
+        try {
+            $this->client->messages->create($to, $params);
+
+            Log::info('WhatsApp envoyé', [
+                'to'         => $to,
+                'body'       => mb_substr($body, 0, 50),
+                'media_count' => count($mediaUrls),
+            ]);
         } catch (\Exception $e) {
             Log::error('Erreur envoi WhatsApp', [
                 'to'    => $to,

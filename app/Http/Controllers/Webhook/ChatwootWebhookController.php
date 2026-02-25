@@ -47,7 +47,16 @@ class ChatwootWebhookController extends Controller
         $content     = $request->input('content', '');
 
         // Ne transmettre que les messages SORTANTS et NON privés
-        if ($messageType !== 'outgoing' || $private || empty($content)) {
+        if ($messageType !== 'outgoing' || $private) {
+            return response()->json(['ok' => true, 'action' => 'skipped']);
+        }
+
+        // Extraire les URLs des pièces jointes (messages media)
+        $attachments = $request->input('attachments', []);
+        $mediaUrls   = collect($attachments)->pluck('data_url')->filter()->values()->all();
+
+        // Ignorer si ni texte ni media
+        if (empty($content) && empty($mediaUrls)) {
             return response()->json(['ok' => true, 'action' => 'skipped']);
         }
 
@@ -61,13 +70,14 @@ class ChatwootWebhookController extends Controller
             return response()->json(['ok' => true, 'action' => 'no_phone']);
         }
 
-        // Envoyer via Twilio WhatsApp
+        // Envoyer via Twilio WhatsApp (texte et/ou media)
         try {
-            $this->twilio->sendWhatsApp($phone, $content);
+            $this->twilio->sendWhatsApp($phone, $content, $mediaUrls);
 
             Log::info('[CHATWOOT WEBHOOK] Message transmis au client', [
-                'phone'   => $phone,
-                'content' => mb_substr($content, 0, 50),
+                'phone'       => $phone,
+                'content'     => mb_substr($content, 0, 50),
+                'media_count' => count($mediaUrls),
             ]);
 
             return response()->json(['ok' => true, 'action' => 'sent']);
