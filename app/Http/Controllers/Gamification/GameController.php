@@ -9,7 +9,7 @@ use App\Models\GameParticipation;
 use App\Models\GameQuestion;
 use App\Services\Gamification\TwilioFlowGeneratorService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GameController extends Controller
@@ -96,23 +96,25 @@ class GameController extends Controller
 
     public function show(string $slug)
     {
+        // Charge le jeu avec questions + leurs réponses (pour questionStats)
+        // Les participations sont chargées séparément avec pagination
         $game = Game::where('slug', $slug)
-            ->with(['questions', 'participations.answers.question'])
+            ->with(['questions.answers'])
             ->firstOrFail();
 
+        // Stats globales via requêtes DB directes (efficace, pas de chargement de toutes les participations)
         $stats = [
-            'total'     => $game->participations->count(),
-            'completed' => $game->participations->where('status', 'completed')->count(),
-            'abandoned' => $game->participations->where('status', 'abandoned')->count(),
-            'started'   => $game->participations->where('status', 'started')->count(),
+            'total'     => $game->participations()->count(),
+            'completed' => $game->participations()->where('status', 'completed')->count(),
+            'abandoned' => $game->participations()->where('status', 'abandoned')->count(),
+            'started'   => $game->participations()->where('status', 'started')->count(),
         ];
 
-        // Taux de complétion
         $stats['completion_rate'] = $stats['total'] > 0
             ? round($stats['completed'] / $stats['total'] * 100)
             : 0;
 
-        // Score par question (pour l'onglet stats dans show)
+        // Score par question (les answers sont déjà chargées via with['questions.answers'])
         $questionStats = [];
         foreach ($game->questions as $question) {
             $answers = $question->answers;
@@ -129,7 +131,13 @@ class GameController extends Controller
             ];
         }
 
-        return view('gamification.show', compact('game', 'stats', 'questionStats'));
+        // Participations paginées (50 par page) avec leurs réponses
+        $participations = $game->participations()
+            ->with(['answers.question'])
+            ->latest('started_at')
+            ->paginate(50);
+
+        return view('gamification.show', compact('game', 'stats', 'questionStats', 'participations'));
     }
 
     // ── Statistiques ──────────────────────────────────────────────────────────
@@ -151,7 +159,7 @@ class GameController extends Controller
 
         $completionRate = $total > 0 ? round($completed / $total * 100) : 0;
 
-        // Score moyen (nb bonnes réponses / total questions, parmi les complétés)
+        // Score moyen parmi les complétés
         $avgScore = null;
         $totalQuestions = $game->questions->count();
         if ($completed > 0 && $totalQuestions > 0) {
@@ -174,7 +182,7 @@ class GameController extends Controller
             // Distribution des réponses brutes
             $distribution = $answers
                 ->groupBy(fn($a) => mb_strtolower(trim($a->answer_text)))
-                ->map(fn($group, $key) => [
+                ->map(fn($group) => [
                     'text'  => $group->first()->answer_text,
                     'count' => $group->count(),
                 ])
@@ -202,14 +210,23 @@ class GameController extends Controller
         }
 
         $funnel = [
-            'started'           => $total,
-            'completed'         => $completed,
+            'started'            => $total,
+            'completed'          => $completed,
             'at_least_1_correct' => $atLeastOneCorrect,
         ];
 
+        // Évolution temporelle : participations par jour
+        $timeline = DB::table('game_participations')
+            ->selectRaw('DATE(started_at) as date, COUNT(*) as count')
+            ->where('game_id', $game->id)
+            ->whereNotNull('started_at')
+            ->groupByRaw('DATE(started_at)')
+            ->orderBy('date')
+            ->get();
+
         return view('gamification.statistics', compact(
             'game', 'total', 'completed', 'started', 'abandoned',
-            'completionRate', 'avgScore', 'questionStats', 'funnel'
+            'completionRate', 'avgScore', 'questionStats', 'funnel', 'timeline'
         ));
     }
 
@@ -246,7 +263,6 @@ class GameController extends Controller
 
         $game->update($validated);
 
-        // Recréer les questions si fournies
         if ($questions !== null) {
             $game->questions()->delete();
             foreach ($questions as $i => $q) {
@@ -300,8 +316,7 @@ class GameController extends Controller
 
         $options = null;
         if (!empty($validated['options'])) {
-            $options = array_filter(array_map('trim', explode("\n", $validated['options'])));
-            $options = array_values($options);
+            $options = array_values(array_filter(array_map('trim', explode("\n", $validated['options']))));
         }
 
         GameQuestion::create([
@@ -322,7 +337,6 @@ class GameController extends Controller
         $game = Game::where('slug', $slug)->firstOrFail();
         GameQuestion::where('game_id', $game->id)->where('id', $id)->delete();
 
-        // Renuméroter les ordres
         $game->questions()->orderBy('order')->each(function ($q, $i) {
             $q->update(['order' => $i + 1]);
         });
@@ -349,7 +363,93 @@ class GameController extends Controller
         return back()->with('success', 'Jeu clôturé.');
     }
 
-    // ── Flow Twilio ───────────────────────────────────────────────────────────
+    // ── Duplication ───────────────────────────────────────────────────────────
+
+    public function duplicate(string $slug)
+    {
+        $original = Game::where('slug', $slug)->with('questions')->firstOrFail();
+
+        $newGame = Game::create([
+            'name'              => $original->name . ' (copie)',
+            'slug'              => Game::generateSlug($original->name . ' copie'),
+            'description'       => $original->description,
+            'type'              => $original->type,
+            'status'            => 'draft',
+            'eligibility'       => $original->eligibility,
+            'start_date'        => null,
+            'end_date'          => null,
+            'max_participants'  => $original->max_participants,
+            'thank_you_message' => $original->thank_you_message,
+        ]);
+
+        foreach ($original->questions as $question) {
+            GameQuestion::create([
+                'game_id'        => $newGame->id,
+                'order'          => $question->order,
+                'text'           => $question->text,
+                'type'           => $question->type,
+                'options'        => $question->options,
+                'correct_answer' => $question->correct_answer,
+            ]);
+        }
+
+        return redirect()->route('gamification.edit', $newGame->slug)
+            ->with('success', 'Jeu dupliqué avec ' . $original->questions->count() . ' question(s). Modifiez les informations puis activez-le.');
+    }
+
+    // ── Validation manuelle des réponses ──────────────────────────────────────
+
+    public function markAnswer(Request $request, string $slug, int $answerId)
+    {
+        $game = Game::where('slug', $slug)->firstOrFail();
+
+        // Vérifier que la réponse appartient bien à ce jeu (sécurité)
+        $answer = GameAnswer::whereHas(
+            'participation',
+            fn($q) => $q->where('game_id', $game->id)
+        )->findOrFail($answerId);
+
+        $answer->update([
+            'is_correct' => filter_var($request->input('is_correct'), FILTER_VALIDATE_BOOLEAN),
+        ]);
+
+        return back()->with('success', 'Réponse mise à jour.');
+    }
+
+    // ── Classement ────────────────────────────────────────────────────────────
+
+    public function leaderboard(string $slug)
+    {
+        $game = Game::where('slug', $slug)->with('questions')->firstOrFail();
+
+        $totalQuestions = $game->questions->count();
+
+        $rankings = $game->participations()
+            ->where('status', 'completed')
+            ->with('answers')
+            ->get()
+            ->map(function ($p) use ($totalQuestions) {
+                $correct = $p->answers->where('is_correct', true)->count();
+                return [
+                    'participation' => $p,
+                    'correct'       => $correct,
+                    'total'         => $totalQuestions,
+                    'score'         => $totalQuestions > 0 ? round($correct / $totalQuestions * 100) : 0,
+                ];
+            })
+            ->sort(function ($a, $b) {
+                // Tri : score décroissant, puis temps de complétion croissant (plus rapide = mieux)
+                if ($b['score'] !== $a['score']) {
+                    return $b['score'] - $a['score'];
+                }
+                return $a['participation']->completed_at <=> $b['participation']->completed_at;
+            })
+            ->values();
+
+        return view('gamification.leaderboard', compact('game', 'rankings', 'totalQuestions'));
+    }
+
+    // ── Flow Studio ───────────────────────────────────────────────────────────
 
     public function showFlow(string $slug)
     {
@@ -376,7 +476,6 @@ class GameController extends Controller
         return response()->streamDownload(function () use ($game) {
             $handle = fopen('php://output', 'w');
 
-            // En-tête
             $headers = ['Nom', 'Téléphone', 'Statut', 'Début', 'Fin'];
             foreach ($game->questions as $question) {
                 $headers[] = "Q{$question->order}: " . mb_substr($question->text, 0, 50);
@@ -384,7 +483,6 @@ class GameController extends Controller
             }
             fputcsv($handle, $headers, ';');
 
-            // Lignes
             foreach ($game->participations as $participation) {
                 $row = [
                     $participation->participant_name ?? '',
@@ -395,10 +493,9 @@ class GameController extends Controller
                 ];
 
                 foreach ($game->questions as $question) {
-                    $answer = $participation->answers
-                        ->firstWhere('question_id', $question->id);
-                    $row[] = $answer?->answer_text ?? '';
-                    $row[] = $answer?->is_correct === true ? 'Oui' : ($answer?->is_correct === false ? 'Non' : '');
+                    $answer = $participation->answers->firstWhere('question_id', $question->id);
+                    $row[]  = $answer?->answer_text ?? '';
+                    $row[]  = $answer?->is_correct === true ? 'Oui' : ($answer?->is_correct === false ? 'Non' : '');
                 }
 
                 fputcsv($handle, $row, ';');

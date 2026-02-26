@@ -21,8 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminOnly::class,
-            'role'  => \App\Http\Middleware\CheckRole::class,
+            'admin'           => \App\Http\Middleware\AdminOnly::class,
+            'role'            => \App\Http\Middleware\CheckRole::class,
+            'twilio.webhook'  => \App\Http\Middleware\VerifyTwilioWebhook::class,
         ]);
         // Exclure les webhooks Twilio de la vérification CSRF
         // (Twilio envoie des POST sans token CSRF)

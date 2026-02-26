@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Game;
 use App\Models\GameAnswer;
 use App\Models\GameParticipation;
+use Illuminate\Support\Facades\DB;
 
 class GamificationService
 {
@@ -72,17 +73,36 @@ class GamificationService
 
     /**
      * Crée une participation pour un participant.
+     * Utilise une transaction avec verrou pour éviter la race condition sur max_participants.
      */
-    public function startParticipation(int $gameId, string $phone, ?string $name): GameParticipation
+    public function startParticipation(int $gameId, string $phone, ?string $name): ?GameParticipation
     {
-        return GameParticipation::firstOrCreate(
-            ['game_id' => $gameId, 'phone_number' => $phone],
-            [
-                'participant_name' => $name,
-                'status'           => 'started',
-                'started_at'       => now(),
-            ]
-        );
+        return DB::transaction(function () use ($gameId, $phone, $name) {
+            // Verrou exclusif sur la ligne Game pour sérialiser les inscriptions
+            $game = Game::lockForUpdate()->find($gameId);
+
+            if (!$game) {
+                return null;
+            }
+
+            // Re-vérification atomique sous verrou : évite que 2 requêtes simultanées
+            // passent toutes les deux alors qu'il ne reste qu'une place
+            if ($game->max_participants !== null) {
+                $currentCount = GameParticipation::where('game_id', $gameId)->count();
+                if ($currentCount >= $game->max_participants) {
+                    return null;
+                }
+            }
+
+            return GameParticipation::firstOrCreate(
+                ['game_id' => $gameId, 'phone_number' => $phone],
+                [
+                    'participant_name' => $name,
+                    'status'           => 'started',
+                    'started_at'       => now(),
+                ]
+            );
+        });
     }
 
     /**

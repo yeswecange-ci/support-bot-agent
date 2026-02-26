@@ -103,6 +103,21 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         Éditer
                     </a>
+                    <form method="POST" action="{{ route('gamification.duplicate', $game->slug) }}">
+                        @csrf
+                        <button type="submit" title="Dupliquer ce jeu"
+                                class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            Dupliquer
+                        </button>
+                    </form>
+                    @if($stats['completed'] > 0)
+                    <a href="{{ route('gamification.leaderboard', $game->slug) }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                        Classement
+                    </a>
+                    @endif
                     <a href="{{ route('gamification.flow', $game->slug) }}"
                        class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
@@ -287,7 +302,7 @@
                            class="flex-1 max-w-sm text-sm bg-transparent border-0 outline-none text-gray-700 placeholder-gray-400">
                 </div>
 
-                @if($game->participations->isEmpty())
+                @if($participations->isEmpty())
                 <div class="py-16 text-center">
                     <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
                         <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,7 +325,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50" id="participants-body">
                             @php $totalQuestions = $game->questions->count(); @endphp
-                            @foreach($game->participations as $p)
+                            @foreach($participations as $p)
                             @php
                                 $correctCount = $p->answers->where('is_correct', true)->count();
                                 $hasScore     = $p->answers->whereNotNull('is_correct')->count() > 0;
@@ -406,6 +421,12 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+                @endif
+
+                @if($participations->hasPages())
+                <div class="px-5 py-3 border-t border-gray-100 bg-gray-50">
+                    {{ $participations->links() }}
                 </div>
                 @endif
             </div>

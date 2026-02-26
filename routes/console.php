@@ -13,3 +13,6 @@ Schedule::command('campaigns:send-scheduled')->everyMinute()->withoutOverlapping
 
 // Synchroniser les stats support client toutes les heures
 Schedule::command('stats:sync --period=all')->hourly()->withoutOverlapping()->runInBackground();
+
+// Gamification : auto-activation/clôture jeux + nettoyage participations bloquées
+Schedule::command('gamification:sync-status')->everyMinute()->withoutOverlapping();
