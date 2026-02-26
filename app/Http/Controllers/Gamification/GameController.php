@@ -360,7 +360,17 @@ class GameController extends Controller
         $game = Game::where('slug', $slug)->firstOrFail();
         $game->update(['status' => 'closed']);
 
-        return back()->with('success', 'Jeu clôturé.');
+        // Abandonner toutes les participations encore en cours
+        $abandoned = $game->participations()
+            ->where('status', 'started')
+            ->update(['status' => 'abandoned']);
+
+        $msg = 'Jeu clôturé.';
+        if ($abandoned > 0) {
+            $msg .= " {$abandoned} participation(s) en cours marquée(s) comme abandonnée(s).";
+        }
+
+        return back()->with('success', $msg);
     }
 
     // ── Duplication ───────────────────────────────────────────────────────────

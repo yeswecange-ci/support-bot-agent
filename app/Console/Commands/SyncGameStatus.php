@@ -21,10 +21,20 @@ class SyncGameStatus extends Command
             ->update(['status' => 'active']);
 
         // 2. Fermer les jeux actifs dont la end_date est passée
-        $closed = Game::where('status', 'active')
+        $gameIdsToClose = Game::where('status', 'active')
             ->whereNotNull('end_date')
             ->where('end_date', '<=', now())
-            ->update(['status' => 'closed']);
+            ->pluck('id');
+
+        $closed = 0;
+        if ($gameIdsToClose->isNotEmpty()) {
+            $closed = Game::whereIn('id', $gameIdsToClose)->update(['status' => 'closed']);
+
+            // Abandonner toutes les participations encore en cours sur ces jeux
+            GameParticipation::whereIn('game_id', $gameIdsToClose)
+                ->where('status', 'started')
+                ->update(['status' => 'abandoned']);
+        }
 
         // 3. Passer en 'abandoned' les participations 'started' depuis plus de 24h
         //    (Le participant a commencé mais n'a jamais terminé le flow)
