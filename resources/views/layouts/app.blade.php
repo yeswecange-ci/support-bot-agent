@@ -409,7 +409,7 @@
                 </div>
 
                 {{-- Identité --}}
-                <div class="px-5 py-4 flex items-center gap-4 bg-gradient-to-r from-indigo-50 to-white border-b border-gray-100 flex-shrink-0">
+                <div class="px-5 py-4 flex items-center gap-4 bg-white border-b border-gray-100 flex-shrink-0">
                     <div class="relative flex-shrink-0">
                         <div class="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center ring-4 ring-white shadow-sm">
                             <span class="text-xl font-bold text-indigo-700 sidebar-user-initials">{{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}</span>
