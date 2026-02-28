@@ -16,3 +16,6 @@ Schedule::command('stats:sync --period=all')->hourly()->withoutOverlapping()->ru
 
 // Gamification : auto-activation/clôture jeux + nettoyage participations bloquées
 Schedule::command('gamification:sync-status')->everyMinute()->withoutOverlapping();
+
+// Bot-tracking : clôturer les conversations inactives depuis 24h
+Schedule::command('bot-tracking:close-abandoned')->hourly()->withoutOverlapping();
