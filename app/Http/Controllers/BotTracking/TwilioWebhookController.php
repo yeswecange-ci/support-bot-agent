@@ -103,41 +103,50 @@ class TwilioWebhookController extends Controller
                 $client->update(['whatsapp_profile_name' => $profileName]);
             }
 
-            $client->incrementInteractions();
+            // Idempotence : éviter le double traitement si Twilio retry le même message
+            // On vérifie si le MessageSid a déjà été enregistré pour cette conversation
+            $alreadyProcessed = ConversationEvent::where('conversation_id', $conversation->id)
+                ->where('event_type', 'message_received')
+                ->whereJsonContains('metadata->message_sid', $messageId)
+                ->exists();
 
-            // Prepare metadata for the event
-            $metadata = [
-                'message_sid' => $messageId,
-                'profile_name' => $profileName,
-            ];
+            if (!$alreadyProcessed) {
+                $client->incrementInteractions();
 
-            // Handle media attachments (images, videos, audio)
-            if ($numMedia > 0) {
-                $mediaItems = [];
+                // Prepare metadata for the event
+                $metadata = [
+                    'message_sid' => $messageId,
+                    'profile_name' => $profileName,
+                ];
 
-                for ($i = 0; $i < min($numMedia, 10); $i++) {
-                    $mediaUrl = $request->input("MediaUrl{$i}");
-                    $mediaType = $request->input("MediaContentType{$i}");
+                // Handle media attachments (images, videos, audio)
+                if ($numMedia > 0) {
+                    $mediaItems = [];
 
-                    if ($mediaUrl) {
-                        $mediaItems[] = [
-                            'url' => $mediaUrl,
-                            'type' => $mediaType,
-                        ];
+                    for ($i = 0; $i < min($numMedia, 10); $i++) {
+                        $mediaUrl = $request->input("MediaUrl{$i}");
+                        $mediaType = $request->input("MediaContentType{$i}");
+
+                        if ($mediaUrl) {
+                            $mediaItems[] = [
+                                'url' => $mediaUrl,
+                                'type' => $mediaType,
+                            ];
+                        }
                     }
+
+                    $metadata['media'] = $mediaItems;
+                    $metadata['media_count'] = $numMedia;
                 }
 
-                $metadata['media'] = $mediaItems;
-                $metadata['media_count'] = $numMedia;
+                // Store the incoming message as an event
+                ConversationEvent::create([
+                    'conversation_id' => $conversation->id,
+                    'event_type' => 'message_received',
+                    'user_input' => $body,
+                    'metadata' => $metadata,
+                ]);
             }
-
-            // Store the incoming message as an event
-            ConversationEvent::create([
-                'conversation_id' => $conversation->id,
-                'event_type' => 'message_received',
-                'user_input' => $body,
-                'metadata' => $metadata,
-            ]);
 
             // Return conversation data to Twilio Flow
             // IMPORTANT: Twilio Flow compare avec des chaînes "true"/"false", pas des booléens
@@ -213,17 +222,23 @@ class TwilioWebhookController extends Controller
                 return response()->json(['success' => false, 'error' => 'Conversation not found'], 404);
             }
 
-            // Update conversation menu
-            $conversation->update([
-                'current_menu' => $menuChoice,
-                'last_activity_at' => now(),
-            ]);
+            // Update conversation menu + menu_path dans une transaction avec verrou
+            // pour éviter la race condition si Twilio envoie deux requêtes simultanées
+            $menuPath = DB::transaction(function () use ($conversation, $menuChoice) {
+                $conversation = Conversation::lockForUpdate()->find($conversation->id);
 
-            // Add menu to path — menu_path is cast as 'array', pass raw array (no json_encode)
-            $rawPath = $conversation->menu_path;
-            $menuPath = is_array($rawPath) ? $rawPath : (is_string($rawPath) ? (json_decode($rawPath, true) ?? []) : []);
-            $menuPath[] = $menuChoice;
-            $conversation->update(['menu_path' => $menuPath]);
+                $rawPath = $conversation->menu_path;
+                $menuPath = is_array($rawPath) ? $rawPath : (is_string($rawPath) ? (json_decode($rawPath, true) ?? []) : []);
+                $menuPath[] = $menuChoice;
+
+                $conversation->update([
+                    'current_menu'    => $menuChoice,
+                    'last_activity_at' => now(),
+                    'menu_path'       => $menuPath,
+                ]);
+
+                return $menuPath;
+            });
 
             // Store event
             ConversationEvent::create([
@@ -294,11 +309,6 @@ class TwilioWebhookController extends Controller
     }
 
     /**
-     * Handle agent transfer request
-     */
-    
-
-    /**
      * Complete a conversation
      */
     public function completeConversation(Request $request)
@@ -336,11 +346,6 @@ class TwilioWebhookController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
-
-    /**
-     * Send a message to a WhatsApp number
-     */
-    
 
     /**
      * Update conversation data based on widget input

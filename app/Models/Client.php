@@ -184,6 +184,6 @@ class Client extends Model
         return ConversationEvent::whereIn(
             'conversation_id',
             $this->conversations()->pluck('id')
-        )->orderBy('event_at', 'desc');
+        )->orderBy('event_at', 'desc')->get();
     }
 }

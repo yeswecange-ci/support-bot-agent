@@ -21,17 +21,21 @@ class WebhookController extends Controller
     public function handleEvent(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'session_id' => 'required|string',
-            'phone_number' => 'required|string',
-            'event_type' => 'required|string',
-            'widget_name' => 'nullable|string',
-            'user_input' => 'nullable|string',
-            'bot_message' => 'nullable|string',
-            'menu_name' => 'nullable|string',
-            'choice_label' => 'nullable|string',
-            'menu_path' => 'nullable|array',
-            'metadata' => 'nullable|array',
-            'timestamp' => 'nullable|date',
+            'session_id'          => 'required|string',
+            'phone_number'        => 'required|string',
+            'event_type'          => 'required|string',
+            'widget_name'         => 'nullable|string',
+            'widget_type'         => 'nullable|string',
+            'user_input'          => 'nullable|string',
+            'expected_input_type' => 'nullable|string',
+            'bot_message'         => 'nullable|string',
+            'media_url'           => 'nullable|url',
+            'menu_name'           => 'nullable|string',
+            'choice_label'        => 'nullable|string',
+            'menu_path'           => 'nullable|array',
+            'metadata'            => 'nullable|array',
+            'response_time_ms'    => 'nullable|integer|min:0',
+            'timestamp'           => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -148,6 +152,9 @@ class WebhookController extends Controller
                 ], 404);
             }
 
+            // Capturer la valeur précédente avant mise à jour (pour les stats)
+            $previousIsClient = $conversation->is_client;
+
             // Mapping legacy : nom_prenom (n8n) → client_full_name (colonne réelle)
             if ($request->has('nom_prenom') && !$request->has('client_full_name')) {
                 $conversation->client_full_name = $request->nom_prenom;
@@ -163,8 +170,9 @@ class WebhookController extends Controller
 
             $conversation->save();
 
-            // Mettre à jour les stats clients/non-clients
-            if ($request->has('is_client')) {
+            // Incrémenter les stats clients/non-clients uniquement au premier classement
+            // (quand is_client passe de null à une valeur) pour éviter le double comptage
+            if ($request->has('is_client') && $previousIsClient === null) {
                 $stat = DailyStatistic::today();
                 if ($request->is_client) {
                     $stat->increment('clients_count');
@@ -223,6 +231,9 @@ class WebhookController extends Controller
             $status = $request->status ?? 'completed';
             $conversation->status = $status;
             $conversation->ended_at = now();
+            if ($conversation->started_at) {
+                $conversation->duration_seconds = $conversation->started_at->diffInSeconds($conversation->ended_at);
+            }
             $conversation->save();
 
             // Logger l'événement

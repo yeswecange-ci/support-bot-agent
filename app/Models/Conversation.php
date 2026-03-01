@@ -71,26 +71,11 @@ class Conversation extends Model
 
     /**
      * Récupérer le parcours complet
+     * Retourne directement menu_path (maintenu en temps réel par les webhooks)
      */
     public function getFullPathAttribute(): array
     {
-        return $this->events()
-                    ->whereIn('event_type', ['menu_choice', 'menu_display'])
-                    ->pluck('menu_name')
-                    ->filter()
-                    ->values()
-                    ->toArray();
-    }
-
-    /**
-     * Calculer la durée de la session
-     */
-    public function getDurationSecondsAttribute(): ?int
-    {
-        if (!$this->ended_at) {
-            return null;
-        }
-        return $this->started_at->diffInSeconds($this->ended_at);
+        return $this->menu_path ?? [];
     }
 
     /**
@@ -165,6 +150,9 @@ class Conversation extends Model
     {
         $this->status = 'completed';
         $this->ended_at = now();
+        if ($this->started_at) {
+            $this->duration_seconds = $this->started_at->diffInSeconds($this->ended_at);
+        }
         return $this->save();
     }
 
