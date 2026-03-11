@@ -33,7 +33,7 @@
                     {{-- Logo --}}
                     <div class="flex justify-center mb-10">
                         <div class="bg-white rounded-2xl px-6 py-4 shadow-lg inline-block">
-                            <img src="{{ asset('images/logo_new.png') }}" alt="SporSportCash" class="h-14 w-auto object-contain">
+                            <img src="{{ asset('images/logo_new.png') }}" alt="SportCash" class="h-20 w-auto object-contain">
                         </div>
                     </div>
 
@@ -93,7 +93,7 @@
 
                 {{-- Logo visible uniquement sur mobile --}}
                 <div class="lg:hidden flex justify-center mb-8">
-                    <img src="{{ asset('images/logo_new.png') }}" alt="SporSportCash" class="h-14 w-auto object-contain">
+                    <img src="{{ asset('images/logo_new.png') }}" alt="SportCash" class="h-20 w-auto object-contain">
                 </div>
 
                 <div class="w-full max-w-md">

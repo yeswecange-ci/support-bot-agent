@@ -44,7 +44,7 @@
             <aside class="hidden md:flex md:flex-col md:w-64 bg-white border-r border-gray-200 relative">
                 {{-- Logo --}}
                 <div class="h-16 flex items-center px-4 border-b border-gray-100">
-                    <img src="{{ asset('images/logo_new.png') }}" alt="SporSportCash" class="h-10 w-auto object-contain">
+                    <img src="{{ asset('images/logo_new.png') }}" alt="SportCash" class="h-14 w-auto object-contain">
                 </div>
 
                 {{-- Navigation --}}
@@ -346,7 +346,7 @@
             {{-- Mobile header --}}
             <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
                 <header class="md:hidden h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 flex-shrink-0">
-                    <img src="{{ asset('images/logo_new.png') }}" alt="SporSportCash" class="h-8 w-auto object-contain">
+                    <img src="{{ asset('images/logo_new.png') }}" alt="SportCash" class="h-10 w-auto object-contain">
                     <div class="flex items-center gap-3">
                         @if(auth()->user()?->isAdmin())
                         <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">
