@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Connexion - tCash</title>
+        <title>Connexion - SportCash</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700&display=swap" rel="stylesheet" />
@@ -33,7 +33,7 @@
                     {{-- Logo --}}
                     <div class="flex justify-center mb-10">
                         <div class="bg-white rounded-2xl px-6 py-4 shadow-lg inline-block">
-                            <img src="{{ asset('images/logo_lonaci.jpg') }}" alt="tCash" class="h-14 w-auto object-contain">
+                            <img src="{{ asset('images/logo_new.png') }}" alt="SporSportCash" class="h-14 w-auto object-contain">
                         </div>
                     </div>
 
@@ -93,14 +93,14 @@
 
                 {{-- Logo visible uniquement sur mobile --}}
                 <div class="lg:hidden flex justify-center mb-8">
-                    <img src="{{ asset('images/logo_lonaci.jpg') }}" alt="tCash" class="h-14 w-auto object-contain">
+                    <img src="{{ asset('images/logo_new.png') }}" alt="SporSportCash" class="h-14 w-auto object-contain">
                 </div>
 
                 <div class="w-full max-w-md">
                     @yield('content')
                 </div>
 
-                <p class="text-center text-xs text-gray-400 mt-8">© 2026 tCash · Tous droits réservés</p>
+                <p class="text-center text-xs text-gray-400 mt-8">© 2026 SportCash · Tous droits réservés</p>
             </div>
 
         </div>
