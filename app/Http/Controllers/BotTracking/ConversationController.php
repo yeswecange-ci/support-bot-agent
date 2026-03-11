@@ -12,67 +12,89 @@ use Illuminate\Support\Facades\DB;
 class ConversationController extends Controller
 {
     /**
+     * Inbox configuré dans .env (CHATWOOT_WHATSAPP_INBOX_ID)
+     */
+    private function inboxId(): ?int
+    {
+        return config('chatwoot.whatsapp_inbox_id') ?: null;
+    }
+
+    /**
+     * Base query Conversation filtrée sur l'inbox configuré
+     */
+    private function inboxQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $q = Conversation::query();
+        if ($this->inboxId()) {
+            $q->where('inbox_id', $this->inboxId());
+        }
+        return $q;
+    }
+
+    /**
      * Display the main dashboard
      */
     public function index(Request $request)
     {
         $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        $dateTo   = $request->input('date_to', now()->format('Y-m-d'));
 
-        // Add time to dates to include full day
         $dateFromFull = $dateFrom . ' 00:00:00';
-        $dateToFull = $dateTo . ' 23:59:59';
+        $dateToFull   = $dateTo   . ' 23:59:59';
 
-        // Get overall statistics - ALL filtered by date range for consistency
-        $conversationsInRange = Conversation::whereBetween('started_at', [$dateFromFull, $dateToFull]);
+        $conversationsInRange = $this->inboxQuery()
+            ->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+
+        $inboxId = $this->inboxId();
 
         $stats = [
-            'total_conversations'     => $conversationsInRange->count(),
+            'total_conversations'     => (clone $conversationsInRange)->count(),
             'active_conversations'    => (clone $conversationsInRange)->where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
-            // Clients/non-clients : source = conversations.is_client (mis à jour à chaque interaction bot)
             'total_clients'           => (clone $conversationsInRange)->where('is_client', true)->distinct()->count('phone_number'),
             'total_non_clients'       => (clone $conversationsInRange)->where('is_client', false)->distinct()->count('phone_number'),
             'avg_duration'            => (clone $conversationsInRange)->whereNotNull('ended_at')->avg('duration_seconds'),
             'total_duration'          => (clone $conversationsInRange)->whereNotNull('ended_at')->sum('duration_seconds'),
-            'total_events'            => ConversationEvent::whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+            'total_events'            => ConversationEvent::whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                 $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                if ($inboxId) $q->where('inbox_id', $inboxId);
             })->count(),
             'total_messages'          => ConversationEvent::where('event_type', 'message_received')
-                ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+                ->whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                    if ($inboxId) $q->where('inbox_id', $inboxId);
                 })->count(),
             'total_menu_choices'      => ConversationEvent::where('event_type', 'menu_choice')
-                ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+                ->whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                    if ($inboxId) $q->where('inbox_id', $inboxId);
                 })->count(),
             'total_free_inputs'       => ConversationEvent::where('event_type', 'free_input')
-                ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+                ->whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                    if ($inboxId) $q->where('inbox_id', $inboxId);
                 })->count(),
             'unique_clients'          => (clone $conversationsInRange)->distinct()->count('phone_number'),
             'new_clients'             => \App\Models\Client::whereBetween('created_at', [$dateFromFull, $dateToFull])->count(),
         ];
 
-        // Get daily statistics for chart
         $dailyStats = DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])
             ->orderBy('date', 'asc')
             ->get();
 
-        // Get menu distribution
         $menuStats = [
-            'informations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_informations'),
-            'demandes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_demandes'),
-            'paris'         => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_paris'),
-            'encaissement'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_encaissement'),
-            'reclamations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
-            'plaintes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_plaintes'),
-            'conseiller'    => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_conseiller'),
-            'faq'           => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_faq'),
+            'informations' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_informations'),
+            'demandes'     => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_demandes'),
+            'paris'        => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_paris'),
+            'encaissement' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_encaissement'),
+            'reclamations' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
+            'plaintes'     => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_plaintes'),
+            'conseiller'   => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_conseiller'),
+            'faq'          => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_faq'),
         ];
 
-        // Recent conversations
-        $recentConversations = Conversation::with('events')
+        $recentConversations = $this->inboxQuery()
+            ->with('events')
             ->whereBetween('started_at', [$dateFromFull, $dateToFull])
             ->orderBy('started_at', 'desc')
             ->limit(10)
@@ -86,7 +108,8 @@ class ConversationController extends Controller
      */
     public function active()
     {
-        $activeConversations = Conversation::active()
+        $activeConversations = $this->inboxQuery()
+            ->where('status', 'active')
             ->with('events')
             ->orderBy('last_activity_at', 'desc')
             ->get();
@@ -95,17 +118,12 @@ class ConversationController extends Controller
     }
 
     /**
-     * Display conversations pending agent takeover
-     */
-
-    /**
      * Display all conversations list
      */
     public function conversations(Request $request)
     {
-        $query = Conversation::with('events');
+        $query = $this->inboxQuery()->with('events');
 
-        // Date range filter — défaut : 30 derniers jours pour cohérence avec dashboard
         $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
         $dateTo   = $request->input('date_to',   now()->format('Y-m-d'));
 
@@ -113,20 +131,17 @@ class ConversationController extends Controller
         $dateToFull   = $dateTo   . ' 23:59:59';
         $query->whereBetween('started_at', [$dateFromFull, $dateToFull]);
 
-        // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Client type filter
         if ($request->filled('is_client')) {
             $query->where('is_client', $request->is_client);
         }
 
-        // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('phone_number', 'like', "%{$search}%")
                   ->orWhere('client_full_name', 'like', "%{$search}%")
                   ->orWhere('whatsapp_profile_name', 'like', "%{$search}%")
@@ -138,20 +153,9 @@ class ConversationController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Build base query for stats with same filters as main query
-        $baseStatsQuery = Conversation::query();
-
-        if ($dateFrom && $dateTo) {
-            $dateFromFull = $dateFrom . ' 00:00:00';
-            $dateToFull = $dateTo . ' 23:59:59';
-            $baseStatsQuery->whereBetween('started_at', [$dateFromFull, $dateToFull]);
-        } elseif ($dateFrom) {
-            $dateFromFull = $dateFrom . ' 00:00:00';
-            $baseStatsQuery->where('started_at', '>=', $dateFromFull);
-        } elseif ($dateTo) {
-            $dateToFull = $dateTo . ' 23:59:59';
-            $baseStatsQuery->where('started_at', '<=', $dateToFull);
-        }
+        // Stats query — même filtres inbox + date
+        $baseStatsQuery = $this->inboxQuery()
+            ->whereBetween('started_at', [$dateFromFull, $dateToFull]);
 
         if ($request->filled('is_client')) {
             $baseStatsQuery->where('is_client', $request->is_client);
@@ -159,7 +163,7 @@ class ConversationController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $baseStatsQuery->where(function($q) use ($search) {
+            $baseStatsQuery->where(function ($q) use ($search) {
                 $q->where('phone_number', 'like', "%{$search}%")
                   ->orWhere('client_full_name', 'like', "%{$search}%")
                   ->orWhere('whatsapp_profile_name', 'like', "%{$search}%")
@@ -167,10 +171,9 @@ class ConversationController extends Controller
             });
         }
 
-        // Calculate total counts for the current filter
         $totalStats = [
-            'total' => $conversations->total(),
-            'active' => (clone $baseStatsQuery)->where('status', 'active')->count(),
+            'total'     => $conversations->total(),
+            'active'    => (clone $baseStatsQuery)->where('status', 'active')->count(),
             'completed' => (clone $baseStatsQuery)->where('status', 'completed')->count(),
         ];
 
@@ -182,16 +185,18 @@ class ConversationController extends Controller
      */
     public function show($id)
     {
-        $conversation = Conversation::with(['events' => function($query) {
-            $query->orderBy('event_at', 'asc')->orderBy('created_at', 'asc');
-        }])->findOrFail($id);
+        $conversation = $this->inboxQuery()
+            ->with(['events' => function ($query) {
+                $query->orderBy('event_at', 'asc')->orderBy('created_at', 'asc');
+            }])
+            ->findOrFail($id);
 
-        // All conversations from this phone number (for the sessions list)
-        $phoneConversations = Conversation::where('phone_number', $conversation->phone_number)
+        // Autres sessions du même numéro — filtrées sur l'inbox
+        $phoneConversations = $this->inboxQuery()
+            ->where('phone_number', $conversation->phone_number)
             ->orderBy('started_at', 'desc')
             ->get();
 
-        // All events across ALL conversations for this phone number
         $allEvents = ConversationEvent::whereIn('conversation_id', $phoneConversations->pluck('id'))
             ->with('conversation')
             ->orderBy('event_at', 'asc')
@@ -207,69 +212,71 @@ class ConversationController extends Controller
     public function statistics(Request $request)
     {
         $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        $dateTo   = $request->input('date_to', now()->format('Y-m-d'));
 
-        // Add time to dates to include full day
         $dateFromFull = $dateFrom . ' 00:00:00';
-        $dateToFull = $dateTo . ' 23:59:59';
+        $dateToFull   = $dateTo   . ' 23:59:59';
 
-        // Get overall statistics - CONSISTENT with dashboard
-        $conversationsInRange = Conversation::whereBetween('started_at', [$dateFromFull, $dateToFull]);
+        $inboxId = $this->inboxId();
+
+        $conversationsInRange = $this->inboxQuery()
+            ->whereBetween('started_at', [$dateFromFull, $dateToFull]);
 
         $stats = [
-            'total_conversations'     => $conversationsInRange->count(),
+            'total_conversations'     => (clone $conversationsInRange)->count(),
             'active_conversations'    => (clone $conversationsInRange)->where('status', 'active')->count(),
             'completed_conversations' => (clone $conversationsInRange)->where('status', 'completed')->count(),
-            // Clients/non-clients : source = conversations.is_client (mis à jour à chaque interaction bot)
             'total_clients'           => (clone $conversationsInRange)->where('is_client', true)->distinct()->count('phone_number'),
             'total_non_clients'       => (clone $conversationsInRange)->where('is_client', false)->distinct()->count('phone_number'),
-            'avg_duration' => (clone $conversationsInRange)->whereNotNull('ended_at')->avg('duration_seconds'),
-            'total_duration' => (clone $conversationsInRange)->whereNotNull('ended_at')->sum('duration_seconds'),
-            'total_events' => ConversationEvent::whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+            'avg_duration'            => (clone $conversationsInRange)->whereNotNull('ended_at')->avg('duration_seconds'),
+            'total_duration'          => (clone $conversationsInRange)->whereNotNull('ended_at')->sum('duration_seconds'),
+            'total_events'            => ConversationEvent::whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                 $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                if ($inboxId) $q->where('inbox_id', $inboxId);
             })->count(),
-            'total_messages' => ConversationEvent::where('event_type', 'message_received')
-                ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+            'total_messages'          => ConversationEvent::where('event_type', 'message_received')
+                ->whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                    if ($inboxId) $q->where('inbox_id', $inboxId);
                 })->count(),
-            'total_menu_choices' => ConversationEvent::where('event_type', 'menu_choice')
-                ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+            'total_menu_choices'      => ConversationEvent::where('event_type', 'menu_choice')
+                ->whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                    if ($inboxId) $q->where('inbox_id', $inboxId);
                 })->count(),
-            'total_free_inputs' => ConversationEvent::where('event_type', 'free_input')
-                ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+            'total_free_inputs'       => ConversationEvent::where('event_type', 'free_input')
+                ->whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                     $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                    if ($inboxId) $q->where('inbox_id', $inboxId);
                 })->count(),
-            'unique_clients' => (clone $conversationsInRange)->distinct()->count('phone_number'),
-            'new_clients' => \App\Models\Client::whereBetween('created_at', [$dateFromFull, $dateToFull])->count(),
+            'unique_clients'          => (clone $conversationsInRange)->distinct()->count('phone_number'),
+            'new_clients'             => \App\Models\Client::whereBetween('created_at', [$dateFromFull, $dateToFull])->count(),
         ];
 
-        // Get daily statistics for charts
         $dailyStats = DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])
             ->orderBy('date', 'asc')
             ->get();
 
-        // Get menu distribution
         $menuStats = [
-            'informations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_informations'),
-            'demandes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_demandes'),
-            'paris'         => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_paris'),
-            'encaissement'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_encaissement'),
-            'reclamations'  => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
-            'plaintes'      => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_plaintes'),
-            'conseiller'    => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_conseiller'),
-            'faq'           => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_faq'),
+            'informations' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_informations'),
+            'demandes'     => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_demandes'),
+            'paris'        => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_paris'),
+            'encaissement' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_encaissement'),
+            'reclamations' => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_reclamations'),
+            'plaintes'     => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_plaintes'),
+            'conseiller'   => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_conseiller'),
+            'faq'          => DailyStatistic::whereBetween('date', [$dateFrom, $dateTo])->sum('menu_faq'),
         ];
 
-        // Status distribution
-        $statusStats = Conversation::whereBetween('started_at', [$dateFromFull, $dateToFull])
+        $statusStats = $this->inboxQuery()
+            ->whereBetween('started_at', [$dateFromFull, $dateToFull])
             ->select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
 
-        // Popular paths
-        $popularPaths = Conversation::whereBetween('started_at', [$dateFromFull, $dateToFull])
+        $popularPaths = $this->inboxQuery()
+            ->whereBetween('started_at', [$dateFromFull, $dateToFull])
             ->whereNotNull('menu_path')
             ->select('menu_path', DB::raw('count(*) as count'))
             ->groupBy('menu_path')
@@ -277,26 +284,26 @@ class ConversationController extends Controller
             ->limit(10)
             ->get();
 
-        // Peak hours
-        $peakHours = Conversation::whereBetween('started_at', [$dateFromFull, $dateToFull])
+        $peakHours = $this->inboxQuery()
+            ->whereBetween('started_at', [$dateFromFull, $dateToFull])
             ->select(DB::raw('HOUR(started_at) as hour'), DB::raw('count(*) as count'))
             ->groupBy('hour')
             ->orderBy('hour', 'asc')
             ->get();
 
-        // Event type breakdown
-        $eventStats = ConversationEvent::whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+        $eventStats = ConversationEvent::whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                 $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                if ($inboxId) $q->where('inbox_id', $inboxId);
             })
             ->select('event_type', DB::raw('count(*) as count'))
             ->groupBy('event_type')
             ->orderBy('count', 'desc')
             ->get();
 
-        // Widget usage statistics
         $widgetStats = ConversationEvent::where('event_type', 'free_input')
-            ->whereHas('conversation', function($q) use ($dateFromFull, $dateToFull) {
+            ->whereHas('conversation', function ($q) use ($dateFromFull, $dateToFull, $inboxId) {
                 $q->whereBetween('started_at', [$dateFromFull, $dateToFull]);
+                if ($inboxId) $q->where('inbox_id', $inboxId);
             })
             ->whereNotNull('widget_name')
             ->select('widget_name', DB::raw('count(*) as count'))
@@ -312,8 +319,13 @@ class ConversationController extends Controller
      */
     public function search(Request $request)
     {
+        $inboxId = $this->inboxId();
+
         $query = ConversationEvent::with('conversation')
-            ->where('event_type', 'free_input');
+            ->where('event_type', 'free_input')
+            ->whereHas('conversation', function ($q) use ($inboxId) {
+                if ($inboxId) $q->where('inbox_id', $inboxId);
+            });
 
         if ($request->filled('search')) {
             $query->where('user_input', 'like', '%' . $request->search . '%');
