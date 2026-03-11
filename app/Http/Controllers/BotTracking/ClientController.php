@@ -16,7 +16,21 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
+        $inboxId = session('active_inbox_id');
+
+        // Si un inbox est sélectionné, restreindre aux numéros ayant des conversations dans cet inbox
+        $inboxPhones = null;
+        if ($inboxId) {
+            $inboxPhones = Conversation::where('inbox_id', $inboxId)
+                ->distinct()
+                ->pluck('phone_number');
+        }
+
         $query = Client::query();
+
+        if ($inboxPhones !== null) {
+            $query->whereIn('phone_number', $inboxPhones);
+        }
 
         // Search filter
         if ($request->filled('search')) {
@@ -55,14 +69,19 @@ class ClientController extends Controller
 
         $clients = $query->paginate(10)->withQueryString();
 
-        // Get statistics
+        // Stats filtrées par inbox
+        $baseQuery = Client::query();
+        if ($inboxPhones !== null) {
+            $baseQuery->whereIn('phone_number', $inboxPhones);
+        }
+
         $stats = [
-            'total_clients' => Client::count(),
-            'sportcash_clients' => Client::isClient()->count(),
-            'non_clients' => Client::isNotClient()->count(),
-            'recent_clients' => Client::recent(30)->count(),
-            'total_interactions' => Client::sum('interaction_count'),
-            'total_conversations' => Client::sum('conversation_count'),
+            'total_clients'      => (clone $baseQuery)->count(),
+            'sportcash_clients'  => (clone $baseQuery)->isClient()->count(),
+            'non_clients'        => (clone $baseQuery)->isNotClient()->count(),
+            'recent_clients'     => (clone $baseQuery)->recent(30)->count(),
+            'total_interactions' => (clone $baseQuery)->sum('interaction_count'),
+            'total_conversations'=> (clone $baseQuery)->sum('conversation_count'),
         ];
 
         return view('bot-tracking.clients.index', compact('clients', 'stats'));
@@ -74,9 +93,16 @@ class ClientController extends Controller
     public function show($id)
     {
         $client = Client::findOrFail($id);
+        $inboxId = session('active_inbox_id');
+
+        // Base query conversations — filtrée par inbox si actif
+        $convQuery = Conversation::where('phone_number', $client->phone_number);
+        if ($inboxId) {
+            $convQuery->where('inbox_id', $inboxId);
+        }
 
         // Get all conversations for this client
-        $conversations = Conversation::where('phone_number', $client->phone_number)
+        $conversations = (clone $convQuery)
             ->with(['events' => function($query) {
                 $query->orderBy('event_at', 'desc');
             }, 'agent'])
@@ -84,12 +110,11 @@ class ClientController extends Controller
             ->paginate(10);
 
         // Get all events for this client across all conversations
-        $allEvents = ConversationEvent::whereIn('conversation_id',
-            Conversation::where('phone_number', $client->phone_number)->pluck('id')
-        )->orderBy('event_at', 'desc')->paginate(20, ['*'], 'events_page');
+        $conversationIds = (clone $convQuery)->pluck('id');
 
-        // Get interaction statistics
-        $conversationIds = Conversation::where('phone_number', $client->phone_number)->pluck('id');
+        $allEvents = ConversationEvent::whereIn('conversation_id', $conversationIds)
+            ->orderBy('event_at', 'desc')
+            ->paginate(20, ['*'], 'events_page');
 
         $interactionStats = [
             'total_messages' => ConversationEvent::whereIn('conversation_id', $conversationIds)
@@ -102,7 +127,7 @@ class ClientController extends Controller
 
             'total_duration' => $client->total_duration,
 
-            'avg_duration' => Conversation::where('phone_number', $client->phone_number)
+            'avg_duration' => (clone $convQuery)
                 ->whereNotNull('duration_seconds')
                 ->avg('duration_seconds'),
         ];

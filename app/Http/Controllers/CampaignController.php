@@ -26,7 +26,12 @@ class CampaignController extends Controller
 
     public function index(Request $request): View
     {
+        $inboxId = session('active_inbox_id');
         $query = Campaign::with('creator')->withCount('contacts', 'messages');
+
+        if ($inboxId) {
+            $query->where('inbox_id', $inboxId);
+        }
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -74,6 +79,8 @@ class CampaignController extends Controller
             'template_body'      => 'nullable|string',
             'template_variables' => 'nullable|array',
         ]);
+
+        $data['inbox_id'] = session('active_inbox_id') ?? config('chatwoot.whatsapp_inbox_id');
 
         $campaign = $this->campaignService->create($data);
 
@@ -308,12 +315,22 @@ class CampaignController extends Controller
             default => Carbon::now()->startOfWeek(),
         };
 
-        // KPIs globaux
-        $totalCampaigns = Campaign::count();
-        $activeCampaigns = Campaign::where('status', 'active')->count();
-        $totalContacts = Contact::count();
+        $inboxId = session('active_inbox_id');
 
-        $messagesQuery = CampaignMessage::where('created_at', '>=', $from);
+        // IDs campagnes filtrées par inbox
+        $campaignQuery = Campaign::query();
+        if ($inboxId) {
+            $campaignQuery->where('inbox_id', $inboxId);
+        }
+        $filteredCampaignIds = (clone $campaignQuery)->pluck('id');
+
+        // KPIs filtrés
+        $totalCampaigns  = (clone $campaignQuery)->count();
+        $activeCampaigns = (clone $campaignQuery)->where('status', 'active')->count();
+        $totalContacts   = Contact::count(); // contacts = globaux (pas liés à un inbox)
+
+        $messagesQuery = CampaignMessage::where('created_at', '>=', $from)
+            ->whereIn('campaign_id', $filteredCampaignIds);
         $totalMessages = (clone $messagesQuery)->count();
         $delivered = (clone $messagesQuery)->where('status', 'delivered')->count();
         $read = (clone $messagesQuery)->where('status', 'read')->count();
@@ -326,6 +343,7 @@ class CampaignController extends Controller
 
         // Tendance par jour
         $trend = CampaignMessage::where('created_at', '>=', $from)
+            ->whereIn('campaign_id', $filteredCampaignIds)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
             ->selectRaw("SUM(CASE WHEN status IN ('delivered','read') THEN 1 ELSE 0 END) as delivered")
             ->selectRaw("SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed")
@@ -342,8 +360,8 @@ class CampaignController extends Controller
             'queued' => $queued,
         ];
 
-        // Top campagnes avec stats
-        $campaigns = Campaign::withCount('contacts')
+        // Top campagnes avec stats (filtrées par inbox)
+        $campaigns = (clone $campaignQuery)->withCount('contacts')
             ->with(['messages' => function ($q) use ($from) {
                 $q->where('created_at', '>=', $from);
             }])

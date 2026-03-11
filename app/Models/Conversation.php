@@ -32,6 +32,7 @@ class Conversation extends Model
         'transferred_at',
         'agent_id',
         'duration_seconds',
+        'inbox_id',
     ];
 
     protected $casts = [

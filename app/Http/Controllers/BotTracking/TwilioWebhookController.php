@@ -72,6 +72,7 @@ class TwilioWebhookController extends Controller
                         'last_activity_at'      => now(),
                         'current_menu'          => 'main_menu',
                         'status'                => 'active',
+                        'inbox_id'              => config('chatwoot.whatsapp_inbox_id'),
                     ]);
 
                     Log::info('New conversation created', [

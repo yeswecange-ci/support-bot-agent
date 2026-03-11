@@ -20,6 +20,7 @@ class Campaign extends Model
         'scheduled_at',
         'sent_at',
         'created_by',
+        'inbox_id',
     ];
 
     protected function casts(): array

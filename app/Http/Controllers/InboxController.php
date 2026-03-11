@@ -64,4 +64,14 @@ class InboxController extends Controller
             return response()->json([]);
         }
     }
+
+    /**
+     * AJAX — Set active inbox in session (global filter)
+     */
+    public function setActive(Request $request): JsonResponse
+    {
+        $inboxId = $request->input('inbox_id');
+        session(['active_inbox_id' => $inboxId ? (int) $inboxId : null]);
+        return response()->json(['success' => true, 'inbox_id' => $inboxId]);
+    }
 }
