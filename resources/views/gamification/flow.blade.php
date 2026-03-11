@@ -276,8 +276,8 @@
         <div id="view-json" class="hidden">
 
             {{-- Instructions --}}
-            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5 mb-5">
-                <h2 class="text-sm font-semibold text-indigo-800 mb-3">Comment importer ce flow dans Studio</h2>
+            <div class="bg-green-50 border border-green-200 rounded-xl p-5 mb-5">
+                <h2 class="text-sm font-semibold text-green-800 mb-3">Comment importer ce flow dans Studio</h2>
                 <ol class="space-y-2">
                     @foreach([
                         'Copiez le JSON ci-dessous avec le bouton "Copier le JSON"',
@@ -286,8 +286,8 @@
                         'Cliquez sur <em>Next</em> puis <em>Publish</em>',
                         'Associez ce flow à votre numéro WhatsApp',
                     ] as $step_i => $step)
-                    <li class="flex items-start gap-2.5 text-sm text-indigo-700">
-                        <span class="w-5 h-5 rounded-full bg-indigo-200 text-indigo-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{{ $step_i + 1 }}</span>
+                    <li class="flex items-start gap-2.5 text-sm text-green-700">
+                        <span class="w-5 h-5 rounded-full bg-green-200 text-green-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{{ $step_i + 1 }}</span>
                         <span>{!! $step !!}</span>
                     </li>
                     @endforeach

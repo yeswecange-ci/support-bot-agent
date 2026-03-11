@@ -189,7 +189,7 @@
                         $total = max($stats['total'], 1);
                         $bars = [
                             ['label' => 'Delivres', 'key' => 'delivered', 'count' => $stats['delivered'] ?? 0, 'color' => 'bg-green-500'],
-                            ['label' => 'Lus',      'key' => 'read',      'count' => $stats['read'] ?? 0,      'color' => 'bg-indigo-500'],
+                            ['label' => 'Lus',      'key' => 'read',      'count' => $stats['read'] ?? 0,      'color' => 'bg-green-500'],
                             ['label' => 'Envoyes',  'key' => 'sent',      'count' => $stats['sent'] ?? 0,      'color' => 'bg-blue-400'],
                             ['label' => 'En file',  'key' => 'queued',    'count' => $stats['queued'] ?? 0,    'color' => 'bg-gray-300'],
                             ['label' => 'Echoues',  'key' => 'failed',    'count' => $stats['failed'] ?? 0,    'color' => 'bg-red-400'],
@@ -360,7 +360,7 @@
     let currentStatsPeriod = 'all';
     const barsConfig = [
         { key: 'delivered', label: 'Delivres', color: 'bg-green-500' },
-        { key: 'read',      label: 'Lus',      color: 'bg-indigo-500' },
+        { key: 'read',      label: 'Lus',      color: 'bg-green-500' },
         { key: 'sent',      label: 'Envoyes',  color: 'bg-blue-400' },
         { key: 'queued',    label: 'En file',  color: 'bg-gray-300' },
         { key: 'failed',    label: 'Echoues',  color: 'bg-red-400' },

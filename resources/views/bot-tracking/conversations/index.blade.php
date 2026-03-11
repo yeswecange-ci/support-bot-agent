@@ -11,7 +11,7 @@
                 <p class="text-sm text-gray-500 mt-0.5">Vue d'ensemble des conversations du bot WhatsApp</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('bot-tracking.active') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">Conversations actives</a>
+                <a href="{{ route('bot-tracking.active') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">Conversations actives</a>
                 <a href="{{ route('bot-tracking.conversations') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">Toutes les conversations</a>
             </div>
         </div>
@@ -21,13 +21,13 @@
             <form method="GET" action="{{ route('bot-tracking.index') }}" class="flex flex-wrap items-end gap-4">
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Date debut</label>
-                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Date fin</label>
-                    <input type="date" name="date_to" value="{{ $dateTo }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <input type="date" name="date_to" value="{{ $dateTo }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                 </div>
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">Filtrer</button>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">Filtrer</button>
                 <a href="{{ route('bot-tracking.index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">Reinitialiser</a>
             </form>
         </div>
@@ -55,7 +55,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Clients Sportcash</p>
-                <p class="text-3xl font-bold text-indigo-600 mt-1">{{ number_format($stats['total_clients'] ?? 0) }}</p>
+                <p class="text-3xl font-bold text-green-600 mt-1">{{ number_format($stats['total_clients'] ?? 0) }}</p>
                 <p class="text-xs text-gray-400 mt-1">Identifies</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-5">
@@ -118,7 +118,7 @@
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-gray-700">Conversations recentes</h3>
-                <a href="{{ route('bot-tracking.conversations') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir tout &rarr;</a>
+                <a href="{{ route('bot-tracking.conversations') }}" class="text-xs text-green-600 hover:text-green-800 font-medium">Voir tout &rarr;</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-100">
@@ -149,7 +149,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm">
                                 @if($conv->is_client === true || $conv->is_client == 1)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">Client</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Client</span>
                                 @elseif($conv->is_client === false || $conv->is_client == 0)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                                 @else
@@ -171,7 +171,7 @@
                                     —
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right"><a href="{{ route('bot-tracking.conversations.show', $conv->id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir &rarr;</a></td>
+                            <td class="px-4 py-3 text-right"><a href="{{ route('bot-tracking.conversations.show', $conv->id) }}" class="text-xs text-green-600 hover:text-green-800 font-medium">Voir &rarr;</a></td>
                         </tr>
                         @empty
                         <tr><td colspan="7" class="px-4 py-10 text-center text-sm text-gray-400">Aucune conversation sur cette periode.</td></tr>

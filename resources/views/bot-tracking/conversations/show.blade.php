@@ -18,8 +18,8 @@
         <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                        <span class="text-xl font-bold text-indigo-700">{{ strtoupper(substr($conversation->display_name, 0, 1)) }}</span>
+                    <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <span class="text-xl font-bold text-green-700">{{ strtoupper(substr($conversation->display_name, 0, 1)) }}</span>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900">{{ $conversation->display_name }}</h1>
@@ -36,7 +36,7 @@
                     @endphp
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $sc }}">{{ ucfirst($conversation->status) }}</span>
                     @if($conversation->is_client === true || $conversation->is_client == 1)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700">Client Sportcash</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">Client Sportcash</span>
                     @elseif($conversation->is_client === false || $conversation->is_client == 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">Non-client</span>
                     @endif
@@ -100,7 +100,7 @@
             <h3 class="text-sm font-semibold text-gray-700 mb-3">Parcours menu (cette session)</h3>
             <div class="flex flex-wrap items-center gap-2">
                 @foreach($menuPathArray as $step)
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">{{ $step }}</span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-100">{{ $step }}</span>
                     @if(!$loop->last)<span class="text-gray-300 text-sm">&rarr;</span>@endif
                 @endforeach
             </div>
@@ -118,10 +118,10 @@
                     $sessBadge  = $sessColors[$sess->status] ?? 'bg-gray-100 text-gray-600';
                     $isCurrent  = $sess->id === $conversation->id;
                 @endphp
-                <div class="flex items-center justify-between p-2.5 rounded-lg {{ $isCurrent ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50' }}">
+                <div class="flex items-center justify-between p-2.5 rounded-lg {{ $isCurrent ? 'bg-green-50 border border-green-200' : 'bg-gray-50' }}">
                     <div class="flex items-center gap-2">
                         @if($isCurrent)
-                            <span class="text-xs font-medium text-indigo-600">&#9654; Session actuelle</span>
+                            <span class="text-xs font-medium text-green-600">&#9654; Session actuelle</span>
                         @endif
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sessBadge }}">{{ ucfirst($sess->status) }}</span>
                         <span class="text-xs text-gray-500">
@@ -137,7 +137,7 @@
                             @endif
                         </span>
                         @if(!$isCurrent)
-                            <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir &rarr;</a>
+                            <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-green-600 hover:text-green-800 font-medium">Voir &rarr;</a>
                         @endif
                     </div>
                 </div>
@@ -157,7 +157,7 @@
             @else
             @php
                 $typeColors = [
-                    'menu_choice'      => 'bg-indigo-500',
+                    'menu_choice'      => 'bg-green-500',
                     'free_input'       => 'bg-purple-500',
                     'message_received' => 'bg-green-500',
                     'message_sent'     => 'bg-blue-500',
@@ -194,9 +194,9 @@
                                 @if($sess->started_at){{ $sess->started_at->format('d/m/Y H:i') }}@endif
                             </span>
                             @if($sess->id !== $conversation->id)
-                                <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-indigo-500 hover:text-indigo-700">voir &rarr;</a>
+                                <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-green-500 hover:text-green-700">voir &rarr;</a>
                             @else
-                                <span class="text-xs text-indigo-600 font-medium">session actuelle</span>
+                                <span class="text-xs text-green-600 font-medium">session actuelle</span>
                             @endif
                         @endif
                     </div>
@@ -211,7 +211,7 @@
                             <span class="text-xs text-gray-400">{{ $ts ? \Carbon\Carbon::parse($ts)->format('d/m/Y H:i:s') : '' }}</span>
                         </div>
                         @if($event->user_input)
-                        <div class="bg-gray-50 rounded-lg px-3 py-2 mb-1 border-l-2 border-indigo-400">
+                        <div class="bg-gray-50 rounded-lg px-3 py-2 mb-1 border-l-2 border-green-400">
                             <p class="text-xs text-gray-500 mb-0.5">Saisie utilisateur</p>
                             <p class="text-sm text-gray-800">{{ $event->user_input }}</p>
                         </div>

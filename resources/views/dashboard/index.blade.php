@@ -23,7 +23,7 @@
             <div class="flex items-center gap-3">
                 {{-- Bouton synchronisation manuelle --}}
                 <button id="sync-btn" onclick="syncStats(this)"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-lg hover:bg-indigo-100 border border-indigo-200 transition"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-lg hover:bg-green-100 border border-green-200 transition"
                     title="Synchroniser les stats depuis Chatwoot">
                     <svg id="sync-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -39,7 +39,7 @@
                     <button onclick="changePeriod('{{ $p }}')"
                        data-period="{{ $p }}"
                        class="period-btn px-3 py-1.5 text-xs font-medium rounded-md transition
-                              {{ $period === $p ? 'bg-white shadow-sm text-indigo-700' : 'text-gray-500 hover:text-gray-700' }}">
+                              {{ $period === $p ? 'bg-white shadow-sm text-green-700' : 'text-gray-500 hover:text-gray-700' }}">
                         {{ $label }}
                     </button>
                 @endforeach
@@ -74,8 +74,8 @@
             {{-- Conversations --}}
             <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-2 mb-2">
-                    <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                     </div>
                     <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Conversations</p>
                 </div>
@@ -146,7 +146,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-gray-900">Tendance des conversations</h3>
                     <div class="flex items-center gap-4 text-[10px]">
-                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Conversations</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Conversations</span>
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Resolues</span>
                     </div>
                 </div>
@@ -237,7 +237,7 @@
                                 $resolved = $entry['metric']['resolutions_count'] ?? 0;
                                 $firstResp = $entry['metric']['avg_first_response_time'] ?? 0;
                                 $resMoy = $entry['metric']['avg_resolution_time'] ?? 0;
-                                $avatarColors = ['bg-indigo-100 text-indigo-600', 'bg-green-100 text-green-600', 'bg-blue-100 text-blue-600', 'bg-amber-100 text-amber-600', 'bg-rose-100 text-rose-600'];
+                                $avatarColors = ['bg-green-100 text-green-600', 'bg-green-100 text-green-600', 'bg-blue-100 text-blue-600', 'bg-amber-100 text-amber-600', 'bg-rose-100 text-rose-600'];
                                 $avatarColor = $avatarColors[$i % count($avatarColors)];
                             @endphp
                             <tr class="hover:bg-gray-50 transition-colors">
@@ -280,14 +280,14 @@
                 </div>
             </a>
             <a href="{{ route('conversations.index', ['status' => 'open']) }}"
-               class="bg-white rounded-xl p-5 border border-gray-200 hover:border-indigo-300 hover:shadow-md transition group">
+               class="bg-white rounded-xl p-5 border border-gray-200 hover:border-green-300 hover:shadow-md transition group">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
                     </div>
                     <div>
                         <h3 class="font-semibold text-gray-900 text-sm">Conversations ouvertes</h3>
-                        <p class="text-xs text-gray-500 mt-0.5"><span class="font-bold text-indigo-600" id="quick-open">{{ $counts['all_count'] ?? 0 }}</span> en cours</p>
+                        <p class="text-xs text-gray-500 mt-0.5"><span class="font-bold text-green-600" id="quick-open">{{ $counts['all_count'] ?? 0 }}</span> en cours</p>
                     </div>
                 </div>
             </a>
@@ -658,7 +658,7 @@
 
     // ═══ Period Switching (AJAX) ═══
     let currentPeriod = '{{ $period }}';
-    const activeClass = 'bg-white shadow-sm text-indigo-700';
+    const activeClass = 'bg-white shadow-sm text-green-700';
     const inactiveClass = 'text-gray-500 hover:text-gray-700';
     const baseClass = 'period-btn px-3 py-1.5 text-xs font-medium rounded-md transition';
 

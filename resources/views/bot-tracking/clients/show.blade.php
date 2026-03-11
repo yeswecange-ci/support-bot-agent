@@ -15,7 +15,7 @@
                 <span class="text-sm font-medium text-gray-900">{{ $client->client_full_name ?? $client->whatsapp_profile_name ?? $client->phone_number }}</span>
             </div>
             @if(auth()->user()?->isAdmin())
-            <a href="{{ route('bot-tracking.clients.edit', $client->id) }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">
+            <a href="{{ route('bot-tracking.clients.edit', $client->id) }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Modifier
             </a>
@@ -25,14 +25,14 @@
         {{-- Client Header Card --}}
         <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <span class="text-2xl font-bold text-indigo-700">{{ strtoupper(substr($client->client_full_name ?? $client->whatsapp_profile_name ?? '?', 0, 1)) }}</span>
+                <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span class="text-2xl font-bold text-green-700">{{ strtoupper(substr($client->client_full_name ?? $client->whatsapp_profile_name ?? '?', 0, 1)) }}</span>
                 </div>
                 <div class="flex-1">
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                         <h1 class="text-xl font-bold text-gray-900">{{ $client->client_full_name ?? $client->whatsapp_profile_name ?? 'Inconnu' }}</h1>
                         @if($client->is_client === true || $client->is_client == 1)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">Client Sportcash</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Client Sportcash</span>
                         @elseif($client->is_client === false || $client->is_client == 0)
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                         @else
@@ -55,7 +55,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">Messages</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-indigo-600">{{ number_format($interactionStats['menu_choices'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-green-600">{{ number_format($interactionStats['menu_choices'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Choix menu</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -104,7 +104,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-gray-400">@if($conv->started_at){{ \Carbon\Carbon::parse($conv->started_at)->format('d/m/Y') }}@endif</p>
-                            <a href="{{ route('bot-tracking.conversations.show', $conv->id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir &rarr;</a>
+                            <a href="{{ route('bot-tracking.conversations.show', $conv->id) }}" class="text-xs text-green-600 hover:text-green-800 font-medium">Voir &rarr;</a>
                         </div>
                     </div>
                     @empty
@@ -127,7 +127,7 @@
                 <div class="absolute left-2 top-2 bottom-2 w-px bg-gray-200"></div>
                 @foreach($allEvents as $event)
                 @php
-                    $tc = ['menu_choice' => 'bg-indigo-500', 'free_input' => 'bg-purple-500', 'message_received' => 'bg-green-500', 'message_sent' => 'bg-blue-500', 'agent_transfer' => 'bg-amber-500', 'error' => 'bg-red-500', 'invalid_input' => 'bg-red-400'];
+                    $tc = ['menu_choice' => 'bg-green-500', 'free_input' => 'bg-purple-500', 'message_received' => 'bg-green-500', 'message_sent' => 'bg-blue-500', 'agent_transfer' => 'bg-amber-500', 'error' => 'bg-red-500', 'invalid_input' => 'bg-red-400'];
                     $dot = $tc[$event->event_type] ?? 'bg-gray-400';
                     $ts  = $event->event_at ?? $event->created_at;
                 @endphp
@@ -139,7 +139,7 @@
                             <span class="text-xs text-gray-400">{{ $ts ? \Carbon\Carbon::parse($ts)->format('d/m/Y H:i:s') : '' }}</span>
                         </div>
                         @if($event->user_input)
-                        <div class="bg-gray-50 rounded-lg px-3 py-2 mb-1 border-l-2 border-indigo-400">
+                        <div class="bg-gray-50 rounded-lg px-3 py-2 mb-1 border-l-2 border-green-400">
                             <p class="text-xs text-gray-400 mb-0.5">Saisie</p><p class="text-sm text-gray-800">{{ $event->user_input }}</p>
                         </div>
                         @endif

@@ -34,11 +34,11 @@
             <form method="GET" action="{{ route('bot-tracking.conversations') }}" class="flex flex-wrap items-end gap-3">
                 <div class="flex flex-col gap-1 flex-1 min-w-48">
                     <label class="text-xs font-medium text-gray-600">Recherche</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom, telephone..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom, telephone..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Statut</label>
-                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                         <option value="">Tous</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Actif</option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Complete</option>
@@ -48,7 +48,7 @@
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Type</label>
-                    <select name="is_client" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <select name="is_client" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                         <option value="">Tous</option>
                         <option value="1" {{ request('is_client') === '1' ? 'selected' : '' }}>Clients</option>
                         <option value="0" {{ request('is_client') === '0' ? 'selected' : '' }}>Non-clients</option>
@@ -56,13 +56,13 @@
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Du</label>
-                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Au</label>
-                    <input type="date" name="date_to" value="{{ $dateTo }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <input type="date" name="date_to" value="{{ $dateTo }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                 </div>
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">Filtrer</button>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">Filtrer</button>
                 <a href="{{ route('bot-tracking.conversations') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">Reinitialiser</a>
             </form>
         </div>
@@ -98,7 +98,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm">
                                 @if($conv->is_client === true || $conv->is_client == 1)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">Client</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Client</span>
                                 @elseif($conv->is_client === false || $conv->is_client == 0)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                                 @else
@@ -121,7 +121,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <a href="{{ route('bot-tracking.conversations.show', $conv->id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir &rarr;</a>
+                                <a href="{{ route('bot-tracking.conversations.show', $conv->id) }}" class="text-xs text-green-600 hover:text-green-800 font-medium">Voir &rarr;</a>
                             </td>
                         </tr>
                         @empty

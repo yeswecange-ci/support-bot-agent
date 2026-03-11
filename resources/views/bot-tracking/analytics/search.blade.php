@@ -19,17 +19,17 @@
                 <div class="flex flex-col gap-1 flex-1 min-w-64">
                     <label class="text-xs font-medium text-gray-600">Texte recherche</label>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher dans les messages..." autofocus
-                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Du</label>
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Au</label>
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
                 </div>
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     Rechercher
                 </button>
@@ -83,11 +83,11 @@
                         <span class="text-xs text-gray-500">{{ $input->conversation->display_name }}</span>
                         @endif
                         @if($input->conversation->is_client === true || $input->conversation->is_client == 1)
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">Client</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Client</span>
                         @elseif($input->conversation->is_client === false || $input->conversation->is_client == 0)
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                         @endif
-                        <a href="{{ route('bot-tracking.conversations.show', $input->conversation->id) }}" class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium">Voir conversation &rarr;</a>
+                        <a href="{{ route('bot-tracking.conversations.show', $input->conversation->id) }}" class="inline-flex items-center gap-1 text-xs text-green-600 hover:text-green-800 font-medium">Voir conversation &rarr;</a>
                         @endif
 
                         @if($input->widget_name)
@@ -109,8 +109,8 @@
         @else
         {{-- Empty state (no search yet) --}}
         <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
             <h3 class="text-base font-medium text-gray-900 mb-1">Lancez une recherche</h3>
             <p class="text-sm text-gray-500">Entrez des mots-cles pour rechercher dans les saisies des utilisateurs.</p>

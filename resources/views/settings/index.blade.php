@@ -21,7 +21,7 @@
                 </div>
             </div>
             <button onclick="testAll()" id="btn-test-all"
-                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
+                    class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -38,8 +38,8 @@
             <div class="bg-white rounded-xl border border-gray-200 p-5" id="card-chatwoot">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
                         </div>
@@ -54,7 +54,7 @@
                 </div>
                 <p id="detail-chatwoot" class="text-xs text-gray-400 min-h-[16px]">{{ $config['chatwoot']['base_url'] }}</p>
                 <button onclick="testConnection('chatwoot')"
-                        class="mt-3 w-full py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition">
+                        class="mt-3 w-full py-1.5 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition">
                     Tester la connexion
                 </button>
             </div>
@@ -115,7 +115,7 @@
             {{-- Tab header --}}
             <div class="border-b border-gray-200 flex">
                 <button onclick="switchTab('chatwoot')" id="tab-chatwoot"
-                        class="tab-btn active-tab px-5 py-3 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600 transition">
+                        class="tab-btn active-tab px-5 py-3 text-sm font-medium border-b-2 border-green-600 text-green-600 transition">
                     Chatwoot
                 </button>
                 <button onclick="switchTab('twilio')" id="tab-twilio"
@@ -145,19 +145,19 @@
                         <div class="md:col-span-2">
                             <label class="block text-xs font-medium text-gray-700 mb-1">URL de l'instance Chatwoot</label>
                             <input type="url" name="CHATWOOT_BASE_URL" value="{{ $config['chatwoot']['base_url'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                    placeholder="https://support.example.com">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Account ID</label>
                             <input type="text" name="CHATWOOT_ACCOUNT_ID" value="{{ $config['chatwoot']['account_id'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                    placeholder="1">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">WhatsApp Inbox ID</label>
                             <input type="text" name="CHATWOOT_WHATSAPP_INBOX_ID" value="{{ $config['chatwoot']['whatsapp_inbox_id'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                    placeholder="ID de l'inbox WhatsApp">
                         </div>
                         <div class="md:col-span-2">
@@ -165,7 +165,7 @@
                             <div class="relative">
                                 <input type="password" name="CHATWOOT_API_TOKEN" value="{{ $config['chatwoot']['api_token'] }}"
                                        id="field-chatwoot-token"
-                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-10"
+                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent pr-10"
                                        placeholder="user_access_token">
                                 <button type="button" onclick="toggleReveal('field-chatwoot-token')"
                                         class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -178,7 +178,7 @@
                             <div class="relative">
                                 <input type="password" name="CHATWOOT_WEBHOOK_SECRET" value="{{ $config['chatwoot']['webhook_secret'] }}"
                                        id="field-chatwoot-webhook"
-                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-10"
+                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent pr-10"
                                        placeholder="Secret webhook">
                                 <button type="button" onclick="toggleReveal('field-chatwoot-webhook')"
                                         class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -189,13 +189,13 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Intervalle de polling (ms)</label>
                             <input type="number" name="CHATWOOT_POLLING_INTERVAL" value="{{ $config['chatwoot']['polling_interval'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                    min="1000" max="60000" step="1000">
                         </div>
                     </div>
                     <div class="flex justify-end pt-2">
                         <button type="submit"
-                                class="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
+                                class="px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition flex items-center gap-2">
                             <svg class="w-4 h-4 save-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span class="save-label">Enregistrer</span>
                         </button>
@@ -212,13 +212,13 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Account SID</label>
                             <input type="text" name="TWILIO_SID" value="{{ $config['twilio']['sid'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                    placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Numéro WhatsApp (From)</label>
                             <input type="text" name="TWILIO_WHATSAPP_FROM" value="{{ $config['twilio']['whatsapp_from'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                    placeholder="whatsapp:+14155238886">
                         </div>
                         <div class="md:col-span-2">
@@ -226,7 +226,7 @@
                             <div class="relative">
                                 <input type="password" name="TWILIO_AUTH_TOKEN" value="{{ $config['twilio']['auth_token'] }}"
                                        id="field-twilio-token"
-                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-10"
+                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent pr-10"
                                        placeholder="Auth token Twilio">
                                 <button type="button" onclick="toggleReveal('field-twilio-token')"
                                         class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -237,7 +237,7 @@
                     </div>
                     <div class="flex justify-end pt-2">
                         <button type="submit"
-                                class="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
+                                class="px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition flex items-center gap-2">
                             <svg class="w-4 h-4 save-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span class="save-label">Enregistrer</span>
                         </button>
@@ -254,17 +254,17 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Nom de l'application</label>
                             <input type="text" name="APP_NAME" value="{{ $config['app']['name'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">URL de l'application</label>
                             <input type="url" name="APP_URL" value="{{ $config['app']['url'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Environnement</label>
                             <select name="APP_ENV"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                                 <option value="local" {{ $config['app']['env'] === 'local' ? 'selected' : '' }}>Local (développement)</option>
                                 <option value="production" {{ $config['app']['env'] === 'production' ? 'selected' : '' }}>Production</option>
                                 <option value="staging" {{ $config['app']['env'] === 'staging' ? 'selected' : '' }}>Staging</option>
@@ -273,7 +273,7 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Fuseau horaire</label>
                             <input type="text" name="APP_TIMEZONE" value="{{ $config['app']['timezone'] }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                    placeholder="Africa/Abidjan">
                         </div>
                         <div class="flex items-center gap-3">
@@ -291,7 +291,7 @@
                     </div>
                     <div class="flex justify-end pt-2">
                         <button type="submit"
-                                class="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
+                                class="px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition flex items-center gap-2">
                             <svg class="w-4 h-4 save-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span class="save-label">Enregistrer</span>
                         </button>
@@ -346,12 +346,12 @@
             </div>
 
             {{-- URL de base --}}
-            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between gap-4">
+            <div class="bg-green-50 border border-green-100 rounded-xl p-4 flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-xs font-medium text-indigo-600 uppercase tracking-wide mb-1">URL de base</p>
-                    <code class="text-sm font-mono text-indigo-900 select-all" id="base-url-text">{{ $baseUrl }}</code>
+                    <p class="text-xs font-medium text-green-600 uppercase tracking-wide mb-1">URL de base</p>
+                    <code class="text-sm font-mono text-green-900 select-all" id="base-url-text">{{ $baseUrl }}</code>
                 </div>
-                <button onclick="copyText('{{ $baseUrl }}', this)" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-white border border-indigo-200 rounded-lg hover:bg-indigo-100 transition">
+                <button onclick="copyText('{{ $baseUrl }}', this)" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 bg-white border border-green-200 rounded-lg hover:bg-green-100 transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     Copier
                 </button>
@@ -384,7 +384,7 @@
                                     ['NumMedia','optional','Nombre de médias joints (0 par défaut)'],
                                 ] as [$param, $req, $desc])
                                 <div class="flex items-start gap-2 text-xs">
-                                    <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
+                                    <code class="font-mono text-green-700 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
                                     <span class="px-1 py-0.5 rounded text-[10px] font-medium {{ $req === 'required' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500' }} whitespace-nowrap">{{ $req === 'required' ? 'requis' : 'optionnel' }}</span>
                                     <span class="text-gray-500">{{ $desc }}</span>
                                 </div>
@@ -450,7 +450,7 @@
                                     ['user_input','optional','Texte brut saisi par l\'utilisateur'],
                                 ] as [$param, $req, $desc])
                                 <div class="flex items-start gap-2 text-xs">
-                                    <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
+                                    <code class="font-mono text-green-700 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
                                     <span class="px-1 py-0.5 rounded text-[10px] font-medium {{ $req === 'required' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500' }} whitespace-nowrap">{{ $req === 'required' ? 'requis' : 'optionnel' }}</span>
                                     <span class="text-gray-500">{{ $desc }}</span>
                                 </div>
@@ -507,7 +507,7 @@
                                     ['widget_name','optional','Contexte de la saisie (voir tableau ci-dessous)'],
                                 ] as [$param, $req, $desc])
                                 <div class="flex items-start gap-2 text-xs">
-                                    <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
+                                    <code class="font-mono text-green-700 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $param }}</code>
                                     <span class="px-1 py-0.5 rounded text-[10px] font-medium {{ $req === 'required' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500' }} whitespace-nowrap">{{ $req === 'required' ? 'requis' : 'optionnel' }}</span>
                                     <span class="text-gray-500">{{ $desc }}</span>
                                 </div>
@@ -560,7 +560,7 @@
                         <div>
                             <p class="text-xs font-semibold text-gray-700 mb-2">Paramètres envoyés</p>
                             <div class="flex items-start gap-2 text-xs">
-                                <code class="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">conversation_id</code>
+                                <code class="font-mono text-green-700 bg-green-50 px-1.5 py-0.5 rounded">conversation_id</code>
                                 <span class="px-1 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-600">requis</span>
                                 <span class="text-gray-500">ID de la conversation à clôturer</span>
                             </div>
@@ -602,7 +602,7 @@
                             ['→','',''],
                             ['split','Split\nagent_mode = "true" ?','bg-yellow-50 text-yellow-700 border-yellow-200'],
                             ['→','',''],
-                            ['menu','HTTP\ntrack_menu\n→ /twilio/menu-choice','bg-indigo-50 text-indigo-700 border-indigo-200'],
+                            ['menu','HTTP\ntrack_menu\n→ /twilio/menu-choice','bg-green-50 text-green-700 border-green-200'],
                             ['→','',''],
                             ['input','HTTP\ntrack_input\n→ /twilio/free-input','bg-purple-50 text-purple-700 border-purple-200'],
                             ['→','',''],
@@ -633,13 +633,13 @@ const TOKEN = document.querySelector('meta[name="csrf-token"]')?.content;
 function switchTab(name) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
     document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('active-tab', 'border-indigo-600', 'text-indigo-600');
+        b.classList.remove('active-tab', 'border-green-600', 'text-green-600');
         b.classList.add('border-transparent', 'text-gray-500');
     });
 
     document.getElementById('panel-' + name).classList.remove('hidden');
     const btn = document.getElementById('tab-' + name);
-    btn.classList.add('active-tab', 'border-indigo-600', 'text-indigo-600');
+    btn.classList.add('active-tab', 'border-green-600', 'text-green-600');
     btn.classList.remove('border-transparent', 'text-gray-500');
 
     if (name === 'logs') loadLogs();
@@ -722,7 +722,7 @@ async function saveSection(e, section) {
         if (res.ok) {
             label.textContent = 'Enregistré !';
             icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>';
-            btn.classList.replace('bg-indigo-600', 'bg-green-600');
+            btn.classList.replace('bg-green-600', 'bg-green-600');
             showToast('Configuration enregistrée avec succès', 'success');
         } else {
             label.textContent = 'Erreur';
@@ -736,7 +736,7 @@ async function saveSection(e, section) {
     setTimeout(() => {
         btn.disabled = false;
         label.textContent = 'Enregistrer';
-        btn.classList.replace('bg-green-600', 'bg-indigo-600');
+        btn.classList.replace('bg-green-600', 'bg-green-600');
     }, 2000);
 }
 

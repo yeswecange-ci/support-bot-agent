@@ -34,7 +34,7 @@
                 'quiz'       => ['label' => 'Quiz',          'class' => 'bg-violet-100 text-violet-700', 'icon_color' => 'bg-violet-100'],
                 'free_text'  => ['label' => 'Réponse libre', 'class' => 'bg-blue-100 text-blue-700',   'icon_color' => 'bg-blue-100'],
                 'vote'       => ['label' => 'Vote',          'class' => 'bg-amber-100 text-amber-700', 'icon_color' => 'bg-amber-100'],
-                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-indigo-100 text-indigo-700','icon_color' => 'bg-indigo-100'],
+                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-green-100 text-green-700','icon_color' => 'bg-green-100'],
             ];
             $tc = $typeConfig[$game->type] ?? ['label' => $game->type, 'class' => 'bg-gray-100 text-gray-600', 'icon_color' => 'bg-gray-100'];
         @endphp
@@ -119,7 +119,7 @@
                     </a>
                     @endif
                     <a href="{{ route('gamification.flow', $game->slug) }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition">
+                       class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                         Flow Studio
                     </a>

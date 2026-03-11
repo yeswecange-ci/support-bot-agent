@@ -94,7 +94,7 @@
                 'quiz'       => ['label' => 'Quiz',          'class' => 'bg-violet-100 text-violet-700'],
                 'free_text'  => ['label' => 'Réponse libre', 'class' => 'bg-blue-100 text-blue-700'],
                 'vote'       => ['label' => 'Vote',          'class' => 'bg-amber-100 text-amber-700'],
-                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-indigo-100 text-indigo-700'],
+                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-green-100 text-green-700'],
             ];
         @endphp
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">

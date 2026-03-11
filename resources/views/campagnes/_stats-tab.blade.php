@@ -6,7 +6,7 @@
             ['label' => 'En file', 'key' => 'queued', 'color' => 'gray', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
             ['label' => 'Envoyes', 'key' => 'sent', 'color' => 'blue', 'icon' => 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8'],
             ['label' => 'Delivres', 'key' => 'delivered', 'color' => 'green', 'icon' => 'M5 13l4 4L19 7'],
-            ['label' => 'Lus', 'key' => 'read', 'color' => 'indigo', 'icon' => 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'],
+            ['label' => 'Lus', 'key' => 'read', 'color' => 'green', 'icon' => 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'],
             ['label' => 'Echoues', 'key' => 'failed', 'color' => 'red', 'icon' => 'M6 18L18 6M6 6l12 12'],
             ['label' => 'Non delivres', 'key' => 'undelivered', 'color' => 'orange', 'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z'],
         ];

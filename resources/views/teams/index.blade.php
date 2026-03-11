@@ -50,7 +50,7 @@
                     @php
                         $members = $team['members'] ?? [];
                         $online = collect($members)->where('availability_status', 'online')->values();
-                        $colors = ['bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-500', 'bg-violet-500'];
+                        $colors = ['bg-green-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-500', 'bg-violet-500'];
                         $teamColor = $colors[$loop->index % count($colors)];
                         $memberIds = collect($members)->pluck('id')->toArray();
                     @endphp

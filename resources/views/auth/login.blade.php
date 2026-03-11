@@ -5,8 +5,8 @@
 @section('content')
 
     {{-- Header --}}
-    <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">Bon retour !</h2>
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-1">Bon retour !</h2>
         <p class="text-gray-500 text-sm">Connectez-vous pour accéder à votre espace</p>
     </div>
 
@@ -40,7 +40,7 @@
                 <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Adresse email</label>
                 <input id="email" name="email" type="email" autocomplete="username" required autofocus
                        value="{{ old('email') }}"
-                       class="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all text-sm placeholder:text-gray-400"
+                       class="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all text-sm placeholder:text-gray-400"
                        placeholder="votre.email@exemple.com">
             </div>
 
@@ -49,26 +49,26 @@
                 <div class="flex items-center justify-between mb-2">
                     <label for="password" class="block text-sm font-semibold text-gray-700">Mot de passe</label>
                     @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                        <a href="{{ route('password.request') }}" class="text-xs font-semibold text-green-600 hover:text-green-700 transition-colors">
                             Mot de passe oublié ?
                         </a>
                     @endif
                 </div>
                 <input id="password" name="password" type="password" autocomplete="current-password" required
-                       class="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all text-sm placeholder:text-gray-400"
+                       class="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all text-sm placeholder:text-gray-400"
                        placeholder="••••••••">
             </div>
 
             {{-- Remember me --}}
             <div class="flex items-center">
                 <input id="remember" name="remember" type="checkbox" {{ old('remember') ? 'checked' : '' }}
-                       class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-colors">
+                       class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded transition-colors">
                 <label for="remember" class="ml-2 block text-sm text-gray-600 font-medium">Se souvenir de moi</label>
             </div>
 
             {{-- Submit --}}
             <button type="submit" id="submitBtn"
-                    class="w-full flex justify-center items-center gap-3 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
+                    class="w-full flex justify-center items-center gap-3 py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
                 <svg id="btnLoader" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -77,8 +77,6 @@
             </button>
         </form>
     </div>
-
-    <p class="text-center text-xs text-gray-400 mt-6">© 2026 YesWeCange · Tous droits réservés</p>
 
 @endsection
 
