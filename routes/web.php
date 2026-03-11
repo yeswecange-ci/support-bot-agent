@@ -158,7 +158,6 @@ Route::middleware('auth')->group(function () {
 
             // Inboxes settings
             Route::get('/inboxes', [InboxController::class, 'list'])->name('ajax.inboxes');
-            Route::post('/inboxes/set-active', [InboxController::class, 'setActive'])->name('ajax.inboxes.setActive');
             Route::get('/inboxes/{inboxId}/settings', [InboxController::class, 'getSettings'])->name('ajax.inboxes.settings');
             Route::post('/inboxes/{inboxId}/auto-assignment', [InboxController::class, 'updateAutoAssignment'])->name('ajax.inboxes.autoAssign');
 

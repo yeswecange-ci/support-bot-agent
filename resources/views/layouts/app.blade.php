@@ -47,30 +47,6 @@
                     <img src="{{ asset('images/logo_new.png') }}" alt="SportCash" class="h-14 w-auto object-contain">
                 </div>
 
-                {{-- Sélecteur d'inbox --}}
-                <div class="px-3 py-2 border-b border-gray-100">
-                    <div class="relative">
-                        <div class="flex items-center gap-1.5 mb-1">
-                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
-                            <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Inbox actif</span>
-                        </div>
-                        <select id="inbox-selector"
-                                class="w-full text-xs bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer"
-                                onchange="setActiveInbox(this.value)">
-                            <option value="">Tous les inboxes</option>
-                            {{-- Options chargées dynamiquement --}}
-                        </select>
-                        <div id="inbox-loading" class="hidden absolute right-2 top-7">
-                            <svg class="w-3 h-3 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
                 {{-- Navigation --}}
                 <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                     {{-- Menu déroulant Chat --}}
@@ -558,49 +534,6 @@
 
         @auth
         <script>
-        // ── Inbox selector ──────────────────────────────────
-        (function() {
-            const TOKEN = document.querySelector('meta[name="csrf-token"]')?.content;
-            const activeInboxId = {{ session('active_inbox_id') ? session('active_inbox_id') : 'null' }};
-
-            async function loadInboxes() {
-                const sel = document.getElementById('inbox-selector');
-                if (!sel) return;
-                try {
-                    const r = await fetch('/ajax/inboxes');
-                    const inboxes = await r.json();
-                    // vider les options sauf la première
-                    while (sel.options.length > 1) sel.remove(1);
-                    (inboxes || []).forEach(function(inbox) {
-                        const opt = document.createElement('option');
-                        opt.value = inbox.id;
-                        opt.textContent = inbox.name;
-                        if (inbox.id === activeInboxId) opt.selected = true;
-                        sel.appendChild(opt);
-                    });
-                    // Si pas d'inbox actif, première option sélectionnée
-                    if (!activeInboxId) sel.value = '';
-                } catch(e) {}
-            }
-
-            window.setActiveInbox = async function(inboxId) {
-                const loader = document.getElementById('inbox-loading');
-                if (loader) loader.classList.remove('hidden');
-                try {
-                    await fetch('/ajax/inboxes/set-active', {
-                        method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': TOKEN, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ inbox_id: inboxId || null }),
-                    });
-                    window.location.reload();
-                } catch(e) {
-                    if (loader) loader.classList.add('hidden');
-                }
-            };
-
-            loadInboxes();
-        })();
-
         (function() {
             const TOKEN = document.querySelector('meta[name="csrf-token"]')?.content;
             let notifOpen = false;

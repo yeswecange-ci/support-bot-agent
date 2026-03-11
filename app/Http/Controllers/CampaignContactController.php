@@ -176,14 +176,26 @@ class CampaignContactController extends Controller
         $page = 1;
         $maxPages = 50; // sécurité
 
+        $inboxId = config('chatwoot.whatsapp_inbox_id');
+
         try {
             while ($page <= $maxPages) {
-                $data = $this->chatwoot->listContacts($page, '-last_activity_at');
-                $contacts = $data['payload'] ?? [];
+                $data = $this->chatwoot->listContacts($page, '-last_activity_at', true);
+                $allContacts = $data['payload'] ?? [];
 
-                if (empty($contacts)) {
+                if (empty($allContacts)) {
                     break;
                 }
+
+                // Filtrer uniquement les contacts liés à l'inbox configuré
+                $contacts = array_filter($allContacts, function ($c) use ($inboxId) {
+                    foreach ($c['contact_inboxes'] ?? [] as $ci) {
+                        if (($ci['inbox']['id'] ?? null) == $inboxId) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
 
                 foreach ($contacts as $cwContact) {
                     $phone = $cwContact['phone_number'] ?? null;

@@ -16,21 +16,14 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-        $inboxId = session('active_inbox_id');
+        $inboxId = config('chatwoot.whatsapp_inbox_id');
 
-        // Si un inbox est sélectionné, restreindre aux numéros ayant des conversations dans cet inbox
-        $inboxPhones = null;
-        if ($inboxId) {
-            $inboxPhones = Conversation::where('inbox_id', $inboxId)
-                ->distinct()
-                ->pluck('phone_number');
-        }
+        // Restreindre aux numéros ayant des conversations dans l'inbox configuré
+        $inboxPhones = Conversation::where('inbox_id', $inboxId)
+            ->distinct()
+            ->pluck('phone_number');
 
-        $query = Client::query();
-
-        if ($inboxPhones !== null) {
-            $query->whereIn('phone_number', $inboxPhones);
-        }
+        $query = Client::query()->whereIn('phone_number', $inboxPhones);
 
         // Search filter
         if ($request->filled('search')) {
@@ -69,11 +62,8 @@ class ClientController extends Controller
 
         $clients = $query->paginate(10)->withQueryString();
 
-        // Stats filtrées par inbox
-        $baseQuery = Client::query();
-        if ($inboxPhones !== null) {
-            $baseQuery->whereIn('phone_number', $inboxPhones);
-        }
+        // Stats filtrées sur l'inbox configuré
+        $baseQuery = Client::query()->whereIn('phone_number', $inboxPhones);
 
         $stats = [
             'total_clients'      => (clone $baseQuery)->count(),
@@ -93,13 +83,10 @@ class ClientController extends Controller
     public function show($id)
     {
         $client = Client::findOrFail($id);
-        $inboxId = session('active_inbox_id');
 
-        // Base query conversations — filtrée par inbox si actif
-        $convQuery = Conversation::where('phone_number', $client->phone_number);
-        if ($inboxId) {
-            $convQuery->where('inbox_id', $inboxId);
-        }
+        // Conversations filtrées sur l'inbox configuré
+        $convQuery = Conversation::where('phone_number', $client->phone_number)
+            ->where('inbox_id', config('chatwoot.whatsapp_inbox_id'));
 
         // Get all conversations for this client
         $conversations = (clone $convQuery)
