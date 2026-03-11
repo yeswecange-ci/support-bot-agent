@@ -105,7 +105,7 @@
                     'trigger'               => ['pill' => 'bg-gray-100 text-gray-600',   'dot' => 'bg-gray-400',   'border' => 'border-gray-200',   'line' => 'border-gray-300'],
                     'make-http-request'     => ['pill' => 'bg-blue-100 text-blue-700',   'dot' => 'bg-blue-500',   'border' => 'border-blue-200',   'line' => 'border-blue-300'],
                     'send-and-wait-for-reply' => ['pill' => 'bg-violet-100 text-violet-700', 'dot' => 'bg-violet-500', 'border' => 'border-violet-200', 'line' => 'border-violet-300'],
-                    'send-message'          => ['pill' => 'bg-green-100 text-green-700', 'dot' => 'bg-green-500',  'border' => 'border-green-200',  'line' => 'border-green-300'],
+                    'send-message'          => ['pill' => 'bg-orange-100 text-orange-700', 'dot' => 'bg-green-500',  'border' => 'border-green-200',  'line' => 'border-green-300'],
                     'split-based-on'        => ['pill' => 'bg-amber-100 text-amber-700', 'dot' => 'bg-amber-500', 'border' => 'border-amber-200',  'line' => 'border-amber-300'],
                 ];
             @endphp
@@ -286,8 +286,8 @@
                         'Cliquez sur <em>Next</em> puis <em>Publish</em>',
                         'Associez ce flow à votre numéro WhatsApp',
                     ] as $step_i => $step)
-                    <li class="flex items-start gap-2.5 text-sm text-green-700">
-                        <span class="w-5 h-5 rounded-full bg-green-200 text-green-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{{ $step_i + 1 }}</span>
+                    <li class="flex items-start gap-2.5 text-sm text-orange-700">
+                        <span class="w-5 h-5 rounded-full bg-green-200 text-orange-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{{ $step_i + 1 }}</span>
                         <span>{!! $step !!}</span>
                     </li>
                     @endforeach

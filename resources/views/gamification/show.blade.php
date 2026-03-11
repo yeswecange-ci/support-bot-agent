@@ -34,7 +34,7 @@
                 'quiz'       => ['label' => 'Quiz',          'class' => 'bg-violet-100 text-violet-700', 'icon_color' => 'bg-violet-100'],
                 'free_text'  => ['label' => 'Réponse libre', 'class' => 'bg-blue-100 text-blue-700',   'icon_color' => 'bg-blue-100'],
                 'vote'       => ['label' => 'Vote',          'class' => 'bg-amber-100 text-amber-700', 'icon_color' => 'bg-amber-100'],
-                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-green-100 text-green-700','icon_color' => 'bg-green-100'],
+                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-orange-100 text-orange-700','icon_color' => 'bg-orange-100'],
             ];
             $tc = $typeConfig[$game->type] ?? ['label' => $game->type, 'class' => 'bg-gray-100 text-gray-600', 'icon_color' => 'bg-gray-100'];
         @endphp
@@ -52,7 +52,7 @@
                         <div class="flex items-center gap-2.5 flex-wrap">
                             <h1 class="text-xl font-bold text-gray-900">{{ $game->name }}</h1>
                             @if($game->status === 'active')
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                     <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Actif
                                 </span>
                             @elseif($game->status === 'closed')
@@ -83,7 +83,7 @@
                     <form method="POST" action="{{ route('gamification.activate', $game->slug) }}">
                         @csrf
                         <button type="submit"
-                                class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition">
+                                class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-orange-100 transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             Activer
                         </button>
@@ -119,7 +119,7 @@
                     </a>
                     @endif
                     <a href="{{ route('gamification.flow', $game->slug) }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition">
+                       class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-orange-100 transition">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                         Flow Studio
                     </a>
@@ -138,7 +138,7 @@
                     <p class="text-xs text-gray-500 mt-0.5">Participants</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-2xl font-bold text-green-600">{{ $stats['completed'] }}</p>
+                    <p class="text-2xl font-bold text-orange-600">{{ $stats['completed'] }}</p>
                     <p class="text-xs text-gray-500 mt-0.5">Complétés</p>
                 </div>
                 <div class="text-center">
@@ -348,7 +348,7 @@
                                 </td>
                                 <td class="px-4 py-3.5">
                                     @if($p->status === 'completed')
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                             <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Complété
                                         </span>
                                     @elseif($p->status === 'abandoned')
@@ -400,7 +400,7 @@
                                             <span class="text-gray-300">·</span>
                                             <span class="text-gray-700 flex-1">{{ $answer->answer_text }}</span>
                                             @if($answer->is_correct === true)
-                                                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                                     Correct
                                                 </span>

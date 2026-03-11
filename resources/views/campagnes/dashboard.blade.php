@@ -30,7 +30,7 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="kpi-cards">
             <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-2 mb-3">
-                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                         <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
                     </div>
                     <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Campagnes</p>
@@ -220,7 +220,7 @@
     const STATUS_CONFIG = [
         { key: 'sent',         label: 'Envoyés',   color: '#60a5fa', bg: 'bg-blue-100',    text: 'text-blue-700'    },
         { key: 'delivered',    label: 'Livrés',    color: '#34d399', bg: 'bg-emerald-100', text: 'text-emerald-700' },
-        { key: 'read',         label: 'Lus',       color: '#818cf8', bg: 'bg-green-100',  text: 'text-green-700'  },
+        { key: 'read',         label: 'Lus',       color: '#818cf8', bg: 'bg-orange-100',  text: 'text-orange-700'  },
         { key: 'failed',       label: 'Échoués',   color: '#f87171', bg: 'bg-red-100',     text: 'text-red-600'     },
         { key: 'queued',       label: 'En attente',color: '#d1d5db', bg: 'bg-gray-100',    text: 'text-gray-500'    },
     ];

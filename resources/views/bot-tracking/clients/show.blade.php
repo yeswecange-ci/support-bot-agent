@@ -15,7 +15,7 @@
                 <span class="text-sm font-medium text-gray-900">{{ $client->client_full_name ?? $client->whatsapp_profile_name ?? $client->phone_number }}</span>
             </div>
             @if(auth()->user()?->isAdmin())
-            <a href="{{ route('bot-tracking.clients.edit', $client->id) }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">
+            <a href="{{ route('bot-tracking.clients.edit', $client->id) }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Modifier
             </a>
@@ -25,14 +25,14 @@
         {{-- Client Header Card --}}
         <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <span class="text-2xl font-bold text-green-700">{{ strtoupper(substr($client->client_full_name ?? $client->whatsapp_profile_name ?? '?', 0, 1)) }}</span>
+                <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    <span class="text-2xl font-bold text-orange-700">{{ strtoupper(substr($client->client_full_name ?? $client->whatsapp_profile_name ?? '?', 0, 1)) }}</span>
                 </div>
                 <div class="flex-1">
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                         <h1 class="text-xl font-bold text-gray-900">{{ $client->client_full_name ?? $client->whatsapp_profile_name ?? 'Inconnu' }}</h1>
                         @if($client->is_client === true || $client->is_client == 1)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Client Sportcash</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Client Sportcash</span>
                         @elseif($client->is_client === false || $client->is_client == 0)
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                         @else
@@ -55,7 +55,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">Messages</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($interactionStats['menu_choices'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ number_format($interactionStats['menu_choices'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Choix menu</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -94,7 +94,7 @@
                     @forelse($conversations as $conv)
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                            @php $sm2 = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600']; @endphp
+                            @php $sm2 = ['active' => 'bg-orange-100 text-orange-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600']; @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sm2[$conv->status] ?? 'bg-gray-100 text-gray-600' }}">{{ ucfirst($conv->status) }}</span>
                             <p class="text-xs text-gray-500 mt-0.5">{{ $conv->current_menu ?: '—' }} &bull;
                                 @if($conv->duration_seconds){{ round($conv->duration_seconds / 60) }}min

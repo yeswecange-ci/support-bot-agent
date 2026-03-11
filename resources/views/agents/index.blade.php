@@ -33,7 +33,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">Administrateurs</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 px-4 py-3.5">
-                <p class="text-2xl font-bold text-green-600">{{ $onlineCount }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ $onlineCount }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">En ligne</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 px-4 py-3.5">
@@ -217,7 +217,7 @@ function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.className = 'fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white transition-all duration-300 ' +
-        (type === 'success' ? 'bg-green-600' : 'bg-red-600');
+        (type === 'success' ? 'bg-orange-600' : 'bg-red-600');
     setTimeout(() => t.classList.add('hidden'), 3000);
 }
 

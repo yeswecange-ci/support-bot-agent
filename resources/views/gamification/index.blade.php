@@ -94,7 +94,7 @@
                 'quiz'       => ['label' => 'Quiz',          'class' => 'bg-violet-100 text-violet-700'],
                 'free_text'  => ['label' => 'Réponse libre', 'class' => 'bg-blue-100 text-blue-700'],
                 'vote'       => ['label' => 'Vote',          'class' => 'bg-amber-100 text-amber-700'],
-                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-green-100 text-green-700'],
+                'prediction' => ['label' => 'Pronostic',     'class' => 'bg-orange-100 text-orange-700'],
             ];
         @endphp
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -162,7 +162,7 @@
                             </td>
                             <td class="px-4 py-4">
                                 @if($game->status === 'active')
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Actif
                                     </span>
                                 @elseif($game->status === 'closed')

@@ -12,7 +12,7 @@
                 <p class="text-sm text-gray-500 mt-1">{{ count($teams) }} equipe{{ count($teams) > 1 ? 's' : '' }} configuree{{ count($teams) > 1 ? 's' : '' }}</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                     {{ collect($teams)->sum(fn($t) => collect($t['members'] ?? [])->where('availability_status', 'online')->count()) }} en ligne
                 </span>
@@ -35,7 +35,7 @@
                     <p class="text-xs text-gray-500 mt-0.5">Membres total</p>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 px-4 py-3.5">
-                    <p class="text-2xl font-bold text-green-600">{{ collect($teams)->sum(fn($t) => collect($t['members'] ?? [])->where('availability_status', 'online')->count()) }}</p>
+                    <p class="text-2xl font-bold text-orange-600">{{ collect($teams)->sum(fn($t) => collect($t['members'] ?? [])->where('availability_status', 'online')->count()) }}</p>
                     <p class="text-xs text-gray-500 mt-0.5">En ligne</p>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 px-4 py-3.5">
@@ -71,7 +71,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 @if($online->count() > 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">
                                         <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                                         {{ $online->count() }} en ligne
                                     </span>
@@ -225,7 +225,7 @@ function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.className = 'fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white transition-all duration-300 ' +
-        (type === 'success' ? 'bg-green-600' : 'bg-red-600');
+        (type === 'success' ? 'bg-orange-600' : 'bg-red-600');
     setTimeout(() => t.classList.add('hidden'), 3000);
 }
 

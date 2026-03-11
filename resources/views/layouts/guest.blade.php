@@ -20,12 +20,12 @@
         <div class="min-h-screen flex">
 
             {{-- ── Colonne gauche : branding ── --}}
-            <div class="hidden lg:flex lg:w-1/2 bg-green-700 flex-col items-center justify-center px-12 relative overflow-hidden">
+            <div class="hidden lg:flex lg:w-1/2 bg-green-900 flex-col items-center justify-center px-12 relative overflow-hidden">
 
                 {{-- Cercles décoratifs --}}
-                <div class="absolute -top-24 -left-24 w-72 h-72 bg-green-600 rounded-full opacity-40"></div>
-                <div class="absolute bottom-0 right-0 w-96 h-96 bg-green-800 rounded-full opacity-30 translate-x-1/3 translate-y-1/3"></div>
-                <div class="absolute top-1/2 left-0 w-40 h-40 bg-orange-400 rounded-full opacity-10 -translate-x-1/2"></div>
+                <div class="absolute -top-24 -left-24 w-72 h-72 bg-orange-600 rounded-full opacity-40"></div>
+                <div class="absolute bottom-0 right-0 w-96 h-96 bg-orange-600 rounded-full opacity-20 translate-x-1/3 translate-y-1/3"></div>
+                <div class="absolute top-1/2 left-0 w-40 h-40 bg-orange-500 rounded-full opacity-20 -translate-x-1/2"></div>
 
                 {{-- Contenu --}}
                 <div class="relative z-10 max-w-md text-center">

@@ -48,7 +48,7 @@
 
                 @if($conversation->status === 'resolved')
                     <button onclick="toggleStatus('reopen')"
-                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition">
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-orange-50 text-orange-700 border border-green-200 rounded-lg hover:bg-orange-100 transition">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         Reouvrir
                     </button>

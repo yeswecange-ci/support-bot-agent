@@ -234,7 +234,7 @@
                                         {{ $typeLabelsQ[$question->type] ?? $question->type }}
                                     </span>
                                     @if($question->correct_answer)
-                                    <span class="text-xs px-1.5 py-0.5 bg-green-50 border border-green-200 text-green-700 rounded">
+                                    <span class="text-xs px-1.5 py-0.5 bg-green-50 border border-green-200 text-orange-700 rounded">
                                         ✓ {{ $question->correct_answer }}
                                     </span>
                                     @endif
@@ -282,7 +282,7 @@
                             @endif
                         </div>
                         <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs">
-                            <span class="flex items-center gap-1.5 text-green-700">
+                            <span class="flex items-center gap-1.5 text-orange-700">
                                 <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
                                 {{ $qs['correct'] }} corrects
                             </span>
@@ -325,7 +325,7 @@
                                             @csrf
                                             <input type="hidden" name="is_correct" value="1">
                                             <button type="submit"
-                                                    class="w-7 h-7 flex items-center justify-center bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition font-bold text-sm"
+                                                    class="w-7 h-7 flex items-center justify-center bg-orange-100 text-orange-700 rounded-lg hover:bg-green-200 transition font-bold text-sm"
                                                     title="Marquer comme correct">✓</button>
                                         </form>
                                         <form method="POST" action="{{ route('gamification.answers.mark', [$game->slug, $answer->id]) }}">

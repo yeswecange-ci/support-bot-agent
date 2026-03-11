@@ -103,7 +103,7 @@
         {{-- Etape 3 : Resultat --}}
         <div id="step-result" class="hidden">
             <div class="bg-white rounded-xl border border-gray-200 p-8 text-center">
-                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
                     <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>

@@ -7,7 +7,7 @@
 
         {{-- Header --}}
         <div class="flex items-center gap-4 mb-8">
-            <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+            <div class="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
                 <span class="text-xl font-semibold text-green-600">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
             </div>
             <div>

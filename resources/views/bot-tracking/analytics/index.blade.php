@@ -17,13 +17,13 @@
             <form method="GET" action="{{ route('bot-tracking.statistics') }}" class="flex flex-wrap items-end gap-4">
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Date debut</label>
-                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Date fin</label>
-                    <input type="date" name="date_to" value="{{ $dateTo }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                    <input type="date" name="date_to" value="{{ $dateTo }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                 </div>
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">Filtrer</button>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition shadow-sm">Filtrer</button>
                 <a href="{{ route('bot-tracking.statistics') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">Reinitialiser</a>
             </form>
         </div>
@@ -35,7 +35,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">Conversations</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($stats['active_conversations'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['active_conversations'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Actives</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -47,7 +47,7 @@
         {{-- Stats Row 2 --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($stats['total_clients'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['total_clients'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Clients</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -67,7 +67,7 @@
         {{-- Stats Row 3 --}}
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($stats['total_menu_choices'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['total_menu_choices'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Choix menu</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -75,7 +75,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">Saisies libres</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($stats['unique_clients'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['unique_clients'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Clients uniques</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -136,7 +136,7 @@
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div class="flex flex-wrap items-center gap-1">
                         @forelse($steps as $step)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">{{ $step }}</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-700">{{ $step }}</span>
                             @if(!$loop->last)<span class="text-gray-300 text-xs">&rarr;</span>@endif
                         @empty
                             <span class="text-xs text-gray-400 italic">Parcours non defini</span>
@@ -209,7 +209,7 @@
                         @php
                             $totalForPct = array_sum($statusStats ?? []);
                             $statusBadge = [
-                                'active'    => 'bg-green-100 text-green-700',
+                                'active'    => 'bg-orange-100 text-orange-700',
                                 'completed' => 'bg-blue-100 text-blue-700',
                                 'timeout'   => 'bg-amber-100 text-amber-700',
                                 'abandoned' => 'bg-gray-100 text-gray-600',

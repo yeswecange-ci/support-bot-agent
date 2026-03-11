@@ -21,7 +21,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">Total contacts</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($stats['sportcash_clients'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['sportcash_clients'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Clients Sportcash</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -29,7 +29,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">Non-clients</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($stats['recent_clients'] ?? 0) }}</p>
+                <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['recent_clients'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Recents (30j)</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -46,11 +46,11 @@
             <form method="GET" action="{{ route('bot-tracking.clients.index') }}" class="flex flex-wrap items-end gap-3">
                 <div class="flex flex-col gap-1 flex-1 min-w-48">
                     <label class="text-xs font-medium text-gray-600">Recherche</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom, telephone, email..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom, telephone, email..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Type</label>
-                    <select name="is_client" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                    <select name="is_client" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                         <option value="">Tous</option>
                         <option value="true">Clients Sportcash</option>
                         <option value="false">Non-clients</option>
@@ -58,22 +58,22 @@
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Du</label>
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Au</label>
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-medium text-gray-600">Trier par</label>
-                    <select name="sort_by" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                    <select name="sort_by" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                         <option value="last_interaction_at" {{ request('sort_by') == 'last_interaction_at' ? 'selected' : '' }}>Derniere interaction</option>
                         <option value="client_full_name" {{ request('sort_by') == 'client_full_name' ? 'selected' : '' }}>Nom</option>
                         <option value="interaction_count" {{ request('sort_by') == 'interaction_count' ? 'selected' : '' }}>Nb interactions</option>
                         <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Date creation</option>
                     </select>
                 </div>
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">Filtrer</button>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition shadow-sm">Filtrer</button>
                 <a href="{{ route('bot-tracking.clients.index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">Reinitialiser</a>
             </form>
         </div>
@@ -96,8 +96,8 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                        <span class="text-xs font-bold text-green-700">{{ strtoupper(substr($client->client_full_name ?? $client->whatsapp_profile_name ?? '?', 0, 1)) }}</span>
+                                    <div class="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-xs font-bold text-orange-700">{{ strtoupper(substr($client->client_full_name ?? $client->whatsapp_profile_name ?? '?', 0, 1)) }}</span>
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-gray-900">{{ $client->client_full_name ?? $client->whatsapp_profile_name ?? 'Inconnu' }}</p>
@@ -111,7 +111,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 @if($client->is_client === true || $client->is_client == 1)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Client Sportcash</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Client Sportcash</span>
                                 @elseif($client->is_client === false || $client->is_client == 0)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                                 @else

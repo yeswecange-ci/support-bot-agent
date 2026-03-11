@@ -18,8 +18,8 @@
         <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                        <span class="text-xl font-bold text-green-700">{{ strtoupper(substr($conversation->display_name, 0, 1)) }}</span>
+                    <div class="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                        <span class="text-xl font-bold text-orange-700">{{ strtoupper(substr($conversation->display_name, 0, 1)) }}</span>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900">{{ $conversation->display_name }}</h1>
@@ -31,12 +31,12 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     @php
-                        $sm = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
+                        $sm = ['active' => 'bg-orange-100 text-orange-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
                         $sc = $sm[$conversation->status] ?? 'bg-gray-100 text-gray-600';
                     @endphp
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $sc }}">{{ ucfirst($conversation->status) }}</span>
                     @if($conversation->is_client === true || $conversation->is_client == 1)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">Client Sportcash</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">Client Sportcash</span>
                     @elseif($conversation->is_client === false || $conversation->is_client == 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">Non-client</span>
                     @endif
@@ -100,7 +100,7 @@
             <h3 class="text-sm font-semibold text-gray-700 mb-3">Parcours menu (cette session)</h3>
             <div class="flex flex-wrap items-center gap-2">
                 @foreach($menuPathArray as $step)
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-100">{{ $step }}</span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-700 border border-green-100">{{ $step }}</span>
                     @if(!$loop->last)<span class="text-gray-300 text-sm">&rarr;</span>@endif
                 @endforeach
             </div>
@@ -114,7 +114,7 @@
             <div class="space-y-2">
                 @foreach($phoneConversations as $sess)
                 @php
-                    $sessColors = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
+                    $sessColors = ['active' => 'bg-orange-100 text-orange-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600'];
                     $sessBadge  = $sessColors[$sess->status] ?? 'bg-gray-100 text-gray-600';
                     $isCurrent  = $sess->id === $conversation->id;
                 @endphp
@@ -188,13 +188,13 @@
                     <div class="pl-2 flex items-center gap-2 flex-wrap">
                         <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Session</span>
                         @if($sess)
-                            @php $sc2 = ['active' => 'bg-green-100 text-green-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600']; @endphp
+                            @php $sc2 = ['active' => 'bg-orange-100 text-orange-700', 'completed' => 'bg-blue-100 text-blue-700', 'timeout' => 'bg-amber-100 text-amber-700', 'abandoned' => 'bg-gray-100 text-gray-600']; @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sc2[$sess->status] ?? 'bg-gray-100 text-gray-600' }}">{{ ucfirst($sess->status) }}</span>
                             <span class="text-xs text-gray-400">
                                 @if($sess->started_at){{ $sess->started_at->format('d/m/Y H:i') }}@endif
                             </span>
                             @if($sess->id !== $conversation->id)
-                                <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-green-500 hover:text-green-700">voir &rarr;</a>
+                                <a href="{{ route('bot-tracking.conversations.show', $sess->id) }}" class="text-xs text-green-500 hover:text-orange-700">voir &rarr;</a>
                             @else
                                 <span class="text-xs text-green-600 font-medium">session actuelle</span>
                             @endif

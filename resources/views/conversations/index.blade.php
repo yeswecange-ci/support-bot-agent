@@ -411,7 +411,7 @@
             // Update status badge if provided
             if (options.status) {
                 const _sl = {'open':'Ouvert','pending':'En attente','resolved':'Résolu','snoozed':'Reporté'};
-                const _sc = {'open':'bg-blue-50 text-blue-700','pending':'bg-amber-50 text-amber-700','resolved':'bg-green-50 text-green-700','snoozed':'bg-gray-100 text-gray-600'};
+                const _sc = {'open':'bg-blue-50 text-blue-700','pending':'bg-amber-50 text-amber-700','resolved':'bg-orange-50 text-orange-700','snoozed':'bg-gray-100 text-gray-600'};
                 const badge = item.querySelector('.inline-block.px-1\\.5');
                 if (badge) {
                     badge.textContent = _sl[options.status] || options.status;
@@ -447,7 +447,7 @@
             const statusClasses = {
                 'open': 'bg-blue-50 text-blue-700',
                 'pending': 'bg-amber-50 text-amber-700',
-                'resolved': 'bg-green-50 text-green-700',
+                'resolved': 'bg-orange-50 text-orange-700',
                 'snoozed': 'bg-gray-100 text-gray-600',
             };
             const statusLabels = {
@@ -602,7 +602,7 @@
             const _statusClasses = {
                 'open': 'bg-blue-50 text-blue-700',
                 'pending': 'bg-amber-50 text-amber-700',
-                'resolved': 'bg-green-50 text-green-700',
+                'resolved': 'bg-orange-50 text-orange-700',
                 'snoozed': 'bg-gray-100 text-gray-600',
             };
             const _statusLabels = {

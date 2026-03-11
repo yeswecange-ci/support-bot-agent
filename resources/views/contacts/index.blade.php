@@ -160,7 +160,7 @@
     <div class="bg-white rounded-2xl shadow-2xl w-[480px] max-w-[95vw] overflow-hidden flex flex-col">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
+                <div class="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center">
                     <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                 </div>
                 <h3 class="font-semibold text-gray-900 text-sm">Envoyer un template WhatsApp</h3>
@@ -173,7 +173,7 @@
         <div class="px-5 py-4 space-y-4 overflow-y-auto max-h-[70vh]">
             {{-- Destinataire --}}
             <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-100">
-                <div class="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-semibold text-sm flex-shrink-0" id="st-avatar">?</div>
+                <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-semibold text-sm flex-shrink-0" id="st-avatar">?</div>
                 <div>
                     <p class="text-sm font-medium text-gray-900" id="st-name">—</p>
                     <p class="text-xs text-gray-400" id="st-phone">—</p>
@@ -208,7 +208,7 @@
 
         <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end gap-2 flex-shrink-0">
             <button onclick="closeModal('modal-send-template')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Annuler</button>
-            <button onclick="submitSendTemplate()" id="btn-send-template" disabled class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+            <button onclick="submitSendTemplate()" id="btn-send-template" disabled class="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                 Envoyer
             </button>
@@ -333,7 +333,7 @@
                 const safeName = (contact.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 const safePhone = contact.phone_number.replace(/'/g, "\\'");
                 headerActions.innerHTML = `<button onclick="closeModal('modal-contact-detail'); setTimeout(() => openSendTemplate(${id}, '${safeName}', '${safePhone}'), 60)"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-lg hover:bg-green-100 border border-green-200 transition"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-lg hover:bg-orange-100 border border-green-200 transition"
                     title="Envoyer un template WhatsApp">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     Envoyer template
@@ -346,7 +346,7 @@
             if (convs.length > 0) {
                 convsHtml = convs.slice(0, 10).map(c => {
                     const lastMsg = c.last_non_activity_message?.content || c.messages?.[0]?.content || 'Pas de message';
-                    const statusCls = c.status === 'open' ? 'bg-green-100 text-green-700' : c.status === 'resolved' ? 'bg-gray-100 text-gray-600' : 'bg-amber-100 text-amber-700';
+                    const statusCls = c.status === 'open' ? 'bg-orange-100 text-orange-700' : c.status === 'resolved' ? 'bg-gray-100 text-gray-600' : 'bg-amber-100 text-amber-700';
                     return `<div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50 px-2 rounded" onclick="closeModal('modal-contact-detail'); window.location.href='/conversations/${c.id}'">
                         <span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${statusCls}">${c.status}</span>
                         <span class="text-xs text-gray-500 truncate flex-1">${esc(lastMsg.substring(0, 60))}</span>
@@ -680,7 +680,7 @@
 
             // Success feedback
             btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Envoyé !';
-            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            btn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
             btn.classList.add('bg-green-500');
             setTimeout(() => closeModal('modal-send-template'), 1200);
         } catch(e) {

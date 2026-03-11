@@ -53,7 +53,7 @@
                     <div>
                         <button onclick="toggleChatMenu()" id="chat-menu-btn"
                                 class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                                       {{ request()->routeIs(['dashboard', 'conversations.*', 'agents.*', 'teams.*', 'contacts.*', 'canned-responses.*', 'statistics.*']) ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                       {{ request()->routeIs(['dashboard', 'conversations.*', 'agents.*', 'teams.*', 'contacts.*', 'canned-responses.*', 'statistics.*']) ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                             <div class="flex items-center gap-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -71,7 +71,7 @@
                             @if(auth()->user()?->isAdmin())
                             <a href="{{ route('dashboard') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('dashboard') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('dashboard') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                                 </svg>
@@ -81,7 +81,7 @@
 
                             <a href="{{ route('conversations.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('conversations.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('conversations.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                                 </svg>
@@ -91,7 +91,7 @@
                             @if(auth()->user()?->isAdmin())
                             <a href="{{ route('agents.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('agents.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('agents.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
@@ -100,7 +100,7 @@
 
                             <a href="{{ route('teams.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('teams.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('teams.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                 </svg>
@@ -110,7 +110,7 @@
 
                             <!-- <a href="{{ route('contacts.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('contacts.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('contacts.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
@@ -119,7 +119,7 @@
 
                             <a href="{{ route('canned-responses.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('canned-responses.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('canned-responses.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                                 </svg>
@@ -129,7 +129,7 @@
                             @if(auth()->user()?->isAdmin())
                             <a href="{{ route('statistics.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('statistics.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('statistics.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                 </svg>
@@ -143,7 +143,7 @@
                     <div>
                         <button onclick="toggleCampaignMenu()" id="campaign-menu-btn"
                                 class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                                       {{ request()->routeIs(['campagnes.*']) ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                       {{ request()->routeIs(['campagnes.*']) ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                             <div class="flex items-center gap-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
@@ -159,7 +159,7 @@
                         <div id="campaign-submenu" class="submenu {{ request()->routeIs(['campagnes.*']) ? 'open' : '' }} pl-4 mt-1 space-y-1">
                             <a href="{{ route('campagnes.dashboard') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('campagnes.dashboard') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('campagnes.dashboard') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                 </svg>
@@ -168,7 +168,7 @@
 
                             <a href="{{ route('campagnes.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('campagnes.index') || request()->routeIs('campagnes.show') || request()->routeIs('campagnes.create') || request()->routeIs('campagnes.edit') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('campagnes.index') || request()->routeIs('campagnes.show') || request()->routeIs('campagnes.create') || request()->routeIs('campagnes.edit') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                 </svg>
@@ -177,7 +177,7 @@
 
                             <a href="{{ route('campagnes.contacts.index') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('campagnes.contacts.index') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('campagnes.contacts.index') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
@@ -186,7 +186,7 @@
 
                             <a href="{{ route('campagnes.contacts.import') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                                      {{ request()->routeIs('campagnes.contacts.import') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                      {{ request()->routeIs('campagnes.contacts.import') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
@@ -199,7 +199,7 @@
   <div>
       <button onclick="toggleBotTrackingMenu()" id="bot-tracking-menu-btn"
               class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                     {{ request()->routeIs('bot-tracking.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                     {{ request()->routeIs('bot-tracking.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
           <div class="flex items-center gap-3">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0
@@ -219,7 +219,7 @@
           <a href="{{ route('bot-tracking.index') }}"
              class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
                     {{ request()->routeIs('bot-tracking.index') || request()->routeIs('bot-tracking.active') ||
-  request()->routeIs('bot-tracking.conversations*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+  request()->routeIs('bot-tracking.conversations*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863
   9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -230,7 +230,7 @@
           {{-- Sous-menu : Clients --}}
           <a href="{{ route('bot-tracking.clients.index') }}"
              class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                    {{ request()->routeIs('bot-tracking.clients.*') ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    {{ request()->routeIs('bot-tracking.clients.*') ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
   }}">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10
@@ -243,7 +243,7 @@
           {{-- Sous-menu : Analytics --}}
           <a href="{{ route('bot-tracking.statistics') }}"
              class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                    {{ request()->routeIs('bot-tracking.statistics') || request()->routeIs('bot-tracking.search') ? 'bg-green-50 text-green-700' :
+                    {{ request()->routeIs('bot-tracking.statistics') || request()->routeIs('bot-tracking.search') ? 'bg-orange-50 text-orange-700' :
   'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0
@@ -304,7 +304,7 @@
                     <div class="h-14 px-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
                         <h3 class="font-semibold text-gray-900 text-sm">Notifications</h3>
                         <div class="flex items-center gap-2">
-                            <button onclick="markAllNotifRead()" class="text-[11px] text-green-600 hover:text-green-700 font-medium">Tout marquer lu</button>
+                            <button onclick="markAllNotifRead()" class="text-[11px] text-orange-600 hover:text-orange-700 font-medium">Tout marquer lu</button>
                             <button onclick="toggleNotifications()" class="w-7 h-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
@@ -314,7 +314,7 @@
                         <div class="p-8 text-center text-gray-400 text-sm">Chargement...</div>
                     </div>
                     <div id="notif-load-more" class="hidden border-t border-gray-100 flex-shrink-0">
-                        <button onclick="loadMoreNotifications()" class="w-full py-2.5 text-xs text-green-600 hover:text-green-700 hover:bg-gray-50 font-medium transition">
+                        <button onclick="loadMoreNotifications()" class="w-full py-2.5 text-xs text-orange-600 hover:text-orange-700 hover:bg-gray-50 font-medium transition">
                             Charger plus
                         </button>
                     </div>
@@ -325,8 +325,8 @@
                     <button onclick="openProfileModal()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-all duration-200 group text-left">
                         <div class="relative flex-shrink-0">
-                            <div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center ring-2 ring-white">
-                                <span class="text-sm font-bold text-green-700 sidebar-user-initials">
+                            <div class="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center ring-2 ring-white">
+                                <span class="text-sm font-bold text-orange-700 sidebar-user-initials">
                                     {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}
                                 </span>
                             </div>
@@ -397,8 +397,8 @@
                 {{-- Identité --}}
                 <div class="px-5 py-4 flex items-center gap-4 bg-white border-b border-gray-100 flex-shrink-0">
                     <div class="relative flex-shrink-0">
-                        <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center ring-4 ring-white shadow-sm">
-                            <span class="text-xl font-bold text-green-700 sidebar-user-initials">{{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}</span>
+                        <div class="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center ring-4 ring-white shadow-sm">
+                            <span class="text-xl font-bold text-orange-700 sidebar-user-initials">{{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}</span>
                         </div>
                         <span id="modal-avail-dot" class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white bg-green-500 transition-colors"></span>
                     </div>
@@ -411,7 +411,7 @@
 
                 {{-- Onglets --}}
                 <div class="flex border-b border-gray-100 px-5 flex-shrink-0">
-                    <button onclick="switchProfileTab('status')"  id="tab-status"   class="profile-tab active   py-3 px-1 mr-6 text-xs font-medium border-b-2 border-green-600 text-green-600 transition-colors">Statut</button>
+                    <button onclick="switchProfileTab('status')"  id="tab-status"   class="profile-tab active   py-3 px-1 mr-6 text-xs font-medium border-b-2 border-orange-600 text-orange-600 transition-colors">Statut</button>
                     <button onclick="switchProfileTab('profil')"  id="tab-profil"   class="profile-tab inactive py-3 px-1 mr-6 text-xs font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">Profil</button>
                     <button onclick="switchProfileTab('password')" id="tab-password" class="profile-tab inactive py-3 px-1      text-xs font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">Mot de passe</button>
                 </div>
@@ -461,19 +461,19 @@
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Nom complet</label>
                                 <input type="text" name="name" id="profile-name"
                                        value="{{ auth()->user()?->name ?? '' }}"
-                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition placeholder-gray-400"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition placeholder-gray-400"
                                        placeholder="Votre nom complet">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Adresse email</label>
                                 <input type="email" name="email" id="profile-email"
                                        value="{{ auth()->user()?->email ?? '' }}"
-                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition placeholder-gray-400"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition placeholder-gray-400"
                                        placeholder="votre@email.com">
                             </div>
                             <div id="profile-msg" class="hidden text-xs py-2.5 px-3.5 rounded-lg font-medium"></div>
                             <button type="submit"
-                                    class="w-full py-2.5 px-4 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 active:bg-green-800 transition shadow-sm flex items-center justify-center gap-2">
+                                    class="w-full py-2.5 px-4 bg-orange-600 text-white text-sm font-medium rounded-xl hover:bg-orange-700 active:bg-orange-800 transition shadow-sm flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 Enregistrer les modifications
                             </button>
@@ -486,24 +486,24 @@
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Mot de passe actuel</label>
                                 <input type="password" name="current_password"
-                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                                        placeholder="••••••••" autocomplete="current-password">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Nouveau mot de passe</label>
                                 <input type="password" name="password"
-                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                                        placeholder="••••••••" autocomplete="new-password">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Confirmer le mot de passe</label>
                                 <input type="password" name="password_confirmation"
-                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                                       class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                                        placeholder="••••••••" autocomplete="new-password">
                             </div>
                             <div id="password-msg" class="hidden text-xs py-2.5 px-3.5 rounded-lg font-medium"></div>
                             <button type="submit"
-                                    class="w-full py-2.5 px-4 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 active:bg-green-800 transition shadow-sm flex items-center justify-center gap-2">
+                                    class="w-full py-2.5 px-4 bg-orange-600 text-white text-sm font-medium rounded-xl hover:bg-orange-700 active:bg-orange-800 transition shadow-sm flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                 Changer le mot de passe
                             </button>
@@ -638,7 +638,7 @@
             function getNotifIcon(type) {
                 const icons = {
                     conversation_creation: {
-                        bg: 'bg-green-100 text-green-600',
+                        bg: 'bg-orange-100 text-green-600',
                         svg: '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'
                     },
                     conversation_assignment: {
@@ -972,7 +972,7 @@
                     const panel = document.getElementById(`tab-content-${t}`);
                     if (!btn || !panel) return;
                     const isActive = t === tab;
-                    btn.className = `profile-tab ${isActive ? 'active' : 'inactive'} py-3 px-1 ${t !== 'password' ? 'mr-6' : ''} text-xs font-medium border-b-2 ${isActive ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'} transition-colors`;
+                    btn.className = `profile-tab ${isActive ? 'active' : 'inactive'} py-3 px-1 ${t !== 'password' ? 'mr-6' : ''} text-xs font-medium border-b-2 ${isActive ? 'border-orange-600 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'} transition-colors`;
                     panel.classList.toggle('hidden', !isActive);
                 });
             };
@@ -1001,7 +1001,7 @@
                     const res = await r.json();
                     if (res.success) {
                         msg.textContent = 'Profil mis à jour avec succès';
-                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-green-50 text-green-700';
+                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-orange-50 text-orange-700';
                         msg.classList.remove('hidden');
                         // Mettre à jour les éléments affichant le nom
                         document.querySelectorAll('.sidebar-user-name').forEach(el => el.textContent = name);
@@ -1039,7 +1039,7 @@
                     const res = await r.json();
                     if (res.success) {
                         msg.textContent = 'Mot de passe changé avec succès';
-                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-green-50 text-green-700';
+                        msg.className = 'text-xs py-2.5 px-3.5 rounded-lg font-medium bg-orange-50 text-orange-700';
                         msg.classList.remove('hidden');
                         form.reset();
                     } else {

@@ -11,7 +11,7 @@
                 <p class="text-sm text-gray-500 mt-0.5">{{ $activeConversations->count() }} conversation(s) en cours en ce moment</p>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="window.location.reload()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">
+                <button onclick="window.location.reload()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     Actualiser
                 </button>
@@ -31,7 +31,7 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-1">Aucune conversation active</h3>
             <p class="text-sm text-gray-500">Il n'y a pas de conversations en cours pour le moment.</p>
-            <button onclick="window.location.reload()" class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">Actualiser la page</button>
+            <button onclick="window.location.reload()" class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition shadow-sm">Actualiser la page</button>
         </div>
         @else
         {{-- Active Conversations Grid --}}
@@ -40,15 +40,15 @@
             <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                            <span class="text-sm font-semibold text-green-700">{{ strtoupper(substr($conv->display_name ?? '?', 0, 1)) }}</span>
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                            <span class="text-sm font-semibold text-orange-700">{{ strtoupper(substr($conv->display_name ?? '?', 0, 1)) }}</span>
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-gray-900">{{ $conv->display_name ?? 'Inconnu' }}</p>
                             <p class="text-xs text-gray-400">{{ $conv->phone_number }}</p>
                         </div>
                     </div>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Actif
                     </span>
                 </div>
@@ -56,7 +56,7 @@
                     <div class="flex items-center justify-between text-xs">
                         <span class="text-gray-500">Type</span>
                         @if($conv->is_client === true || $conv->is_client == 1)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Client</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Client</span>
                         @elseif($conv->is_client === false || $conv->is_client == 0)
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Non-client</span>
                         @else
@@ -77,7 +77,7 @@
                     </div>
                 </div>
                 <a href="{{ route('bot-tracking.conversations.show', $conv->id) }}"
-                   class="inline-flex w-full items-center justify-center gap-2 px-3 py-2 bg-green-50 text-green-700 text-xs font-medium rounded-lg hover:bg-green-100 transition">
+                   class="inline-flex w-full items-center justify-center gap-2 px-3 py-2 bg-orange-50 text-orange-700 text-xs font-medium rounded-lg hover:bg-orange-100 transition">
                     Voir le detail &rarr;
                 </a>
             </div>

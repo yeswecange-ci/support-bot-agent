@@ -14,7 +14,7 @@
                 <div class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
-                        <input type="text" name="client_full_name" value="{{ old('client_full_name', $client->client_full_name) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white @error('client_full_name') border-red-400 @enderror">
+                        <input type="text" name="client_full_name" value="{{ old('client_full_name', $client->client_full_name) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white @error('client_full_name') border-red-400 @enderror">
                         @error('client_full_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
@@ -23,17 +23,17 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Telephone <span class="text-red-500">*</span></label>
-                        <input type="text" name="phone_number" value="{{ old('phone_number', $client->phone_number) }}" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white @error('phone_number') border-red-400 @enderror">
+                        <input type="text" name="phone_number" value="{{ old('phone_number', $client->phone_number) }}" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white @error('phone_number') border-red-400 @enderror">
                         @error('phone_number')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" value="{{ old('email', $client->email) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white @error('email') border-red-400 @enderror">
+                        <input type="email" name="email" value="{{ old('email', $client->email) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white @error('email') border-red-400 @enderror">
                         @error('email')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Type de client</label>
-                        <select name="is_client" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 bg-white">
+                        <select name="is_client" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 bg-white">
                             <option value="" {{ old('is_client', $client->is_client) === null ? 'selected' : '' }}>Non defini</option>
                             <option value="1" {{ (string)old('is_client', $client->is_client) === '1' ? 'selected' : '' }}>Client Sportcash</option>
                             <option value="0" {{ (string)old('is_client', $client->is_client) === '0' ? 'selected' : '' }}>Non-client</option>
@@ -41,7 +41,7 @@
                         @error('is_client')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div class="flex items-center gap-3 pt-2">
-                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition shadow-sm">Enregistrer</button>
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition shadow-sm">Enregistrer</button>
                         <a href="{{ route('bot-tracking.clients.show', $client->id) }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">Annuler</a>
                     </div>
                 </div>

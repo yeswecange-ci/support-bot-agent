@@ -56,7 +56,7 @@
                     </button>
                     @endif
                     <button onclick="toggleStatus('resolve')"
-                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition">
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium bg-orange-50 text-orange-700 border border-green-200 rounded-lg hover:bg-orange-100 transition">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Resoudre
                     </button>
@@ -300,7 +300,7 @@
                     @if($twilioConfigured ?? false)
                     <button type="button" onclick="toggleTemplatePicker()"
                             title="Envoyer un template WhatsApp"
-                            class="w-9 h-9 flex items-center justify-center rounded-lg text-green-600 bg-green-50 border border-green-200 hover:bg-green-100 transition">
+                            class="w-9 h-9 flex items-center justify-center rounded-lg text-green-600 bg-green-50 border border-green-200 hover:bg-orange-100 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </button>
                     @endif
@@ -422,7 +422,7 @@
         }
         t.textContent = msg;
         t.className = t.className.replace(/bg-\w+-\d+/g, '');
-        t.classList.add(isError ? 'bg-red-600' : 'bg-green-600');
+        t.classList.add(isError ? 'bg-red-600' : 'bg-orange-600');
         t.classList.remove('hidden');
         clearTimeout(t._hideTimer);
         t._hideTimer = setTimeout(() => t.classList.add('hidden'), isError ? 4000 : 2500);
@@ -1249,7 +1249,7 @@
             convos.forEach(c => {
                 const isCurrent = c.id == CID;
                 const msgs = c.messages || [];
-                const _sClasses = {'open':'bg-blue-50 text-blue-700','pending':'bg-amber-50 text-amber-700','resolved':'bg-green-50 text-green-700','snoozed':'bg-gray-100 text-gray-600'};
+                const _sClasses = {'open':'bg-blue-50 text-blue-700','pending':'bg-amber-50 text-amber-700','resolved':'bg-orange-50 text-orange-700','snoozed':'bg-gray-100 text-gray-600'};
                 const _sLabels = {'open':'Ouvert','pending':'En attente','resolved':'Résolu','snoozed':'Reporté'};
                 const statusClass = _sClasses[c.status] || 'bg-gray-100 text-gray-600';
                 const statusLabel = _sLabels[c.status] || c.status;

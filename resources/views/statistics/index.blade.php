@@ -23,7 +23,7 @@
             <div class="flex items-center gap-3">
                 {{-- Bouton synchronisation manuelle --}}
                 <button id="sync-btn" onclick="syncStats(this)"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-lg hover:bg-green-100 border border-green-200 transition"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-lg hover:bg-orange-100 border border-green-200 transition"
                     title="Synchroniser les stats depuis Chatwoot">
                     <svg id="sync-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -38,7 +38,7 @@
                 @foreach(['today' => 'Aujourd\'hui', 'week' => 'Semaine', 'month' => 'Mois', 'quarter' => 'Trimestre'] as $val => $label)
                     <button onclick="changePeriod('{{ $val }}')"
                        data-period="{{ $val }}"
-                       class="period-btn px-3 py-1.5 text-xs font-medium rounded-md transition {{ $currentPeriod === $val ? 'bg-white shadow-sm text-green-700' : 'text-gray-500 hover:text-gray-700' }}">
+                       class="period-btn px-3 py-1.5 text-xs font-medium rounded-md transition {{ $currentPeriod === $val ? 'bg-white shadow-sm text-orange-700' : 'text-gray-500 hover:text-gray-700' }}">
                         {{ $label }}
                     </button>
                 @endforeach
@@ -74,7 +74,7 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="kpi-cards">
             <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-2 mb-2">
-                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                         <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                     </div>
                     <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Conversations</p>
@@ -83,12 +83,12 @@
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-2 mb-2">
-                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                         <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Resolues</p>
                 </div>
-                <p class="text-2xl font-bold text-green-600" id="kpi-resolutions">{{ $resolutions }}</p>
+                <p class="text-2xl font-bold text-orange-600" id="kpi-resolutions">{{ $resolutions }}</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-2 mb-2">
@@ -255,7 +255,7 @@
                                 $resolved = $entry['metric']['resolutions_count'] ?? 0;
                                 $firstResp = $entry['metric']['avg_first_response_time'] ?? 0;
                                 $resMoy = $entry['metric']['avg_resolution_time'] ?? 0;
-                                $avatarColors = ['bg-green-100 text-green-600', 'bg-green-100 text-green-600', 'bg-blue-100 text-blue-600', 'bg-amber-100 text-amber-600', 'bg-rose-100 text-rose-600'];
+                                $avatarColors = ['bg-orange-100 text-green-600', 'bg-orange-100 text-green-600', 'bg-blue-100 text-blue-600', 'bg-amber-100 text-amber-600', 'bg-rose-100 text-rose-600'];
                                 $avatarColor = $avatarColors[$i % count($avatarColors)];
                             @endphp
                             <tr class="hover:bg-gray-50 transition-colors">
@@ -309,7 +309,7 @@
                 <p class="text-[10px] text-gray-400 uppercase font-semibold mt-1">Agents actifs</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:shadow-md transition-shadow">
-                <p class="text-3xl font-bold text-green-600" id="stat-open">{{ $counts['all_count'] ?? 0 }}</p>
+                <p class="text-3xl font-bold text-orange-600" id="stat-open">{{ $counts['all_count'] ?? 0 }}</p>
                 <p class="text-[10px] text-gray-400 uppercase font-semibold mt-1">Conv. ouvertes</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:shadow-md transition-shadow">
@@ -317,7 +317,7 @@
                 <p class="text-[10px] text-gray-400 uppercase font-semibold mt-1">Non assignees</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:shadow-md transition-shadow">
-                <p class="text-3xl font-bold text-green-600" id="stat-resolved">{{ $counts['resolved_count'] ?? 0 }}</p>
+                <p class="text-3xl font-bold text-orange-600" id="stat-resolved">{{ $counts['resolved_count'] ?? 0 }}</p>
                 <p class="text-[10px] text-gray-400 uppercase font-semibold mt-1">Resolues (total)</p>
             </div>
         </div>
@@ -625,7 +625,7 @@
 
     // ═══ AJAX Period Switching ═══
     let currentPeriod = '{{ $currentPeriod }}';
-    const activeClass = 'bg-white shadow-sm text-green-700';
+    const activeClass = 'bg-white shadow-sm text-orange-700';
     const inactiveClass = 'text-gray-500 hover:text-gray-700';
     const baseClass = 'period-btn px-3 py-1.5 text-xs font-medium rounded-md transition';
 
@@ -750,7 +750,7 @@
             // Rebuild agent table
             const tbody = document.getElementById('agent-tbody');
             if (tbody && Array.isArray(leaderboard)) {
-                const colors = ['bg-green-100 text-green-600', 'bg-green-100 text-green-600', 'bg-blue-100 text-blue-600', 'bg-amber-100 text-amber-600', 'bg-rose-100 text-rose-600'];
+                const colors = ['bg-orange-100 text-green-600', 'bg-orange-100 text-green-600', 'bg-blue-100 text-blue-600', 'bg-amber-100 text-amber-600', 'bg-rose-100 text-rose-600'];
                 const stars = ['<span class="text-amber-500 text-sm">&#9733;</span>', '<span class="text-gray-400 text-sm">&#9733;</span>', '<span class="text-amber-700 text-sm">&#9733;</span>'];
 
                 if (leaderboard.length === 0) {
