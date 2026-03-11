@@ -15,7 +15,8 @@ class ConversationService
      */
     public function list(string $status = 'open', string $assigneeType = 'all', int $page = 1): array
     {
-        $response = $this->client->listConversations($status, $assigneeType, $page);
+        $inboxId  = (int) config('chatwoot.whatsapp_inbox_id') ?: null;
+        $response = $this->client->listConversations($status, $assigneeType, $page, $inboxId);
 
         return [
             'conversations' => collect($response['data']['payload'] ?? [])
@@ -76,7 +77,8 @@ class ConversationService
 
     public function search(string $query, int $page = 1): array
     {
-        $response = $this->client->searchConversations($query, $page);
+        $inboxId  = (int) config('chatwoot.whatsapp_inbox_id') ?: null;
+        $response = $this->client->searchConversations($query, $page, $inboxId);
 
         return [
             'conversations' => collect($response['data']['payload'] ?? [])
@@ -91,7 +93,18 @@ class ConversationService
      */
     public function advancedFilter(array $filters, int $page = 1): array
     {
+        $inboxId = (int) config('chatwoot.whatsapp_inbox_id') ?: null;
+
         $payload = [];
+
+        if ($inboxId) {
+            $payload[] = [
+                'attribute_key'   => 'inbox_id',
+                'filter_operator' => 'equal_to',
+                'values'          => [$inboxId],
+                'query_operator'  => null,
+            ];
+        }
 
         if (!empty($filters['status'])) {
             $payload[] = [
@@ -196,12 +209,20 @@ class ConversationService
 
     public function filterByLabel(string $label, string $status = 'open', int $page = 1): array
     {
+        $inboxId = (int) config('chatwoot.whatsapp_inbox_id') ?: null;
+
         $filters = [
+            [
+                'attribute_key'   => 'inbox_id',
+                'filter_operator' => 'equal_to',
+                'values'          => [$inboxId],
+                'query_operator'  => null,
+            ],
             [
                 'attribute_key'   => 'labels',
                 'filter_operator' => 'contains',
                 'values'          => [$label],
-                'query_operator'  => null,
+                'query_operator'  => 'AND',
             ],
         ];
 

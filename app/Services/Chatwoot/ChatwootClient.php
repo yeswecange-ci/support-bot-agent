@@ -163,18 +163,21 @@ class ChatwootClient
      */
     public function getConversationCounts(): array
     {
+        $inboxId = (int) config('chatwoot.whatsapp_inbox_id') ?: null;
+        $inboxParam = $inboxId ? ['inbox_id' => $inboxId] : [];
+
         $openMeta = $this->client()
-            ->get($this->url('conversations'), ['status' => 'open', 'page' => 1])
+            ->get($this->url('conversations'), array_merge(['status' => 'open', 'page' => 1], $inboxParam))
             ->throw()
             ->json('data.meta');
 
         $pendingMeta = $this->client()
-            ->get($this->url('conversations'), ['status' => 'pending', 'page' => 1])
+            ->get($this->url('conversations'), array_merge(['status' => 'pending', 'page' => 1], $inboxParam))
             ->throw()
             ->json('data.meta');
 
         $resolvedMeta = $this->client()
-            ->get($this->url('conversations'), ['status' => 'resolved', 'page' => 1])
+            ->get($this->url('conversations'), array_merge(['status' => 'resolved', 'page' => 1], $inboxParam))
             ->throw()
             ->json('data.meta');
 
@@ -192,13 +195,16 @@ class ChatwootClient
     /**
      * Rechercher dans les conversations
      */
-    public function searchConversations(string $query, int $page = 1): array
+    public function searchConversations(string $query, int $page = 1, ?int $inboxId = null): array
     {
+        $params = ['q' => $query, 'page' => $page];
+
+        if ($inboxId) {
+            $params['inbox_id'] = $inboxId;
+        }
+
         return $this->client()
-            ->get($this->url('conversations'), [
-                'q'    => $query,
-                'page' => $page,
-            ])
+            ->get($this->url('conversations'), $params)
             ->throw()
             ->json();
     }

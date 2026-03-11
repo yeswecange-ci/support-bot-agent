@@ -369,7 +369,8 @@ class ConversationController extends Controller
         $assigneeType = $request->get('assignee_type', 'all');
 
         try {
-            $response = $this->chatwoot->listConversations($status, $assigneeType, 1);
+            $inboxId  = (int) config('chatwoot.whatsapp_inbox_id') ?: null;
+            $response = $this->chatwoot->listConversations($status, $assigneeType, 1, $inboxId);
             $conversations = collect($response['data']['payload'] ?? [])->map(function ($conv) {
                 $lastMsg = $conv['last_non_activity_message'] ?? $conv['messages'][0] ?? [];
                 $lastMsgType = $lastMsg['message_type'] ?? null; // 0=incoming(client), 1=outgoing(agent), 2=activity
